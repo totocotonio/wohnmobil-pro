@@ -991,7 +991,7 @@
         <div class="entries-list" id="list-sonstiges"></div>
       </div>
 
-      <button class="btn archive-btn" onclick="archiveActiveTrip()">Urlaub archivieren</button>
+      <button class="btn archive-btn" id="archiveBtn" onclick="archiveActiveTrip()">Urlaub archivieren</button>
 
     </div>
 
@@ -1467,7 +1467,7 @@ function renderTripDropdown() {
           <div class="trip-item-sub">${t.erstellt} &middot; ${tripTotal(t).toFixed(0)} €</div>
         </div>
         <div class="trip-item-actions">
-          <button class="btn" style="padding:5px 10px;font-size:0.72rem" onclick="unarchiveTrip(${t.id})">Reaktivieren</button>
+          <button class="btn" style="padding:5px 10px;font-size:0.72rem" onclick="viewArchivedTrip(${t.id})">Ansehen</button>
           <button class="ei-del" onclick="deleteTripById(${t.id})">✕</button>
         </div>
       </div>`).join('')
@@ -1492,6 +1492,11 @@ function archiveTripById(id) {
   toast(`"${trip.name}" archiviert`);
 }
 
+function viewArchivedTrip(id) {
+  activeTripId = String(id);
+  saveTrips(); renderKosten(); closeTripDropdown();
+}
+
 function unarchiveTrip(id) {
   const trip = trips.find(t => String(t.id) === String(id));
   if (!trip) return;
@@ -1514,7 +1519,11 @@ function deleteTripById(id) {
 function renderKosten() {
   const trip = getActiveTrip();
   const btn = document.getElementById('tripNameBtn');
-  document.getElementById('tripNameText').textContent = trip ? trip.name : 'Urlaub wählen…';
+  const isArchived = trip && trip.archiviert === true;
+
+  document.getElementById('tripNameText').textContent = trip
+    ? (trip.name + (isArchived ? ' · Archiviert' : ''))
+    : 'Urlaub wählen…';
   btn.classList.toggle('has-trip', !!trip);
 
   const dd = document.getElementById('tripDropdown');
@@ -1527,12 +1536,32 @@ function renderKosten() {
   document.getElementById('noTripMsg').style.display = 'none';
   if (dd.style.display === 'none') document.getElementById('tripContent').style.display = 'block';
 
+  // Archived view: hide entry forms, no delete buttons
+  document.querySelectorAll('#tripContent .entry-form').forEach(f => {
+    f.style.display = isArchived ? 'none' : '';
+  });
+
+  const archBtn = document.getElementById('archiveBtn');
+  if (isArchived) {
+    archBtn.textContent = 'Urlaub reaktivieren';
+    archBtn.onclick = () => unarchiveTrip(trip.id);
+    archBtn.style.color = 'var(--accent)';
+    archBtn.style.borderColor = 'rgba(34,197,94,0.35)';
+  } else {
+    archBtn.textContent = 'Urlaub archivieren';
+    archBtn.onclick = archiveActiveTrip;
+    archBtn.style.color = '';
+    archBtn.style.borderColor = '';
+  }
+
   const kf = trip.kraftstoff.reduce((s,e) => s+e.l*e.p, 0);
   const sp = trip.stellplatz.reduce((s,e) => s+e.p, 0);
   const so = trip.sonstiges.reduce((s,e) => s+e.b, 0);
   document.getElementById('sk-gesamt').textContent = (kf+sp+so).toFixed(0) + ' €';
   document.getElementById('sk-kf').textContent = kf.toFixed(0) + ' €';
   document.getElementById('sk-sp').textContent = sp.toFixed(0) + ' €';
+
+  const del = (type, id) => isArchived ? '' : `<button class="ei-del" onclick="delEntry('${type}',${id})">✕</button>`;
 
   const kfEl = document.getElementById('list-kraftstoff');
   kfEl.innerHTML = trip.kraftstoff.length ? trip.kraftstoff.map(e =>
@@ -1542,7 +1571,7 @@ function renderKosten() {
         <div class="ei-sub">${e.dat||'–'}${e.km?' &middot; '+e.km.toLocaleString('de-DE')+' km':''}</div>
       </div>
       <div class="ei-cost">${(e.l*e.p).toFixed(2)} €</div>
-      <button class="ei-del" onclick="delEntry('kraftstoff',${e.id})">✕</button>
+      ${del('kraftstoff',e.id)}
     </div>`).join('') : '<div class="no-entries">Noch keine Tankungen</div>';
 
   const spEl = document.getElementById('list-stellplatz');
@@ -1553,7 +1582,7 @@ function renderKosten() {
         <div class="ei-sub">${e.dat||'–'} &middot; ${e.n} Nacht/Nächte</div>
       </div>
       <div class="ei-cost">${e.p.toFixed(2)} €</div>
-      <button class="ei-del" onclick="delEntry('stellplatz',${e.id})">✕</button>
+      ${del('stellplatz',e.id)}
     </div>`).join('') : '<div class="no-entries">Noch keine Stellplätze</div>';
 
   const soEl = document.getElementById('list-sonstiges');
@@ -1564,7 +1593,7 @@ function renderKosten() {
         <div class="ei-sub">${e.dat||'–'}</div>
       </div>
       <div class="ei-cost">${e.b.toFixed(2)} €</div>
-      <button class="ei-del" onclick="delEntry('sonstiges',${e.id})">✕</button>
+      ${del('sonstiges',e.id)}
     </div>`).join('') : '<div class="no-entries">Noch keine Ausgaben</div>';
 }
 

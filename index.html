@@ -15,7 +15,8 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="WoMo Pro">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="theme-color" content="#16a34a">
+<meta name="theme-color" content="#16a34a" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#15803d" media="(prefers-color-scheme: light)">
 <link rel="manifest" href="./manifest.json">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <title>Wohnmobil Pro – Camper Tools</title>
@@ -42,6 +43,64 @@
     --header-h: 48px;
     --safe-bottom: env(safe-area-inset-bottom, 0px);
   }
+
+  html.light {
+    --bg: #f0f4f8;
+    --panel: #ffffff;
+    --panel2: #e8eef5;
+    --border: #cbd5e1;
+    --accent: #16a34a;
+    --accent-dim: rgba(22,163,74,0.1);
+    --danger: #dc2626;
+    --warn: #d97706;
+    --text: #1e293b;
+    --muted: #475569;
+  }
+  html.light body {
+    background-image: radial-gradient(ellipse at 20% 0%, rgba(22,163,74,0.05) 0%, transparent 50%);
+  }
+  html.light .bubble-outer {
+    background: radial-gradient(circle at 40% 35%, #dce8f0, #c8d8e8);
+  }
+  html.light .level-ring { border-color: rgba(0,0,0,0.08); }
+  html.light .ring-ok    { border-color: rgba(22,163,74,0.5); }
+  html.light .check-item { background: #fff; }
+  html.light .check-item.checked { background: rgba(22,163,74,0.05); }
+  html.light .entry-item { background: #fff; }
+  html.light .form-inp   { background: #f8fafc; }
+  html.light .setting-inp { background: #f8fafc; }
+  html.light .btn        { background: #e8eef5; }
+  html.light .btn-primary { background: rgba(22,163,74,0.1); }
+
+  /* Theme Toggle */
+  .theme-toggle {
+    background: var(--panel2);
+    border: 1px solid var(--border);
+    border-radius: 50px;
+    width: 52px;
+    height: 28px;
+    cursor: pointer;
+    position: relative;
+    flex-shrink: 0;
+    transition: background 0.3s, border-color 0.3s;
+    display: flex;
+    align-items: center;
+    padding: 0 3px;
+  }
+  .theme-toggle-knob {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: var(--accent);
+    transition: transform 0.3s cubic-bezier(.4,0,.2,1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.3);
+    flex-shrink: 0;
+  }
+  html.light .theme-toggle-knob { transform: translateX(24px); }
 
   * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
 
@@ -81,6 +140,14 @@
   .app-version {
     font-size: 0.65rem;
     color: var(--muted);
+  }
+  .header-left {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .header-logo svg {
+    display: block;
   }
 
   /* ── TAB CONTENT ── */
@@ -588,6 +655,16 @@
     color: var(--muted);
   }
   .info-card strong { color: var(--text); }
+  .mehr-link {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    text-decoration: none;
+    color: var(--text);
+    cursor: pointer;
+    transition: border-color 0.15s;
+  }
+  .mehr-link:hover { border-color: var(--accent); }
 </style>
 </head>
 <body>
@@ -595,8 +672,25 @@
 
   <!-- ── HEADER ── -->
   <header class="app-header">
-    <div class="app-title">WOHNMOBIL PRO</div>
-    <div class="app-version">v1.0.0</div>
+    <div class="header-left">
+      <div class="header-logo">
+        <!-- Wohnmobil Icon -->
+        <svg width="28" height="20" viewBox="0 0 28 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="1" y="5" width="22" height="11" rx="2" fill="var(--accent)" opacity="0.9"/>
+          <rect x="23" y="8" width="4" height="5" rx="1" fill="var(--accent)" opacity="0.7"/>
+          <rect x="3" y="7" width="7" height="5" rx="1" fill="var(--bg)" opacity="0.5"/>
+          <rect x="12" y="7" width="5" height="5" rx="1" fill="var(--bg)" opacity="0.5"/>
+          <circle cx="6" cy="17" r="3" fill="var(--panel2)" stroke="var(--accent)" stroke-width="1.5"/>
+          <circle cx="6" cy="17" r="1.2" fill="var(--accent)"/>
+          <circle cx="19" cy="17" r="3" fill="var(--panel2)" stroke="var(--accent)" stroke-width="1.5"/>
+          <circle cx="19" cy="17" r="1.2" fill="var(--accent)"/>
+        </svg>
+      </div>
+      <div class="app-title">WOHNMOBIL PRO</div>
+    </div>
+    <button class="theme-toggle" onclick="toggleTheme()" title="Hell/Dunkel umschalten">
+      <div class="theme-toggle-knob" id="themeKnob">🌙</div>
+    </button>
   </header>
 
   <!-- ════════════ TAB: NIVELLIEREN ════════════ -->
@@ -800,21 +894,43 @@
   <div id="tab-mehr" class="tab-content">
 
     <div class="mehr-block">
-      <div class="section-label">App</div>
-      <div class="info-card">
-        <strong>Wohnmobil Pro</strong> – v1.0.0<br>
-        <span style="margin-top:6px;display:block">Persönliche Camper-App: Nivelliertool, Checklisten, Kostentracking.</span>
-        <span style="margin-top:6px;display:block">© 2026 Torsten Michaely</span>
+      <div class="section-label">Version</div>
+      <div class="info-card" style="display:flex;align-items:center;gap:14px">
+        <svg width="38" height="28" viewBox="0 0 28 20" fill="none">
+          <rect x="1" y="5" width="22" height="11" rx="2" fill="var(--accent)" opacity="0.9"/>
+          <rect x="23" y="8" width="4" height="5" rx="1" fill="var(--accent)" opacity="0.7"/>
+          <rect x="3" y="7" width="7" height="5" rx="1" fill="var(--bg)" opacity="0.5"/>
+          <rect x="12" y="7" width="5" height="5" rx="1" fill="var(--bg)" opacity="0.5"/>
+          <circle cx="6" cy="17" r="3" fill="var(--panel2)" stroke="var(--accent)" stroke-width="1.5"/>
+          <circle cx="6" cy="17" r="1.2" fill="var(--accent)"/>
+          <circle cx="19" cy="17" r="3" fill="var(--panel2)" stroke="var(--accent)" stroke-width="1.5"/>
+          <circle cx="19" cy="17" r="1.2" fill="var(--accent)"/>
+        </svg>
+        <div>
+          <strong>Wohnmobil Pro</strong>
+          <div style="font-size:0.8rem;color:var(--accent);margin-top:2px">v1.0.0</div>
+          <div style="font-size:0.72rem;color:var(--muted);margin-top:2px">© 2026 Torsten Michaely</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="mehr-block">
+      <div class="section-label">Darstellung</div>
+      <div class="info-card" style="display:flex;align-items:center;justify-content:space-between">
+        <span>Hell / Dunkel</span>
+        <button class="theme-toggle" onclick="toggleTheme()" title="Hell/Dunkel umschalten">
+          <div class="theme-toggle-knob" id="themeKnob2">🌙</div>
+        </button>
       </div>
     </div>
 
     <div class="mehr-block">
       <div class="section-label">Daten</div>
-      <div class="info-card">
+      <div class="info-card" style="margin-bottom:8px">
         Alle Daten werden lokal auf dem Gerät gespeichert (localStorage).<br>
         Kein Server, keine Cloud, keine Weitergabe.
       </div>
-      <div class="btn-row" style="margin-top:8px">
+      <div class="btn-row">
         <button class="btn" onclick="exportData()">Export (JSON)</button>
         <button class="btn" onclick="importData()">Import (JSON)</button>
       </div>
@@ -823,6 +939,18 @@
     <div class="mehr-block">
       <div class="section-label">Sensor-Status</div>
       <div class="info-card" id="sensorInfo">Wird ermittelt…</div>
+    </div>
+
+    <div class="mehr-block">
+      <div class="section-label">Rechtliches</div>
+      <a href="./impressum.html" class="info-card mehr-link">
+        Impressum
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="2" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg>
+      </a>
+      <a href="./datenschutz.html" class="info-card mehr-link">
+        Datenschutz
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="2" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg>
+      </a>
     </div>
 
   </div>
@@ -851,6 +979,28 @@
 
 <script>
 'use strict';
+
+// ══════════════════════════════════
+// THEME
+// ══════════════════════════════════
+function toggleTheme() {
+  const isLight = document.documentElement.classList.toggle('light');
+  localStorage.setItem('wmp_theme', isLight ? 'light' : 'dark');
+  syncThemeKnobs(isLight);
+}
+
+function syncThemeKnobs(isLight) {
+  document.querySelectorAll('.theme-toggle-knob').forEach(k => {
+    k.textContent = isLight ? '☀️' : '🌙';
+  });
+}
+
+function loadTheme() {
+  const saved = localStorage.getItem('wmp_theme');
+  const preferLight = saved ? saved === 'light' : window.matchMedia('(prefers-color-scheme: light)').matches;
+  if (preferLight) document.documentElement.classList.add('light');
+  syncThemeKnobs(preferLight);
+}
 
 // ══════════════════════════════════
 // TAB ROUTING
@@ -1265,6 +1415,8 @@ function toast(msg) {
 // INIT
 // ══════════════════════════════════
 (function init() {
+  loadTheme();
+
   const today = new Date().toISOString().split('T')[0];
   ['kf-dat','sp-dat','so-dat'].forEach(id => { const el = document.getElementById(id); if (el) el.value = today; });
 

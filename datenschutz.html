@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Datenschutz – Wohnmobil Pro</title>
+<style>
+  @font-face { font-family:'Rajdhani'; font-weight:400 700; font-display:swap; src:url('fonts/rajdhani-600.woff2') format('woff2'); }
+  :root { --bg:#0a0d14;--panel:#111620;--border:#1e2d45;--accent:#22c55e;--text:#e2e8f0;--muted:#64748b; }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body { background:var(--bg); color:var(--text); font-family:'Rajdhani',system-ui,sans-serif; min-height:100vh; }
+  header { background:var(--panel); border-bottom:1px solid var(--border); padding:14px 20px; display:flex; align-items:center; justify-content:space-between; }
+  .logo { font-size:1.1rem; font-weight:700; color:var(--accent); letter-spacing:0.08em; }
+  header a { color:var(--accent); text-decoration:none; font-size:0.85rem; letter-spacing:0.05em; }
+  main { max-width:680px; margin:32px auto; padding:0 20px 64px; }
+  h1 { font-size:1.8rem; font-weight:700; color:var(--accent); letter-spacing:0.08em; text-transform:uppercase; margin-bottom:24px; border-bottom:1px solid var(--border); padding-bottom:14px; }
+  h2 { font-size:0.75rem; font-weight:700; color:var(--accent); letter-spacing:0.1em; text-transform:uppercase; margin:20px 0 8px; }
+  p { font-size:0.95rem; line-height:1.7; color:var(--text); }
+  a { color:var(--accent); }
+  .card { background:var(--panel); border:1px solid var(--border); border-radius:10px; padding:20px 22px; margin-bottom:10px; }
+  footer { margin-top:48px; border-top:1px solid var(--border); background:var(--panel); padding:16px 20px; text-align:center; font-size:0.8rem; color:var(--muted); }
+  footer a { color:var(--muted); text-decoration:none; margin:0 8px; }
+  footer a:hover { color:var(--accent); }
+</style>
+</head>
+<body>
+<header>
+  <span class="logo">WOHNMOBIL PRO</span>
+  <a href="index.html">&larr; Zurück zur App</a>
+</header>
+<main>
+  <h1>Datenschutz</h1>
+  <div class="card">
+    <h2>Verantwortlicher</h2>
+    <p>Torsten Michaely, Gresaubacherstraße 21, 66839 Schmelz<br>
+    E-Mail: <a href="mailto:info@michaely.de">info@michaely.de</a></p>
+  </div>
+  <div class="card">
+    <h2>Lokale Datenspeicherung</h2>
+    <p>Diese App speichert alle Daten ausschließlich lokal auf deinem Gerät (localStorage des Browsers). Es werden keine Daten an Server übertragen, keine Cookies gesetzt und keine Analyse-Tools verwendet.</p>
+    <h2>Gespeicherte Daten</h2>
+    <p>Folgende Daten werden lokal gespeichert:</p>
+    <p style="margin-top:8px">
+      • Checklisten-Status (welche Punkte abgehakt sind)<br>
+      • Kosteneintragungen (Kraftstoff, Stellplatz, Sonstiges)<br>
+      • Fahrzeugmaße und Kalibrierungswerte für das Nivelliertool<br>
+      • App-Einstellungen (Theme, Toleranz)
+    </p>
+    <h2>Löschen der Daten</h2>
+    <p>Die gespeicherten Daten können jederzeit über die Browser-Einstellungen (Websitedaten löschen) oder durch Deinstallation der PWA entfernt werden.</p>
+  </div>
+  <div class="card">
+    <h2>Externe Dienste</h2>
+    <p>Die App lädt keine externen Ressourcen. Alle Schriftarten und Inhalte sind lokal eingebunden. Es werden keine Verbindungen zu Drittanbietern hergestellt.</p>
+  </div>
+  <div class="card">
+    <h2>Gerätesensoren</h2>
+    <p>Das Nivelliertool verwendet den Lagesensor (Gyroskop) des Geräts. Die Sensordaten werden nur lokal zur Berechnung der Neigung verwendet und nicht gespeichert oder übertragen. Auf iOS-Geräten wird die Erlaubnis vorab abgefragt.</p>
+  </div>
+  <div class="card">
+    <h2>Hosting</h2>
+    <p>Die App wird über GitHub Pages bereitgestellt. Beim Aufrufen der Seite können durch GitHub (Microsoft) Server-Logs erstellt werden. Weitere Informationen: <a href="https://docs.github.com/en/pages/getting-started-with-github-pages/about-github-pages#data-collection" target="_blank" rel="noopener">GitHub Pages Datenschutz</a>.</p>
+  </div>
+</main>
+<footer>
+  &copy; <script>document.write(new Date().getFullYear())</script> Torsten Michaely &nbsp;|&nbsp;
+  <a href="impressum.html">Impressum</a>
+  <a href="datenschutz.html">Datenschutz</a>
+</footer>
+</body>
+</html>

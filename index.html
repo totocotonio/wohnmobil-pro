@@ -739,17 +739,17 @@
         <div class="section-label" style="margin-bottom:8px;text-align:center">Draufsicht – welche Seite anheben</div>
         <svg id="womoSvg" viewBox="0 0 220 130" width="100%" style="display:block">
           <!-- Body -->
-          <rect x="38" y="16" width="144" height="98" rx="10" fill="#161c28" stroke="#1e2d45" stroke-width="1.5"/>
+          <rect x="38" y="16" width="144" height="98" rx="10" fill="var(--panel2)" stroke="var(--border)" stroke-width="1.5"/>
           <!-- Windschutzscheibe -->
-          <rect x="38" y="16" width="144" height="22" rx="10" fill="#1a2535" stroke="#1e2d45" stroke-width="1"/>
+          <rect x="38" y="16" width="144" height="22" rx="10" fill="var(--panel)" stroke="var(--border)" stroke-width="1"/>
           <!-- Fahrrichtung -->
-          <text x="110" y="72" text-anchor="middle" font-size="22" fill="#1e2d45">▲</text>
-          <text x="110" y="84" text-anchor="middle" font-size="7" fill="#1e2d45" letter-spacing="1.5" font-family="sans-serif">VORNE</text>
+          <text x="110" y="72" text-anchor="middle" font-size="22" fill="var(--border)">▲</text>
+          <text x="110" y="84" text-anchor="middle" font-size="7" fill="var(--border)" letter-spacing="1.5" font-family="sans-serif">VORNE</text>
           <!-- Räder -->
-          <rect id="whl-vl" x="22"  y="20"  width="20" height="30" rx="5" fill="#1e2d45"/>
-          <rect id="whl-vr" x="178" y="20"  width="20" height="30" rx="5" fill="#1e2d45"/>
-          <rect id="whl-hl" x="22"  y="80"  width="20" height="30" rx="5" fill="#1e2d45"/>
-          <rect id="whl-hr" x="178" y="80"  width="20" height="30" rx="5" fill="#1e2d45"/>
+          <rect id="whl-vl" x="22"  y="20"  width="20" height="30" rx="5" fill="var(--border)"/>
+          <rect id="whl-vr" x="178" y="20"  width="20" height="30" rx="5" fill="var(--border)"/>
+          <rect id="whl-hl" x="22"  y="80"  width="20" height="30" rx="5" fill="var(--border)"/>
+          <rect id="whl-hr" x="178" y="80"  width="20" height="30" rx="5" fill="var(--border)"/>
           <!-- Labels -->
           <text x="32"  y="52"  text-anchor="middle" font-size="7" fill="#8da0b5" font-family="sans-serif">VL</text>
           <text x="188" y="52"  text-anchor="middle" font-size="7" fill="#8da0b5" font-family="sans-serif">VR</text>
@@ -1125,7 +1125,7 @@ function renderWomoSvg(beta, gamma, tol) {
     return;
   }
 
-  els.forEach(w => { w.setAttribute('fill','#1e2d45'); w.removeAttribute('stroke'); });
+  els.forEach(w => { w.setAttribute('fill','var(--border)'); w.removeAttribute('stroke'); });
 
   const leftLow  = gamma < -tol;
   const rightLow = gamma >  tol;

@@ -538,6 +538,69 @@
   /* ════════════════════════════════════
      KOSTEN
   ════════════════════════════════════ */
+  /* Trip Bar */
+  .trip-bar {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+  .trip-name-btn {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 14px;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    color: var(--muted);
+    font-family: inherit;
+    font-size: 0.88rem;
+    font-weight: 600;
+    cursor: pointer;
+    text-align: left;
+    transition: all 0.15s;
+    min-width: 0;
+  }
+  .trip-name-btn span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .trip-name-btn.has-trip { color: var(--text); border-color: var(--accent); }
+  .trip-dropdown {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+    margin-bottom: 10px;
+  }
+  .trip-item {
+    display: flex;
+    align-items: center;
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--border);
+    gap: 8px;
+  }
+  .trip-item:last-child { border-bottom: none; }
+  .trip-item.is-active { background: rgba(34,197,94,0.06); }
+  .trip-item-name { font-size: 0.88rem; font-weight: 600; color: var(--text); }
+  .trip-item-sub  { font-size: 0.68rem; color: var(--muted); margin-top: 1px; }
+  .trip-item-actions { display: flex; gap: 6px; align-items: center; flex-shrink: 0; }
+  .trip-active-badge { font-size: 0.65rem; color: var(--accent); font-weight: 700; letter-spacing: 0.05em; }
+  .new-trip-form {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 13px;
+    margin-bottom: 10px;
+    display: none;
+  }
+  .archive-btn {
+    width: 100%;
+    margin-top: 12px;
+    color: var(--warn);
+    border-color: rgba(245,158,11,0.25);
+  }
+  .archive-btn:active { background: rgba(245,158,11,0.1); }
+
   .kosten-sum {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
@@ -832,60 +895,104 @@
   <!-- ════════════ TAB: KOSTEN ════════════ -->
   <div id="tab-kosten" class="tab-content">
 
-    <div class="kosten-sum">
-      <div class="sum-card"><div class="sum-lbl">Gesamt</div><div class="sum-val" id="sk-gesamt">0 €</div></div>
-      <div class="sum-card"><div class="sum-lbl">Kraftstoff</div><div class="sum-val" id="sk-kf">0 €</div></div>
-      <div class="sum-card"><div class="sum-lbl">Stellplatz</div><div class="sum-val" id="sk-sp">0 €</div></div>
+    <!-- Trip-Auswahl -->
+    <div class="trip-bar">
+      <button class="trip-name-btn" id="tripNameBtn" onclick="toggleTripDropdown()">
+        <span id="tripNameText">Urlaub wählen…</span>
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
+      </button>
+      <button class="btn btn-primary" style="flex-shrink:0;padding:8px 12px;font-size:0.82rem" onclick="showNewTrip()">+ Neu</button>
     </div>
 
-    <div class="seg-tabs">
-      <button class="seg-tab active" onclick="switchKosten('kraftstoff', this)">Kraftstoff</button>
-      <button class="seg-tab" onclick="switchKosten('stellplatz', this)">Stellplatz</button>
-      <button class="seg-tab" onclick="switchKosten('sonstiges', this)">Sonstiges</button>
-    </div>
-
-    <!-- Kraftstoff -->
-    <div id="kp-kraftstoff" class="kosten-panel">
-      <div class="entry-form">
-        <div class="form-title">Neue Tankung</div>
-        <div class="form-grid">
-          <div class="form-col"><label class="form-lbl">Datum</label><input class="form-inp" type="date" id="kf-dat"></div>
-          <div class="form-col"><label class="form-lbl">km-Stand</label><input class="form-inp" type="number" id="kf-km" placeholder="48250"></div>
-          <div class="form-col"><label class="form-lbl">Liter</label><input class="form-inp" type="number" id="kf-l" placeholder="60.5" step="0.1"></div>
-          <div class="form-col"><label class="form-lbl">Preis / Liter (€)</label><input class="form-inp" type="number" id="kf-p" placeholder="1.699" step="0.001"></div>
-        </div>
-        <button class="btn btn-primary" style="width:100%" onclick="addKraftstoff()">+ Eintragen</button>
+    <!-- Formular: Neuer Urlaub -->
+    <div class="new-trip-form" id="newTripForm">
+      <div class="form-title">Neuer Urlaub</div>
+      <div style="display:flex;gap:8px">
+        <input class="form-inp" type="text" id="newTripName" placeholder="z.B. Südtirol 2026" style="flex:1" onkeydown="if(event.key==='Enter')createTrip()">
+        <button class="btn btn-primary" onclick="createTrip()">Erstellen</button>
       </div>
-      <div class="entries-list" id="list-kraftstoff"></div>
     </div>
 
-    <!-- Stellplatz -->
-    <div id="kp-stellplatz" class="kosten-panel" style="display:none">
-      <div class="entry-form">
-        <div class="form-title">Neuer Stellplatz</div>
-        <div class="form-grid">
-          <div class="form-col"><label class="form-lbl">Datum</label><input class="form-inp" type="date" id="sp-dat"></div>
-          <div class="form-col"><label class="form-lbl">Nächte</label><input class="form-inp" type="number" id="sp-n" placeholder="1" min="1"></div>
-          <div class="form-col full"><label class="form-lbl">Stellplatz / Ort</label><input class="form-inp" type="text" id="sp-name" placeholder="z.B. Campingplatz Bodensee"></div>
-          <div class="form-col"><label class="form-lbl">Preis gesamt (€)</label><input class="form-inp" type="number" id="sp-p" placeholder="24.00" step="0.01"></div>
+    <!-- Trip-Dropdown-Liste -->
+    <div class="trip-dropdown" id="tripDropdown" style="display:none">
+      <div id="tripDropdownItems"></div>
+      <!-- Archiv -->
+      <div style="border-top:1px solid var(--border)">
+        <button class="settings-head" style="width:100%" onclick="toggleArchivSection(this)">
+          <span>Archiv</span><span class="s-arrow">▼</span>
+        </button>
+        <div class="settings-body" id="archivBody">
+          <div id="archivItems"></div>
         </div>
-        <button class="btn btn-primary" style="width:100%" onclick="addStellplatz()">+ Eintragen</button>
       </div>
-      <div class="entries-list" id="list-stellplatz"></div>
     </div>
 
-    <!-- Sonstiges -->
-    <div id="kp-sonstiges" class="kosten-panel" style="display:none">
-      <div class="entry-form">
-        <div class="form-title">Sonstige Ausgabe</div>
-        <div class="form-grid">
-          <div class="form-col"><label class="form-lbl">Datum</label><input class="form-inp" type="date" id="so-dat"></div>
-          <div class="form-col"><label class="form-lbl">Betrag (€)</label><input class="form-inp" type="number" id="so-b" placeholder="15.00" step="0.01"></div>
-          <div class="form-col full"><label class="form-lbl">Beschreibung</label><input class="form-inp" type="text" id="so-desc" placeholder="z.B. Mautgebühr Österreich"></div>
-        </div>
-        <button class="btn btn-primary" style="width:100%" onclick="addSonstiges()">+ Eintragen</button>
+    <!-- Kein Urlaub -->
+    <div id="noTripMsg">
+      <div class="no-entries" style="padding:32px 0">Erstelle einen Urlaub um Kosten zu erfassen.</div>
+    </div>
+
+    <!-- Trip-Inhalt -->
+    <div id="tripContent" style="display:none">
+
+      <div class="kosten-sum">
+        <div class="sum-card"><div class="sum-lbl">Gesamt</div><div class="sum-val" id="sk-gesamt">0 €</div></div>
+        <div class="sum-card"><div class="sum-lbl">Kraftstoff</div><div class="sum-val" id="sk-kf">0 €</div></div>
+        <div class="sum-card"><div class="sum-lbl">Stellplatz</div><div class="sum-val" id="sk-sp">0 €</div></div>
       </div>
-      <div class="entries-list" id="list-sonstiges"></div>
+
+      <div class="seg-tabs">
+        <button class="seg-tab active" onclick="switchKosten('kraftstoff', this)">Kraftstoff</button>
+        <button class="seg-tab" onclick="switchKosten('stellplatz', this)">Stellplatz</button>
+        <button class="seg-tab" onclick="switchKosten('sonstiges', this)">Sonstiges</button>
+      </div>
+
+      <!-- Kraftstoff -->
+      <div id="kp-kraftstoff" class="kosten-panel">
+        <div class="entry-form">
+          <div class="form-title">Neue Tankung</div>
+          <div class="form-grid">
+            <div class="form-col"><label class="form-lbl">Datum</label><input class="form-inp" type="date" id="kf-dat"></div>
+            <div class="form-col"><label class="form-lbl">km-Stand</label><input class="form-inp" type="number" id="kf-km" placeholder="48250"></div>
+            <div class="form-col"><label class="form-lbl">Liter</label><input class="form-inp" type="number" id="kf-l" placeholder="60.5" step="0.1"></div>
+            <div class="form-col"><label class="form-lbl">Preis / Liter (€)</label><input class="form-inp" type="number" id="kf-p" placeholder="1.699" step="0.001"></div>
+          </div>
+          <button class="btn btn-primary" style="width:100%" onclick="addKraftstoff()">+ Eintragen</button>
+        </div>
+        <div class="entries-list" id="list-kraftstoff"></div>
+      </div>
+
+      <!-- Stellplatz -->
+      <div id="kp-stellplatz" class="kosten-panel" style="display:none">
+        <div class="entry-form">
+          <div class="form-title">Neuer Stellplatz</div>
+          <div class="form-grid">
+            <div class="form-col"><label class="form-lbl">Datum</label><input class="form-inp" type="date" id="sp-dat"></div>
+            <div class="form-col"><label class="form-lbl">Nächte</label><input class="form-inp" type="number" id="sp-n" placeholder="1" min="1"></div>
+            <div class="form-col full"><label class="form-lbl">Stellplatz / Ort</label><input class="form-inp" type="text" id="sp-name" placeholder="z.B. Campingplatz Bodensee"></div>
+            <div class="form-col"><label class="form-lbl">Preis gesamt (€)</label><input class="form-inp" type="number" id="sp-p" placeholder="24.00" step="0.01"></div>
+          </div>
+          <button class="btn btn-primary" style="width:100%" onclick="addStellplatz()">+ Eintragen</button>
+        </div>
+        <div class="entries-list" id="list-stellplatz"></div>
+      </div>
+
+      <!-- Sonstiges -->
+      <div id="kp-sonstiges" class="kosten-panel" style="display:none">
+        <div class="entry-form">
+          <div class="form-title">Sonstige Ausgabe</div>
+          <div class="form-grid">
+            <div class="form-col"><label class="form-lbl">Datum</label><input class="form-inp" type="date" id="so-dat"></div>
+            <div class="form-col"><label class="form-lbl">Betrag (€)</label><input class="form-inp" type="number" id="so-b" placeholder="15.00" step="0.01"></div>
+            <div class="form-col full"><label class="form-lbl">Beschreibung</label><input class="form-inp" type="text" id="so-desc" placeholder="z.B. Mautgebühr Österreich"></div>
+          </div>
+          <button class="btn btn-primary" style="width:100%" onclick="addSonstiges()">+ Eintragen</button>
+        </div>
+        <div class="entries-list" id="list-sonstiges"></div>
+      </div>
+
+      <button class="btn archive-btn" onclick="archiveActiveTrip()">Urlaub archivieren</button>
+
     </div>
 
   </div>
@@ -1247,66 +1354,188 @@ function switchCL(name, btn) {
 }
 
 // ══════════════════════════════════
-// KOSTEN
+// TRIPS / KOSTEN
 // ══════════════════════════════════
-let kosten = { kraftstoff: [], stellplatz: [], sonstiges: [] };
+let trips = [];
+let activeTripId = null;
 
-function loadKosten() {
-  kosten = JSON.parse(localStorage.getItem('wmp_kosten') || '{"kraftstoff":[],"stellplatz":[],"sonstiges":[]}');
+function loadTrips() {
+  trips = JSON.parse(localStorage.getItem('wmp_trips') || '[]');
+  activeTripId = localStorage.getItem('wmp_active_trip') || null;
+
+  // Migration: alte kosten-Daten → erster Trip
+  const old = localStorage.getItem('wmp_kosten');
+  if (old && !trips.length) {
+    const k = JSON.parse(old);
+    if (k.kraftstoff.length || k.stellplatz.length || k.sonstiges.length) {
+      const t = { id: Date.now(), name: 'Ältere Einträge', erstellt: new Date().toISOString().split('T')[0], archiviert: false, kraftstoff: k.kraftstoff, stellplatz: k.stellplatz, sonstiges: k.sonstiges };
+      trips.push(t);
+      activeTripId = String(t.id);
+      localStorage.removeItem('wmp_kosten');
+      saveTrips();
+    }
+  }
+  if (activeTripId && !trips.find(t => String(t.id) === activeTripId)) activeTripId = null;
 }
 
-function saveKosten() {
-  localStorage.setItem('wmp_kosten', JSON.stringify(kosten));
-  renderKosten();
-  updateKostenSum();
+function saveTrips() {
+  localStorage.setItem('wmp_trips', JSON.stringify(trips));
+  activeTripId ? localStorage.setItem('wmp_active_trip', activeTripId) : localStorage.removeItem('wmp_active_trip');
 }
 
-function updateKostenSum() {
-  const kf = kosten.kraftstoff.reduce((s,e) => s + e.l * e.p, 0);
-  const sp = kosten.stellplatz.reduce((s,e) => s + e.p, 0);
-  const so = kosten.sonstiges.reduce((s,e)  => s + e.b, 0);
-  document.getElementById('sk-gesamt').textContent = (kf+sp+so).toFixed(0) + ' €';
-  document.getElementById('sk-kf').textContent     = kf.toFixed(0) + ' €';
-  document.getElementById('sk-sp').textContent     = sp.toFixed(0) + ' €';
+function getActiveTrip() {
+  return trips.find(t => String(t.id) === activeTripId) || null;
 }
 
-function addKraftstoff() {
-  const l = parseFloat(document.getElementById('kf-l').value);
-  const p = parseFloat(document.getElementById('kf-p').value);
-  if (!l || !p) { toast('Liter und Preis eingeben'); return; }
-  kosten.kraftstoff.unshift({ id: Date.now(), dat: document.getElementById('kf-dat').value, km: +document.getElementById('kf-km').value||0, l, p });
-  document.getElementById('kf-l').value = '';
-  document.getElementById('kf-p').value = '';
-  saveKosten();
+function tripTotal(t) {
+  return t.kraftstoff.reduce((s,e) => s+e.l*e.p, 0)
+       + t.stellplatz.reduce((s,e) => s+e.p, 0)
+       + t.sonstiges.reduce((s,e) => s+e.b, 0);
 }
 
-function addStellplatz() {
-  const p = parseFloat(document.getElementById('sp-p').value);
-  if (!p) { toast('Preis eingeben'); return; }
-  kosten.stellplatz.unshift({ id: Date.now(), dat: document.getElementById('sp-dat').value, name: document.getElementById('sp-name').value||'–', n: +document.getElementById('sp-n').value||1, p });
-  document.getElementById('sp-name').value = '';
-  document.getElementById('sp-p').value = '';
-  saveKosten();
+function showNewTrip() {
+  const f = document.getElementById('newTripForm');
+  const open = f.style.display !== 'none';
+  f.style.display = open ? 'none' : 'block';
+  if (!open) { closeTripDropdown(); document.getElementById('newTripName').focus(); }
 }
 
-function addSonstiges() {
-  const b = parseFloat(document.getElementById('so-b').value);
-  if (!b) { toast('Betrag eingeben'); return; }
-  kosten.sonstiges.unshift({ id: Date.now(), dat: document.getElementById('so-dat').value, desc: document.getElementById('so-desc').value||'–', b });
-  document.getElementById('so-desc').value = '';
-  document.getElementById('so-b').value = '';
-  saveKosten();
+function createTrip() {
+  const name = document.getElementById('newTripName').value.trim();
+  if (!name) { toast('Name eingeben'); return; }
+  const t = { id: Date.now(), name, erstellt: new Date().toISOString().split('T')[0], archiviert: false, kraftstoff: [], stellplatz: [], sonstiges: [] };
+  trips.unshift(t);
+  activeTripId = String(t.id);
+  document.getElementById('newTripName').value = '';
+  document.getElementById('newTripForm').style.display = 'none';
+  saveTrips(); renderKosten();
+  toast('Urlaub erstellt');
 }
 
-function delEntry(type, id) {
-  kosten[type] = kosten[type].filter(e => e.id !== id);
-  saveKosten();
+function switchTrip(id) {
+  activeTripId = String(id);
+  saveTrips(); renderKosten(); closeTripDropdown();
+}
+
+function toggleTripDropdown() {
+  const dd = document.getElementById('tripDropdown');
+  if (dd.style.display !== 'none') { closeTripDropdown(); return; }
+  renderTripDropdown();
+  dd.style.display = 'block';
+  document.getElementById('tripContent').style.display = 'none';
+  document.getElementById('noTripMsg').style.display = 'none';
+}
+
+function closeTripDropdown() {
+  document.getElementById('tripDropdown').style.display = 'none';
+  const trip = getActiveTrip();
+  document.getElementById('tripContent').style.display = trip ? 'block' : 'none';
+  document.getElementById('noTripMsg').style.display = trip ? 'none' : 'block';
+}
+
+function toggleArchivSection(btn) {
+  const body = document.getElementById('archivBody');
+  body.classList.toggle('open');
+  btn.querySelector('.s-arrow').textContent = body.classList.contains('open') ? '▲' : '▼';
+}
+
+function renderTripDropdown() {
+  const active = trips.filter(t => !t.archiviert);
+  const arch   = trips.filter(t =>  t.archiviert);
+
+  document.getElementById('tripDropdownItems').innerHTML = active.length
+    ? active.map(t => `
+      <div class="trip-item${String(t.id)===activeTripId?' is-active':''}">
+        <div style="flex:1;min-width:0">
+          <div class="trip-item-name">${t.name}</div>
+          <div class="trip-item-sub">${t.erstellt} &middot; ${tripTotal(t).toFixed(0)} €</div>
+        </div>
+        <div class="trip-item-actions">
+          ${String(t.id)===activeTripId
+            ? '<span class="trip-active-badge">AKTIV</span>'
+            : `<button class="btn" style="padding:5px 10px;font-size:0.72rem" onclick="switchTrip(${t.id})">Wählen</button>`}
+          <button class="ei-del" title="Archivieren" onclick="archiveTripById(${t.id})">▾</button>
+        </div>
+      </div>`).join('')
+    : '<div class="no-entries" style="padding:12px">Keine aktiven Urlaube</div>';
+
+  document.getElementById('archivItems').innerHTML = arch.length
+    ? arch.map(t => `
+      <div class="trip-item">
+        <div style="flex:1;min-width:0">
+          <div class="trip-item-name" style="color:var(--muted)">${t.name}</div>
+          <div class="trip-item-sub">${t.erstellt} &middot; ${tripTotal(t).toFixed(0)} €</div>
+        </div>
+        <div class="trip-item-actions">
+          <button class="btn" style="padding:5px 10px;font-size:0.72rem" onclick="unarchiveTrip(${t.id})">Reaktivieren</button>
+          <button class="ei-del" onclick="deleteTripById(${t.id})">✕</button>
+        </div>
+      </div>`).join('')
+    : '<div class="no-entries" style="padding:8px 0;font-size:0.8rem">Leer</div>';
+}
+
+function archiveActiveTrip() {
+  const trip = getActiveTrip();
+  if (!trip) return;
+  archiveTripById(trip.id);
+}
+
+function archiveTripById(id) {
+  const trip = trips.find(t => String(t.id) === String(id));
+  if (!trip) return;
+  trip.archiviert = true;
+  if (activeTripId === String(id)) {
+    const next = trips.find(t => !t.archiviert);
+    activeTripId = next ? String(next.id) : null;
+  }
+  saveTrips(); renderKosten();
+  toast(`"${trip.name}" archiviert`);
+}
+
+function unarchiveTrip(id) {
+  const trip = trips.find(t => String(t.id) === String(id));
+  if (!trip) return;
+  trip.archiviert = false;
+  activeTripId = String(id);
+  saveTrips(); renderKosten(); closeTripDropdown();
+  toast(`"${trip.name}" reaktiviert`);
+}
+
+function deleteTripById(id) {
+  trips = trips.filter(t => String(t.id) !== String(id));
+  if (activeTripId === String(id)) {
+    const next = trips.find(t => !t.archiviert);
+    activeTripId = next ? String(next.id) : null;
+  }
+  saveTrips(); renderTripDropdown(); renderKosten();
+  toast('Urlaub gelöscht');
 }
 
 function renderKosten() {
-  // Kraftstoff
+  const trip = getActiveTrip();
+  const btn = document.getElementById('tripNameBtn');
+  document.getElementById('tripNameText').textContent = trip ? trip.name : 'Urlaub wählen…';
+  btn.classList.toggle('has-trip', !!trip);
+
+  const dd = document.getElementById('tripDropdown');
+  if (!trip) {
+    document.getElementById('tripContent').style.display = 'none';
+    if (dd.style.display === 'none') document.getElementById('noTripMsg').style.display = 'block';
+    ['sk-gesamt','sk-kf','sk-sp'].forEach(id => document.getElementById(id).textContent = '0 €');
+    return;
+  }
+  document.getElementById('noTripMsg').style.display = 'none';
+  if (dd.style.display === 'none') document.getElementById('tripContent').style.display = 'block';
+
+  const kf = trip.kraftstoff.reduce((s,e) => s+e.l*e.p, 0);
+  const sp = trip.stellplatz.reduce((s,e) => s+e.p, 0);
+  const so = trip.sonstiges.reduce((s,e) => s+e.b, 0);
+  document.getElementById('sk-gesamt').textContent = (kf+sp+so).toFixed(0) + ' €';
+  document.getElementById('sk-kf').textContent = kf.toFixed(0) + ' €';
+  document.getElementById('sk-sp').textContent = sp.toFixed(0) + ' €';
+
   const kfEl = document.getElementById('list-kraftstoff');
-  kfEl.innerHTML = kosten.kraftstoff.length ? kosten.kraftstoff.map(e =>
+  kfEl.innerHTML = trip.kraftstoff.length ? trip.kraftstoff.map(e =>
     `<div class="entry-item">
       <div class="ei-info">
         <div class="ei-main">${e.l.toFixed(1)} L &times; ${e.p.toFixed(3)} €/L</div>
@@ -1314,12 +1543,10 @@ function renderKosten() {
       </div>
       <div class="ei-cost">${(e.l*e.p).toFixed(2)} €</div>
       <button class="ei-del" onclick="delEntry('kraftstoff',${e.id})">✕</button>
-    </div>`).join('')
-    : '<div class="no-entries">Noch keine Tankungen</div>';
+    </div>`).join('') : '<div class="no-entries">Noch keine Tankungen</div>';
 
-  // Stellplatz
   const spEl = document.getElementById('list-stellplatz');
-  spEl.innerHTML = kosten.stellplatz.length ? kosten.stellplatz.map(e =>
+  spEl.innerHTML = trip.stellplatz.length ? trip.stellplatz.map(e =>
     `<div class="entry-item">
       <div class="ei-info">
         <div class="ei-main">${e.name}</div>
@@ -1327,12 +1554,10 @@ function renderKosten() {
       </div>
       <div class="ei-cost">${e.p.toFixed(2)} €</div>
       <button class="ei-del" onclick="delEntry('stellplatz',${e.id})">✕</button>
-    </div>`).join('')
-    : '<div class="no-entries">Noch keine Stellplätze</div>';
+    </div>`).join('') : '<div class="no-entries">Noch keine Stellplätze</div>';
 
-  // Sonstiges
   const soEl = document.getElementById('list-sonstiges');
-  soEl.innerHTML = kosten.sonstiges.length ? kosten.sonstiges.map(e =>
+  soEl.innerHTML = trip.sonstiges.length ? trip.sonstiges.map(e =>
     `<div class="entry-item">
       <div class="ei-info">
         <div class="ei-main">${e.desc}</div>
@@ -1340,8 +1565,41 @@ function renderKosten() {
       </div>
       <div class="ei-cost">${e.b.toFixed(2)} €</div>
       <button class="ei-del" onclick="delEntry('sonstiges',${e.id})">✕</button>
-    </div>`).join('')
-    : '<div class="no-entries">Noch keine Ausgaben</div>';
+    </div>`).join('') : '<div class="no-entries">Noch keine Ausgaben</div>';
+}
+
+function addKraftstoff() {
+  const trip = getActiveTrip(); if (!trip) { toast('Zuerst Urlaub wählen'); return; }
+  const l = parseFloat(document.getElementById('kf-l').value);
+  const p = parseFloat(document.getElementById('kf-p').value);
+  if (!l || !p) { toast('Liter und Preis eingeben'); return; }
+  trip.kraftstoff.unshift({ id: Date.now(), dat: document.getElementById('kf-dat').value, km: +document.getElementById('kf-km').value||0, l, p });
+  document.getElementById('kf-l').value = ''; document.getElementById('kf-p').value = '';
+  saveTrips(); renderKosten();
+}
+
+function addStellplatz() {
+  const trip = getActiveTrip(); if (!trip) { toast('Zuerst Urlaub wählen'); return; }
+  const p = parseFloat(document.getElementById('sp-p').value);
+  if (!p) { toast('Preis eingeben'); return; }
+  trip.stellplatz.unshift({ id: Date.now(), dat: document.getElementById('sp-dat').value, name: document.getElementById('sp-name').value||'–', n: +document.getElementById('sp-n').value||1, p });
+  document.getElementById('sp-name').value = ''; document.getElementById('sp-p').value = '';
+  saveTrips(); renderKosten();
+}
+
+function addSonstiges() {
+  const trip = getActiveTrip(); if (!trip) { toast('Zuerst Urlaub wählen'); return; }
+  const b = parseFloat(document.getElementById('so-b').value);
+  if (!b) { toast('Betrag eingeben'); return; }
+  trip.sonstiges.unshift({ id: Date.now(), dat: document.getElementById('so-dat').value, desc: document.getElementById('so-desc').value||'–', b });
+  document.getElementById('so-desc').value = ''; document.getElementById('so-b').value = '';
+  saveTrips(); renderKosten();
+}
+
+function delEntry(type, id) {
+  const trip = getActiveTrip(); if (!trip) return;
+  trip[type] = trip[type].filter(e => e.id !== id);
+  saveTrips(); renderKosten();
 }
 
 function switchKosten(name, btn) {
@@ -1359,7 +1617,7 @@ function exportData() {
     version: '1.0.0', exported: new Date().toISOString(),
     settings: JSON.parse(localStorage.getItem('wmp_settings')||'{}'),
     calib: JSON.parse(localStorage.getItem('wmp_calib')||'null'),
-    checks: clState, kosten,
+    checks: clState, trips, activeTripId,
   }, null, 2)], { type: 'application/json' });
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
@@ -1375,8 +1633,8 @@ function importData() {
     fr.onload = ev => {
       try {
         const d = JSON.parse(ev.target.result);
-        if (d.checks)   { clState = d.checks; saveCL(); renderCL(); }
-        if (d.kosten)   { kosten  = d.kosten; saveKosten(); }
+        if (d.checks) { clState = d.checks; saveCL(); renderCL(); }
+        if (d.trips)  { trips = d.trips; activeTripId = d.activeTripId || null; saveTrips(); renderKosten(); }
         if (d.settings) localStorage.setItem('wmp_settings', JSON.stringify(d.settings));
         if (d.calib)    localStorage.setItem('wmp_calib',    JSON.stringify(d.calib));
         loadSettings();
@@ -1422,10 +1680,9 @@ function toast(msg) {
 
   loadSettings();
   loadCL();
-  loadKosten();
+  loadTrips();
   renderCL();
   renderKosten();
-  updateKostenSum();
   startSensor();
 
   if ('serviceWorker' in navigator) {

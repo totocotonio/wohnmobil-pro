@@ -603,7 +603,7 @@
 
   .kosten-sum {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(4, 1fr);
     gap: 7px;
     margin-bottom: 14px;
   }
@@ -939,6 +939,7 @@
         <div class="sum-card"><div class="sum-lbl">Gesamt</div><div class="sum-val" id="sk-gesamt">0 €</div></div>
         <div class="sum-card"><div class="sum-lbl">Kraftstoff</div><div class="sum-val" id="sk-kf">0 €</div></div>
         <div class="sum-card"><div class="sum-lbl">Stellplatz</div><div class="sum-val" id="sk-sp">0 €</div></div>
+        <div class="sum-card"><div class="sum-lbl">Sonstiges</div><div class="sum-val" id="sk-so">0 €</div></div>
       </div>
 
       <div class="seg-tabs">
@@ -1530,7 +1531,7 @@ function renderKosten() {
   if (!trip) {
     document.getElementById('tripContent').style.display = 'none';
     if (dd.style.display === 'none') document.getElementById('noTripMsg').style.display = 'block';
-    ['sk-gesamt','sk-kf','sk-sp'].forEach(id => document.getElementById(id).textContent = '0 €');
+    ['sk-gesamt','sk-kf','sk-sp','sk-so'].forEach(id => document.getElementById(id).textContent = '0 €');
     return;
   }
   document.getElementById('noTripMsg').style.display = 'none';
@@ -1560,6 +1561,7 @@ function renderKosten() {
   document.getElementById('sk-gesamt').textContent = (kf+sp+so).toFixed(0) + ' €';
   document.getElementById('sk-kf').textContent = kf.toFixed(0) + ' €';
   document.getElementById('sk-sp').textContent = sp.toFixed(0) + ' €';
+  document.getElementById('sk-so').textContent = so.toFixed(0) + ' €';
 
   const del = (type, id) => isArchived ? '' : `<button class="ei-del" onclick="delEntry('${type}',${id})">✕</button>`;
 

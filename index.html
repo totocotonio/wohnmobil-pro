@@ -2204,7 +2204,7 @@ function renderWetter(data, name, sub) {
   const updated = now.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
 
   // Vorschau: Tage 1–7 (heute = 0)
-  const forecastDays = [1, 2, 3, 4, 5, 6, 7].map(i => {
+  const forecastDays = [1, 2, 3, 4, 5, 6, 7].filter(i => daily.time[i]).map(i => {
     const d = new Date(daily.time[i]);
     const dayName = i === 1 ? 'Morgen' : WOCHENTAGE[d.getDay()];
     const info = wmoInfo(daily.weather_code[i], true);

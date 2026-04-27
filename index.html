@@ -153,11 +153,30 @@
     box-shadow: 0 0 14px rgba(34,197,94,0.3);
   }
   .app-title {
-    font-size: 1.15rem;
+    font-size: 1.05rem;
     font-weight: 700;
-    color: var(--accent);
+    color: var(--text);
     letter-spacing: 0.08em;
+    line-height: 1.1;
   }
+  .header-actions {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    flex-shrink: 0;
+  }
+  .header-icon-btn {
+    background: none;
+    border: none;
+    color: var(--muted);
+    width: 34px; height: 34px;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    border-radius: 8px;
+    transition: background 0.15s, color 0.15s;
+    flex-shrink: 0;
+  }
+  .header-icon-btn:active { background: var(--panel2); color: var(--text); }
   .app-version {
     font-size: 0.65rem;
     color: var(--muted);
@@ -1103,11 +1122,25 @@
   </div>
   <div style="flex:1;min-width:0">
     <div class="app-title">WOHNMOBIL <span style="color:var(--accent)">PRO</span></div>
-    <div style="font-size:0.55rem;color:var(--muted);letter-spacing:0.8px">© TORSTEN MICHAELY</div>
+    <div style="font-size:0.52rem;color:var(--muted);letter-spacing:0.8px;line-height:1.3">CAMPING · OFFLINE · KOSTENLOS</div>
+    <div style="font-size:0.48rem;color:var(--muted);letter-spacing:0.5px">© TORSTEN MICHAELY</div>
   </div>
-  <button class="theme-toggle" onclick="toggleTheme()" title="Hell/Dunkel umschalten">
-    <div class="theme-toggle-knob" id="themeKnob">🌙</div>
-  </button>
+  <div class="header-actions">
+    <button class="header-icon-btn" onclick="shareApp()" title="Teilen">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/>
+        <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
+      </svg>
+    </button>
+    <button class="header-icon-btn" onclick="openSearch()" title="Suchen">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+      </svg>
+    </button>
+    <button class="theme-toggle" onclick="toggleTheme()" title="Hell/Dunkel umschalten">
+      <div class="theme-toggle-knob" id="themeKnob">🌙</div>
+    </button>
+  </div>
 </header>
 
 <!-- ZURÜCK-BUTTON -->
@@ -2332,6 +2365,44 @@ function toast(msg) {
   el.style.opacity = '1';
   clearTimeout(el._t);
   el._t = setTimeout(() => el.style.opacity = '0', 2200);
+}
+
+// ══════════════════════════════════
+// SHARE
+// ══════════════════════════════════
+function shareApp() {
+  if (navigator.share) {
+    navigator.share({
+      title: 'Wohnmobil Pro',
+      text: 'Camping-Werkzeug: Nivellieren, Checkliste, Kosten & Wetter – kostenlos & offline.',
+      url: 'https://totocotonio.github.io/wohnmobil-pro/'
+    }).catch(() => {});
+  } else {
+    navigator.clipboard.writeText('https://totocotonio.github.io/wohnmobil-pro/').then(() => toast('Link kopiert!'));
+  }
+}
+
+// ══════════════════════════════════
+// SEARCH
+// ══════════════════════════════════
+function openSearch() {
+  const term = prompt('Suchen:');
+  if (!term || !term.trim()) return;
+  const q = term.trim().toLowerCase();
+  const map = [
+    { keys: ['nivellier','level','ausricht','neigung','gyro'], sec: 'nivellieren' },
+    { keys: ['checkliste','checklist','abfahrt','ankunft','winter','aufgabe'], sec: 'checkliste' },
+    { keys: ['kosten','kraftstoff','diesel','benzin','stellplatz','ausgabe','urlaub','sonstiges'], sec: 'kosten' },
+    { keys: ['wetter','regen','temperatur','wind','prognose','forecast'], sec: 'wetter' },
+    { keys: ['mehr','impressum','datenschutz','info','version'], sec: 'mehr' },
+  ];
+  const match = map.find(m => m.keys.some(k => k.includes(q) || q.includes(k)));
+  if (match) {
+    showSection(match.sec);
+    toast('Zu „' + match.sec.charAt(0).toUpperCase() + match.sec.slice(1) + '" gesprungen');
+  } else {
+    toast('Kein Treffer für „' + term + '"');
+  }
 }
 
 // ══════════════════════════════════

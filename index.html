@@ -1388,7 +1388,11 @@
         </select>
         <input class="form-inp" type="text" id="newTripName" placeholder="z.B. Südtirol 2026" style="flex:1" onkeydown="if(event.key==='Enter')createTrip()">
       </div>
-      <input class="form-inp" type="text" id="newTripOrt" placeholder="Ort / Region (für Karte, z.B. Toskana)" style="width:100%;margin-bottom:8px">
+      <input class="form-inp" type="text" id="newTripOrt" placeholder="Startort / Region (für Karte, z.B. Toskana)" style="width:100%;margin-bottom:8px">
+      <div style="display:flex;gap:8px;margin-bottom:8px">
+        <div style="flex:1"><label class="form-lbl">Von</label><input class="form-inp" type="date" id="newTripVon" style="width:100%"></div>
+        <div style="flex:1"><label class="form-lbl">Bis</label><input class="form-inp" type="date" id="newTripBis" style="width:100%"></div>
+      </div>
       <button class="btn btn-primary" style="width:100%" onclick="createTrip()">Erstellen</button>
     </div>
     <div class="trip-dropdown" id="tripDropdown" style="display:none">
@@ -1406,6 +1410,7 @@
       <div class="no-entries" style="padding:32px 0">Erstelle einen Urlaub um Kosten zu erfassen.</div>
     </div>
     <div id="tripContent" style="display:none">
+      <div id="tripInfoBar" style="display:none;background:var(--panel2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;margin-bottom:12px;font-size:0.82rem;color:var(--muted)"></div>
       <div class="kosten-sum">
         <div class="sum-card"><div class="sum-lbl">Gesamt</div><div class="sum-val" id="sk-gesamt">0 €</div></div>
         <div class="sum-card"><div class="sum-lbl">Kraftstoff</div><div class="sum-val" id="sk-kf">0 €</div></div>
@@ -1416,6 +1421,7 @@
         <button class="seg-tab active" onclick="switchKosten('kraftstoff', this)">Kraftstoff</button>
         <button class="seg-tab" onclick="switchKosten('stellplatz', this)">Stellplatz</button>
         <button class="seg-tab" onclick="switchKosten('sonstiges', this)">Sonstiges</button>
+        <button class="seg-tab" onclick="switchKosten('etappen', this)">Etappen</button>
       </div>
       <div id="kp-kraftstoff" class="kosten-panel">
         <div class="entry-form">
@@ -1454,6 +1460,18 @@
           <button class="btn btn-primary" style="width:100%" onclick="addSonstiges()">+ Eintragen</button>
         </div>
         <div class="entries-list" id="list-sonstiges"></div>
+      </div>
+      <div id="kp-etappen" class="kosten-panel" style="display:none">
+        <div class="entry-form">
+          <div class="form-title">Neue Etappe</div>
+          <div class="form-grid">
+            <div class="form-col full"><label class="form-lbl">Ort / Stellplatz</label><input class="form-inp" type="text" id="et-ort" placeholder="z.B. Gardasee, Riva del Garda"></div>
+            <div class="form-col"><label class="form-lbl">Von</label><input class="form-inp" type="date" id="et-von"></div>
+            <div class="form-col"><label class="form-lbl">Bis</label><input class="form-inp" type="date" id="et-bis"></div>
+          </div>
+          <button class="btn btn-primary" style="width:100%" onclick="addEtappe()">+ Etappe hinzufügen</button>
+        </div>
+        <div class="entries-list" id="list-etappen"></div>
       </div>
       <button class="btn archive-btn" id="archiveBtn" onclick="archiveActiveTrip()">Urlaub archivieren</button>
     </div>
@@ -1918,12 +1936,16 @@ function createTrip() {
   if (!name) { toast('Name eingeben'); return; }
   const land = document.getElementById('newTripLand').value || '';
   const ort  = document.getElementById('newTripOrt').value.trim();
-  const t = { id: Date.now(), name, land, ort, erstellt: new Date().toISOString().split('T')[0], archiviert: false, kraftstoff: [], stellplatz: [], sonstiges: [] };
+  const von  = document.getElementById('newTripVon').value || '';
+  const bis  = document.getElementById('newTripBis').value || '';
+  const t = { id: Date.now(), name, land, ort, von, bis, erstellt: new Date().toISOString().split('T')[0], archiviert: false, kraftstoff: [], stellplatz: [], sonstiges: [], etappen: [] };
   trips.unshift(t);
   activeTripId = String(t.id);
   document.getElementById('newTripName').value = '';
   document.getElementById('newTripLand').value = '';
   document.getElementById('newTripOrt').value = '';
+  document.getElementById('newTripVon').value = '';
+  document.getElementById('newTripBis').value = '';
   document.getElementById('newTripForm').style.display = 'none';
   saveTrips(); renderKosten();
   toast('Urlaub erstellt');
@@ -2053,7 +2075,11 @@ function editTripById(id) {
         ${LAENDER.map(([v,l]) => `<option value="${v}"${trip.land===v?' selected':''}>${l}</option>`).join('')}
       </select>
       <label class="form-lbl">Ort / Region (für Karte)</label>
-      <input class="form-inp" id="_editOrt" value="${trip.ort||''}" placeholder="z.B. Toskana, Gardasee" style="width:100%;margin-bottom:16px">
+      <input class="form-inp" id="_editOrt" value="${trip.ort||''}" placeholder="z.B. Toskana, Gardasee" style="width:100%;margin-bottom:10px">
+      <div style="display:flex;gap:8px;margin-bottom:16px">
+        <div style="flex:1"><label class="form-lbl">Von</label><input class="form-inp" type="date" id="_editVon" value="${trip.von||''}" style="width:100%"></div>
+        <div style="flex:1"><label class="form-lbl">Bis</label><input class="form-inp" type="date" id="_editBis" value="${trip.bis||''}" style="width:100%"></div>
+      </div>
       <div style="display:flex;gap:8px">
         <button class="btn" style="flex:1;background:var(--panel2);color:var(--text);border:1px solid var(--border)" onclick="this.closest('div[style*=fixed]').remove()">Abbrechen</button>
         <button class="btn btn-primary" style="flex:1" onclick="saveEditTrip('${id}')">Speichern</button>
@@ -2070,6 +2096,8 @@ function saveEditTrip(id) {
   const newOrt = document.getElementById('_editOrt').value.trim();
   trip.name = name;
   trip.land = document.getElementById('_editLand').value;
+  trip.von  = document.getElementById('_editVon').value || '';
+  trip.bis  = document.getElementById('_editBis').value || '';
   if (newOrt !== (trip.ort||'')) { trip.ort = newOrt; trip.lat = null; trip.lng = null; geocodeTripOrt(trip); }
   document.querySelector('div[style*="position:fixed"][style*="z-index:1000"]')?.remove();
   saveTrips(); renderTripDropdown(); renderKosten();
@@ -2125,6 +2153,16 @@ function renderKosten() {
   document.getElementById('sk-kf').textContent = kf.toFixed(0) + ' €';
   document.getElementById('sk-sp').textContent = sp.toFixed(0) + ' €';
   document.getElementById('sk-so').textContent = so.toFixed(0) + ' €';
+  // Trip info bar (von-bis Zeitraum)
+  const infoBar = document.getElementById('tripInfoBar');
+  if (trip.von || trip.bis) {
+    const fmt = d => d ? new Date(d+'T00:00:00').toLocaleDateString('de-DE',{day:'2-digit',month:'2-digit',year:'numeric'}) : '?';
+    const tage = (trip.von && trip.bis) ? Math.round((new Date(trip.bis)-new Date(trip.von))/(1000*60*60*24))+1 : null;
+    infoBar.style.display = '';
+    infoBar.innerHTML = `<span style="color:var(--text);font-weight:600">📅 ${fmt(trip.von)} – ${fmt(trip.bis)}</span>${tage ? `<span style="margin-left:10px;color:var(--accent)">${tage} Tage</span>` : ''}`;
+  } else {
+    infoBar.style.display = 'none';
+  }
   const del = (type, id) => isArchived ? '' : `<button class="ei-del" onclick="delEntry('${type}',${id})">✕</button>`;
   document.getElementById('list-kraftstoff').innerHTML = trip.kraftstoff.length ? trip.kraftstoff.map(e =>
     `<div class="entry-item"><div class="ei-info"><div class="ei-main">${e.l.toFixed(1)} L &times; ${e.p.toFixed(3)} €/L${e.verbrauch ? ' &middot; <span style="color:var(--accent)">' + e.verbrauch.toFixed(1) + ' L/100km</span>' : ''}</div><div class="ei-sub">${e.dat||'–'}${e.km?' &middot; '+e.km.toLocaleString('de-DE')+' km':''}</div></div><div class="ei-cost">${(e.l*e.p).toFixed(2)} €</div>${del('kraftstoff',e.id)}</div>`).join('') : '<div class="no-entries">Noch keine Tankungen</div>';
@@ -2132,6 +2170,7 @@ function renderKosten() {
     `<div class="entry-item"><div class="ei-info"><div class="ei-main">${e.name}</div><div class="ei-sub">${e.dat||'–'} &middot; ${e.n} Nacht/Nächte</div></div><div class="ei-cost">${e.p.toFixed(2)} €</div>${del('stellplatz',e.id)}</div>`).join('') : '<div class="no-entries">Noch keine Stellplätze</div>';
   document.getElementById('list-sonstiges').innerHTML = trip.sonstiges.length ? trip.sonstiges.map(e =>
     `<div class="entry-item"><div class="ei-info"><div class="ei-main">${e.desc}</div><div class="ei-sub">${e.dat||'–'}</div></div><div class="ei-cost">${e.b.toFixed(2)} €</div>${del('sonstiges',e.id)}</div>`).join('') : '<div class="no-entries">Noch keine Ausgaben</div>';
+  renderEtappen(trip, isArchived);
 }
 
 function addKraftstoff() {
@@ -2174,6 +2213,65 @@ function switchKosten(name, btn) {
   document.querySelectorAll('.kosten-panel').forEach(p => p.style.display = 'none');
   btn.classList.add('active');
   document.getElementById('kp-' + name).style.display = 'block';
+}
+
+// ══════════════════════════════════
+// ETAPPEN
+// ══════════════════════════════════
+function addEtappe() {
+  const trip = getActiveTrip(); if (!trip) { toast('Zuerst Urlaub wählen'); return; }
+  const ort = document.getElementById('et-ort').value.trim();
+  if (!ort) { toast('Ort eingeben'); return; }
+  if (!trip.etappen) trip.etappen = [];
+  const e = { id: Date.now(), ort, von: document.getElementById('et-von').value||'', bis: document.getElementById('et-bis').value||'', lat: null, lng: null };
+  trip.etappen.push(e);
+  document.getElementById('et-ort').value = '';
+  document.getElementById('et-von').value = '';
+  document.getElementById('et-bis').value = '';
+  saveTrips(); renderKosten();
+  geocodeEtappe(trip, e);
+  toast('Etappe hinzugefügt');
+}
+
+function renderEtappen(trip, isArchived) {
+  if (!trip.etappen) trip.etappen = [];
+  const list = document.getElementById('list-etappen');
+  if (!list) return;
+  if (!trip.etappen.length) { list.innerHTML = '<div class="no-entries">Noch keine Etappen</div>'; return; }
+  const fmt = d => d ? new Date(d+'T00:00:00').toLocaleDateString('de-DE',{day:'2-digit',month:'2-digit',year:'numeric'}) : '';
+  list.innerHTML = trip.etappen.map((e, i) => {
+    const tage = (e.von && e.bis) ? Math.round((new Date(e.bis)-new Date(e.von))/(1000*60*60*24))+1 : null;
+    const datum = e.von ? (fmt(e.von) + (e.bis ? ' – ' + fmt(e.bis) : '') + (tage ? ' ('+tage+' Tage)' : '')) : '';
+    const pinStatus = e.lat ? '📍' : '⏳';
+    return `<div class="entry-item">
+      <div class="ei-info">
+        <div class="ei-main" style="display:flex;align-items:center;gap:6px"><span style="font-size:0.9rem">${pinStatus}</span><strong>${String(i+1).padStart(2,'0')}.</strong> ${e.ort}</div>
+        ${datum ? `<div class="ei-sub">${datum}</div>` : ''}
+      </div>
+      ${isArchived ? '' : `<button class="ei-del" onclick="deleteEtappe(${trip.id},${e.id})">✕</button>`}
+    </div>`;
+  }).join('');
+}
+
+function deleteEtappe(tripId, etappeId) {
+  const trip = trips.find(t => String(t.id) === String(tripId));
+  if (!trip || !trip.etappen) return;
+  trip.etappen = trip.etappen.filter(e => e.id !== etappeId);
+  saveTrips(); renderKosten(); if (_karteMap) renderKartePins();
+}
+
+async function geocodeEtappe(trip, etappe) {
+  try {
+    const res = await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(etappe.ort)}&format=json&limit=1`);
+    const data = await res.json();
+    if (data[0]) {
+      etappe.lat = parseFloat(data[0].lat);
+      etappe.lng = parseFloat(data[0].lon);
+      saveTrips();
+      renderEtappen(trip, false);
+      if (_karteMap) renderKartePins();
+    }
+  } catch(e) {}
 }
 
 // ══════════════════════════════════
@@ -2624,26 +2722,58 @@ function initKarte() {
   setTimeout(() => { _karteMap.invalidateSize(); renderKartePins(); }, 300);
 }
 
+let _kartePins = [];
+let _kartePolylines = [];
+
 function renderKartePins() {
   if (!_karteMap) return;
-  _karteMap.eachLayer(l => { if (l instanceof L.Marker) _karteMap.removeLayer(l); });
-  const redIcon = L.divIcon({
-    html: '<div style="width:18px;height:28px;position:relative"><div style="position:absolute;bottom:0;left:50%;transform:translateX(-50%);width:12px;height:12px;background:#e11d48;border:2px solid #fff;border-radius:50% 50% 50% 0;transform:translateX(-50%) rotate(-45deg);box-shadow:0 2px 6px rgba(0,0,0,0.4)"></div></div>',
+  _kartePins.forEach(l => _karteMap.removeLayer(l));
+  _kartePolylines.forEach(l => _karteMap.removeLayer(l));
+  _kartePins = []; _kartePolylines = [];
+
+  const makeIcon = (color) => L.divIcon({
+    html: `<div style="width:18px;height:28px;position:relative"><div style="position:absolute;bottom:0;left:50%;width:12px;height:12px;background:${color};border:2px solid #fff;border-radius:50% 50% 50% 0;transform:translateX(-50%) rotate(-45deg);box-shadow:0 2px 6px rgba(0,0,0,0.4)"></div></div>`,
     className: '', iconSize: [18, 28], iconAnchor: [9, 28], popupAnchor: [0, -28]
   });
+  const redIcon  = makeIcon('#e11d48');
+  const blueIcon = makeIcon('#2563eb');
+
   let count = 0;
+  const fmt = d => d ? new Date(d+'T00:00:00').toLocaleDateString('de-DE',{day:'2-digit',month:'2-digit',year:'numeric'}) : '?';
+
   trips.forEach(t => {
+    // Etappen-Pins + Route
+    if (t.etappen && t.etappen.length) {
+      const coords = [];
+      t.etappen.forEach((e, i) => {
+        if (!e.lat || !e.lng) return;
+        coords.push([e.lat, e.lng]);
+        const m = L.marker([e.lat, e.lng], { icon: blueIcon }).addTo(_karteMap);
+        const datum = e.von ? fmt(e.von) + (e.bis ? ' – ' + fmt(e.bis) : '') : '';
+        m.bindPopup(`<strong>${t.land||''} ${t.name}</strong><br>Etappe ${i+1}: ${e.ort}${datum ? '<br>' + datum : ''}`);
+        _kartePins.push(m);
+        count++;
+      });
+      if (coords.length > 1) {
+        const poly = L.polyline(coords, { color: '#2563eb', weight: 2, opacity: 0.6, dashArray: '6,6' }).addTo(_karteMap);
+        _kartePolylines.push(poly);
+      }
+    }
+    // Haupt-Trip-Pin
     let lat, lng;
     if (t.lat && t.lng) { lat = t.lat; lng = t.lng; }
     else if (t.land && LAND_COORDS[t.land]) { [lat, lng] = LAND_COORDS[t.land]; }
     else return;
     count++;
-    const marker = L.marker([lat, lng], { icon: redIcon }).addTo(_karteMap);
     const total = tripTotal(t).toFixed(2);
-    marker.bindPopup(`<strong>${t.land||''} ${t.name}</strong><br>${t.ort ? t.ort + '<br>' : ''}${t.erstellt} · ${total} €`);
+    const datum = (t.von || t.bis) ? fmt(t.von) + ' – ' + fmt(t.bis) + '<br>' : '';
+    const m = L.marker([lat, lng], { icon: redIcon }).addTo(_karteMap);
+    m.bindPopup(`<strong>${t.land||''} ${t.name}</strong><br>${datum}${t.ort ? t.ort + '<br>' : ''}${t.erstellt} · ${total} €`);
+    _kartePins.push(m);
   });
+
   const legend = document.getElementById('karte-legend');
-  if (legend) legend.textContent = count ? `${count} Urlaub${count > 1 ? 'e' : ''} gepinnt` : 'Noch keine Urlaube mit Ort oder Land vorhanden.';
+  if (legend) legend.textContent = count ? `${count} Ort${count > 1 ? 'e' : ''} gepinnt` : 'Noch keine Urlaube mit Ort oder Land vorhanden.';
   // Geocode Trips die noch keine Koordinaten haben
   trips.filter(t => !t.lat && (t.ort || t.name)).forEach(t => geocodeTripOrt(t));
 }

@@ -279,7 +279,6 @@
     gap: 14px;
   }
 
-  /* iOS permission */
   .perm-banner {
     width: 100%;
     max-width: 320px;
@@ -296,7 +295,6 @@
     line-height: 1.5;
   }
 
-  /* Bubble Level */
   .bubble-outer {
     width: 230px; height: 230px;
     border-radius: 50%;
@@ -307,7 +305,6 @@
     box-shadow: 0 0 40px rgba(0,0,0,0.6), inset 0 0 30px rgba(0,0,0,0.4);
     flex-shrink: 0;
   }
-  /* crosshair */
   .bubble-outer::before {
     content: '';
     position: absolute; inset: 0;
@@ -348,7 +345,6 @@
     box-shadow: 0 0 20px rgba(34,197,94,0.8), 0 2px 6px rgba(0,0,0,0.4);
   }
 
-  /* Status bar */
   .level-status {
     display: flex;
     align-items: center;
@@ -374,7 +370,6 @@
     flex-shrink: 0;
   }
 
-  /* Angle cards */
   .angle-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -406,7 +401,6 @@
   .angle-cm  { font-size: 0.72rem; color: var(--accent); margin-top: 3px; font-weight: 600; }
   .angle-dir { font-size: 0.68rem; color: var(--muted); margin-top: 2px; min-height: 14px; }
 
-  /* WoMo top-view SVG */
   .womo-topview {
     width: 100%;
     max-width: 320px;
@@ -416,7 +410,6 @@
     padding: 12px 14px;
   }
 
-  /* Settings collapsible */
   .settings-card {
     width: 100%;
     max-width: 320px;
@@ -538,7 +531,6 @@
   /* ════════════════════════════════════
      KOSTEN
   ════════════════════════════════════ */
-  /* Trip Bar */
   .trip-bar {
     display: flex;
     gap: 8px;
@@ -704,6 +696,237 @@
   }
 
   /* ════════════════════════════════════
+     WETTER
+  ════════════════════════════════════ */
+  .wetter-wrap {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  /* Suchzeile */
+  .wetter-search-row {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+  .wetter-search-inp {
+    flex: 1;
+    padding: 10px 12px;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    color: var(--text);
+    font-family: inherit;
+    font-size: 0.88rem;
+    outline: none;
+    transition: border-color 0.15s;
+  }
+  .wetter-search-inp:focus { border-color: rgba(34,197,94,0.5); }
+  .wetter-search-inp::placeholder { color: var(--muted); }
+  .wetter-gps-btn {
+    width: 42px; height: 42px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    background: var(--panel);
+    color: var(--accent);
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    transition: all 0.15s;
+  }
+  .wetter-gps-btn:active { transform: scale(0.95); }
+  .wetter-gps-btn svg { width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+
+  /* Suggestions */
+  .wetter-suggestions {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+    display: none;
+  }
+  .wetter-sug-item {
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--border);
+    cursor: pointer;
+    font-size: 0.85rem;
+    color: var(--text);
+    transition: background 0.1s;
+  }
+  .wetter-sug-item:last-child { border-bottom: none; }
+  .wetter-sug-item:active { background: var(--panel2); }
+  .wetter-sug-sub { font-size: 0.68rem; color: var(--muted); margin-top: 1px; }
+
+  /* Ort-Header */
+  .wetter-location-card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 14px 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .wetter-loc-icon {
+    font-size: 2rem;
+    line-height: 1;
+    flex-shrink: 0;
+  }
+  .wetter-loc-name {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--text);
+  }
+  .wetter-loc-sub {
+    font-size: 0.7rem;
+    color: var(--muted);
+    margin-top: 2px;
+  }
+  .wetter-updated {
+    font-size: 0.63rem;
+    color: var(--muted);
+    margin-top: 3px;
+  }
+
+  /* Aktuell */
+  .wetter-current {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px;
+  }
+  .wetter-cur-top {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 14px;
+  }
+  .wetter-cur-icon { font-size: 3.2rem; line-height: 1; }
+  .wetter-cur-temp {
+    font-size: 3rem;
+    font-weight: 700;
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+  }
+  .wetter-cur-desc {
+    font-size: 0.88rem;
+    color: var(--muted);
+    margin-top: 4px;
+    font-weight: 600;
+  }
+  .wetter-cur-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+  }
+  .wetter-cur-cell {
+    background: var(--panel2);
+    border-radius: 8px;
+    padding: 8px 10px;
+    text-align: center;
+  }
+  .wetter-cur-cell-lbl {
+    font-size: 0.58rem;
+    color: var(--muted);
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    margin-bottom: 3px;
+  }
+  .wetter-cur-cell-val {
+    font-size: 0.92rem;
+    font-weight: 700;
+    color: var(--text);
+  }
+
+  /* 3-Tage Vorschau */
+  .wetter-forecast {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .wetter-day-card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 14px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .wetter-day-name {
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: var(--text);
+    width: 60px;
+    flex-shrink: 0;
+  }
+  .wetter-day-icon { font-size: 1.5rem; flex-shrink: 0; }
+  .wetter-day-desc {
+    font-size: 0.72rem;
+    color: var(--muted);
+    flex: 1;
+  }
+  .wetter-day-temps {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+    flex-shrink: 0;
+  }
+  .wetter-day-max { font-size: 0.95rem; font-weight: 700; color: var(--text); }
+  .wetter-day-min { font-size: 0.82rem; color: var(--muted); }
+
+  /* Camper-Tipps */
+  .wetter-tips {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 14px;
+  }
+  .wetter-tips-title {
+    font-size: 0.6rem;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+  .wetter-tip-item {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    margin-bottom: 8px;
+  }
+  .wetter-tip-item:last-child { margin-bottom: 0; }
+  .wetter-tip-icon { font-size: 1rem; flex-shrink: 0; margin-top: 1px; }
+  .wetter-tip-text { font-size: 0.8rem; color: var(--muted); line-height: 1.5; }
+  .wetter-tip-text strong { color: var(--text); }
+
+  /* Leer-/Ladezustand */
+  .wetter-empty {
+    text-align: center;
+    padding: 32px 16px;
+    color: var(--muted);
+  }
+  .wetter-empty-icon { font-size: 3rem; margin-bottom: 12px; }
+  .wetter-empty-txt { font-size: 0.88rem; line-height: 1.6; }
+
+  .wetter-loading {
+    text-align: center;
+    padding: 24px;
+    color: var(--muted);
+    font-size: 0.85rem;
+  }
+  .wetter-error {
+    background: rgba(248,113,113,0.08);
+    border: 1px solid rgba(248,113,113,0.25);
+    border-radius: 10px;
+    padding: 12px 14px;
+    color: var(--danger);
+    font-size: 0.83rem;
+    text-align: center;
+  }
+
+  /* ════════════════════════════════════
      MEHR
   ════════════════════════════════════ */
   .mehr-block { margin-bottom: 20px; }
@@ -737,7 +960,6 @@
   <header class="app-header">
     <div class="header-left">
       <div class="header-logo">
-        <!-- Wohnmobil Icon -->
         <svg width="28" height="20" viewBox="0 0 28 20" fill="none" xmlns="http://www.w3.org/2000/svg">
           <rect x="1" y="5" width="22" height="11" rx="2" fill="var(--accent)" opacity="0.9"/>
           <rect x="23" y="8" width="4" height="5" rx="1" fill="var(--accent)" opacity="0.7"/>
@@ -759,14 +981,10 @@
   <!-- ════════════ TAB: NIVELLIEREN ════════════ -->
   <div id="tab-nivellieren" class="tab-content active">
     <div class="level-wrap">
-
-      <!-- iOS permission -->
       <div class="perm-banner" id="ios-perm" style="display:none">
         <p>Auf iPhone / iPad muss der Sensorzugriff einmalig freigegeben werden.</p>
         <button class="btn btn-primary" style="width:100%" onclick="requestIOSPermission()">Sensor freigeben</button>
       </div>
-
-      <!-- Bubble Level -->
       <div class="bubble-outer">
         <div class="level-ring ring-ok"></div>
         <div class="level-ring ring-1"></div>
@@ -774,14 +992,10 @@
         <div class="level-ring ring-3"></div>
         <div class="bubble" id="bubble"></div>
       </div>
-
-      <!-- Status -->
       <div class="level-status s-off" id="lvlStatus">
         <div class="status-dot"></div>
         <span id="lvlStatusTxt">Sensor wird gestartet…</span>
       </div>
-
-      <!-- Winkel-Karten -->
       <div class="angle-grid">
         <div class="angle-card">
           <div class="angle-card-label">Links / Rechts</div>
@@ -796,38 +1010,27 @@
           <div class="angle-dir" id="vBetaDir"></div>
         </div>
       </div>
-
-      <!-- Wohnmobil Draufsicht -->
       <div class="womo-topview">
         <div class="section-label" style="margin-bottom:8px;text-align:center">Draufsicht – welche Seite anheben</div>
         <svg id="womoSvg" viewBox="0 0 220 130" width="100%" style="display:block">
-          <!-- Body -->
           <rect x="38" y="16" width="144" height="98" rx="10" fill="var(--panel2)" stroke="var(--border)" stroke-width="1.5"/>
-          <!-- Windschutzscheibe -->
           <rect x="38" y="16" width="144" height="22" rx="10" fill="var(--panel)" stroke="var(--border)" stroke-width="1"/>
-          <!-- Fahrrichtung -->
           <text x="110" y="72" text-anchor="middle" font-size="22" fill="var(--border)">▲</text>
           <text x="110" y="84" text-anchor="middle" font-size="7" fill="var(--border)" letter-spacing="1.5" font-family="sans-serif">VORNE</text>
-          <!-- Räder -->
           <rect id="whl-vl" x="22"  y="20"  width="20" height="30" rx="5" fill="var(--border)"/>
           <rect id="whl-vr" x="178" y="20"  width="20" height="30" rx="5" fill="var(--border)"/>
           <rect id="whl-hl" x="22"  y="80"  width="20" height="30" rx="5" fill="var(--border)"/>
           <rect id="whl-hr" x="178" y="80"  width="20" height="30" rx="5" fill="var(--border)"/>
-          <!-- Labels -->
           <text x="32"  y="52"  text-anchor="middle" font-size="7" fill="#8da0b5" font-family="sans-serif">VL</text>
           <text x="188" y="52"  text-anchor="middle" font-size="7" fill="#8da0b5" font-family="sans-serif">VR</text>
           <text x="32"  y="118" text-anchor="middle" font-size="7" fill="#8da0b5" font-family="sans-serif">HL</text>
           <text x="188" y="118" text-anchor="middle" font-size="7" fill="#8da0b5" font-family="sans-serif">HR</text>
         </svg>
       </div>
-
-      <!-- Buttons -->
       <div class="btn-row" style="max-width:320px">
         <button class="btn btn-primary" onclick="calibrate()">Kalibrieren</button>
         <button class="btn" onclick="resetCalibration()">Zurücksetzen</button>
       </div>
-
-      <!-- Fahrzeugmaße -->
       <div class="settings-card" style="max-width:320px">
         <button class="settings-head" onclick="toggleSettings(this)">
           <span>Fahrzeugmaße</span>
@@ -851,21 +1054,17 @@
           </div>
         </div>
       </div>
-
       <div class="hint">Handy flach auf Armaturenbrett legen.<br>Fahrzeug-Vorderseite = Pfeil auf dem Bild.</div>
-
     </div>
   </div>
 
   <!-- ════════════ TAB: CHECKLISTE ════════════ -->
   <div id="tab-checkliste" class="tab-content">
-
     <div class="seg-tabs">
       <button class="seg-tab active" onclick="switchCL('abfahrt', this)">Abfahrt</button>
       <button class="seg-tab" onclick="switchCL('ankunft', this)">Ankunft</button>
       <button class="seg-tab" onclick="switchCL('winter', this)">Winterlager</button>
     </div>
-
     <div id="cl-abfahrt" class="cl-panel">
       <div id="cl-items-abfahrt"></div>
       <div class="cl-footer">
@@ -873,7 +1072,6 @@
         <button class="btn-reset" onclick="resetCL('abfahrt')">Zurücksetzen</button>
       </div>
     </div>
-
     <div id="cl-ankunft" class="cl-panel" style="display:none">
       <div id="cl-items-ankunft"></div>
       <div class="cl-footer">
@@ -881,7 +1079,6 @@
         <button class="btn-reset" onclick="resetCL('ankunft')">Zurücksetzen</button>
       </div>
     </div>
-
     <div id="cl-winter" class="cl-panel" style="display:none">
       <div id="cl-items-winter"></div>
       <div class="cl-footer">
@@ -889,13 +1086,10 @@
         <button class="btn-reset" onclick="resetCL('winter')">Zurücksetzen</button>
       </div>
     </div>
-
   </div>
 
   <!-- ════════════ TAB: KOSTEN ════════════ -->
   <div id="tab-kosten" class="tab-content">
-
-    <!-- Trip-Auswahl -->
     <div class="trip-bar">
       <button class="trip-name-btn" id="tripNameBtn" onclick="toggleTripDropdown()">
         <span id="tripNameText">Urlaub wählen…</span>
@@ -903,8 +1097,6 @@
       </button>
       <button class="btn btn-primary" style="flex-shrink:0;padding:8px 12px;font-size:0.82rem" onclick="showNewTrip()">+ Neu</button>
     </div>
-
-    <!-- Formular: Neuer Urlaub -->
     <div class="new-trip-form" id="newTripForm">
       <div class="form-title">Neuer Urlaub</div>
       <div style="display:flex;gap:8px">
@@ -912,11 +1104,8 @@
         <button class="btn btn-primary" onclick="createTrip()">Erstellen</button>
       </div>
     </div>
-
-    <!-- Trip-Dropdown-Liste -->
     <div class="trip-dropdown" id="tripDropdown" style="display:none">
       <div id="tripDropdownItems"></div>
-      <!-- Archiv -->
       <div style="border-top:1px solid var(--border)">
         <button class="settings-head" style="width:100%" onclick="toggleArchivSection(this)">
           <span>Archiv</span><span class="s-arrow">▼</span>
@@ -926,29 +1115,21 @@
         </div>
       </div>
     </div>
-
-    <!-- Kein Urlaub -->
     <div id="noTripMsg">
       <div class="no-entries" style="padding:32px 0">Erstelle einen Urlaub um Kosten zu erfassen.</div>
     </div>
-
-    <!-- Trip-Inhalt -->
     <div id="tripContent" style="display:none">
-
       <div class="kosten-sum">
         <div class="sum-card"><div class="sum-lbl">Gesamt</div><div class="sum-val" id="sk-gesamt">0 €</div></div>
         <div class="sum-card"><div class="sum-lbl">Kraftstoff</div><div class="sum-val" id="sk-kf">0 €</div></div>
         <div class="sum-card"><div class="sum-lbl">Stellplatz</div><div class="sum-val" id="sk-sp">0 €</div></div>
         <div class="sum-card"><div class="sum-lbl">Sonstiges</div><div class="sum-val" id="sk-so">0 €</div></div>
       </div>
-
       <div class="seg-tabs">
         <button class="seg-tab active" onclick="switchKosten('kraftstoff', this)">Kraftstoff</button>
         <button class="seg-tab" onclick="switchKosten('stellplatz', this)">Stellplatz</button>
         <button class="seg-tab" onclick="switchKosten('sonstiges', this)">Sonstiges</button>
       </div>
-
-      <!-- Kraftstoff -->
       <div id="kp-kraftstoff" class="kosten-panel">
         <div class="entry-form">
           <div class="form-title">Neue Tankung</div>
@@ -962,8 +1143,6 @@
         </div>
         <div class="entries-list" id="list-kraftstoff"></div>
       </div>
-
-      <!-- Stellplatz -->
       <div id="kp-stellplatz" class="kosten-panel" style="display:none">
         <div class="entry-form">
           <div class="form-title">Neuer Stellplatz</div>
@@ -977,8 +1156,6 @@
         </div>
         <div class="entries-list" id="list-stellplatz"></div>
       </div>
-
-      <!-- Sonstiges -->
       <div id="kp-sonstiges" class="kosten-panel" style="display:none">
         <div class="entry-form">
           <div class="form-title">Sonstige Ausgabe</div>
@@ -991,16 +1168,41 @@
         </div>
         <div class="entries-list" id="list-sonstiges"></div>
       </div>
-
       <button class="btn archive-btn" id="archiveBtn" onclick="archiveActiveTrip()">Urlaub archivieren</button>
+    </div>
+  </div>
+
+  <!-- ════════════ TAB: WETTER ════════════ -->
+  <div id="tab-wetter" class="tab-content">
+    <div class="wetter-wrap">
+
+      <!-- Suche -->
+      <div class="wetter-search-row">
+        <input class="wetter-search-inp" type="text" id="wetterSearchInp"
+          placeholder="Ort suchen…"
+          oninput="onWetterInput()"
+          onkeydown="if(event.key==='Enter')wetterSearchSubmit()">
+        <button class="wetter-gps-btn" onclick="wetterGPS()" title="GPS-Standort">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/><circle cx="12" cy="12" r="9" stroke-dasharray="3 2"/></svg>
+        </button>
+      </div>
+
+      <!-- Vorschläge -->
+      <div class="wetter-suggestions" id="wetterSuggestions"></div>
+
+      <!-- Inhalt -->
+      <div id="wetterContent">
+        <div class="wetter-empty">
+          <div class="wetter-empty-icon">🌤️</div>
+          <div class="wetter-empty-txt">Ort suchen oder GPS verwenden<br>um das Wetter abzurufen.</div>
+        </div>
+      </div>
 
     </div>
-
   </div>
 
   <!-- ════════════ TAB: MEHR ════════════ -->
   <div id="tab-mehr" class="tab-content">
-
     <div class="mehr-block">
       <div class="section-label">Version</div>
       <div class="info-card" style="display:flex;align-items:center;gap:14px">
@@ -1016,12 +1218,11 @@
         </svg>
         <div>
           <strong>Wohnmobil Pro</strong>
-          <div style="font-size:0.8rem;color:var(--accent);margin-top:2px">v1.0.3</div>
+          <div style="font-size:0.8rem;color:var(--accent);margin-top:2px">v1.1.0</div>
           <div style="font-size:0.72rem;color:var(--muted);margin-top:2px">© 2026 Torsten Michaely</div>
         </div>
       </div>
     </div>
-
     <div class="mehr-block">
       <div class="section-label">Darstellung</div>
       <div class="info-card" style="display:flex;align-items:center;justify-content:space-between">
@@ -1031,7 +1232,6 @@
         </button>
       </div>
     </div>
-
     <div class="mehr-block">
       <div class="section-label">Daten</div>
       <div class="info-card" style="margin-bottom:8px">
@@ -1043,12 +1243,10 @@
         <button class="btn" onclick="importData()">Import (JSON)</button>
       </div>
     </div>
-
     <div class="mehr-block">
       <div class="section-label">Sensor-Status</div>
       <div class="info-card" id="sensorInfo">Wird ermittelt…</div>
     </div>
-
     <div class="mehr-block">
       <div class="section-label">Rechtliches</div>
       <a href="./impressum.html" class="info-card mehr-link">
@@ -1060,14 +1258,13 @@
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="2" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg>
       </a>
     </div>
-
   </div>
 
   <!-- ── BOTTOM NAV ── -->
   <nav class="bottom-nav">
     <button class="nav-btn active" onclick="switchTab('nivellieren', this)">
       <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><circle cx="12" cy="12" r="9"/><line x1="3" y1="12" x2="6" y2="12"/><line x1="18" y1="12" x2="21" y2="12"/><line x1="12" y1="3" x2="12" y2="6"/><line x1="12" y1="18" x2="12" y2="21"/></svg>
-      Nivellieren
+      Niveau
     </button>
     <button class="nav-btn" onclick="switchTab('checkliste', this)">
       <svg viewBox="0 0 24 24"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
@@ -1076,6 +1273,10 @@
     <button class="nav-btn" onclick="switchTab('kosten', this)">
       <svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
       Kosten
+    </button>
+    <button class="nav-btn" onclick="switchTab('wetter', this)">
+      <svg viewBox="0 0 24 24"><path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"/></svg>
+      Wetter
     </button>
     <button class="nav-btn" onclick="switchTab('mehr', this)">
       <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg>
@@ -1096,13 +1297,11 @@ function toggleTheme() {
   localStorage.setItem('wmp_theme', isLight ? 'light' : 'dark');
   syncThemeKnobs(isLight);
 }
-
 function syncThemeKnobs(isLight) {
   document.querySelectorAll('.theme-toggle-knob').forEach(k => {
     k.textContent = isLight ? '☀️' : '🌙';
   });
 }
-
 function loadTheme() {
   const saved = localStorage.getItem('wmp_theme');
   const preferLight = saved ? saved === 'light' : window.matchMedia('(prefers-color-scheme: light)').matches;
@@ -1136,7 +1335,6 @@ function loadSettings() {
   const c = JSON.parse(localStorage.getItem('wmp_calib') || 'null');
   if (c) calib = c;
 }
-
 function saveSettings() {
   localStorage.setItem('wmp_settings', JSON.stringify({
     track:     +document.getElementById('cfgTrack').value,
@@ -1144,19 +1342,16 @@ function saveSettings() {
     tol:       +document.getElementById('cfgTol').value,
   }));
 }
-
 function toggleSettings(btn) {
   const body = document.getElementById('settingsBody');
   body.classList.toggle('open');
   btn.querySelector('.s-arrow').textContent = body.classList.contains('open') ? '▲' : '▼';
 }
-
 function calibrate() {
   calib = { beta: smoothB, gamma: smoothG };
   localStorage.setItem('wmp_calib', JSON.stringify(calib));
   toast('Kalibriert');
 }
-
 function resetCalibration() {
   calib = { beta: 0, gamma: 0 };
   localStorage.removeItem('wmp_calib');
@@ -1173,10 +1368,8 @@ function onOrientation(e) {
     document.getElementById('sensorInfo').innerHTML =
       '<strong>Gyroskop:</strong> aktiv<br><span style="margin-top:4px;display:block">DeviceOrientationEvent vorhanden</span>';
   }
-
   smoothB = smoothB + ((e.beta  || 0) - smoothB) * SMOOTH;
   smoothG = smoothG + ((e.gamma || 0) - smoothG) * SMOOTH;
-
   const beta  = smoothB - calib.beta;
   const gamma = smoothG - calib.gamma;
   renderLevel(beta, gamma);
@@ -1186,40 +1379,28 @@ function renderLevel(beta, gamma) {
   const track     = +document.getElementById('cfgTrack').value     || 190;
   const wheelbase = +document.getElementById('cfgWheelbase').value || 380;
   const tol       = +document.getElementById('cfgTol').value       || 0.5;
-
-  // Bubble position (±10° = full deflection to edge)
   const R = 88;
   const bx = Math.max(-R, Math.min(R, (gamma / 10) * R));
   const by = Math.max(-R, Math.min(R, (beta  / 10) * R));
   const el = document.getElementById('bubble');
   el.style.left = `calc(50% + ${bx}px)`;
   el.style.top  = `calc(50% + ${by}px)`;
-
   const dev = Math.sqrt(beta*beta + gamma*gamma);
   const isOk   = dev < tol;
   const isWarn = dev < tol * 4;
-
   el.className = 'bubble ' + (isOk ? 's-ok' : isWarn ? 's-warn' : '');
-
   const st = document.getElementById('lvlStatus');
   const tx = document.getElementById('lvlStatusTxt');
   st.className = 'level-status ' + (isOk ? 's-ok' : isWarn ? 's-warn' : 's-off');
   tx.textContent = isOk ? 'Nivelliert' : isWarn ? 'Fast nivelliert' : 'Nicht nivelliert';
-
-  // Angle display
   document.getElementById('vGamma').textContent = Math.abs(gamma).toFixed(1);
   document.getElementById('vBeta').textContent  = Math.abs(beta).toFixed(1);
-
   const cmG = Math.abs(Math.sin(gamma * Math.PI/180) * track);
   const cmB = Math.abs(Math.sin(beta  * Math.PI/180) * wheelbase);
-
   document.getElementById('vGammaCm').textContent = cmG < 0.4 ? 'eben' : cmG.toFixed(1) + ' cm anheben';
   document.getElementById('vBetaCm').textContent  = cmB < 0.4 ? 'eben' : cmB.toFixed(1) + ' cm anheben';
-
   document.getElementById('vGammaDir').textContent = Math.abs(gamma) < 0.3 ? '' : gamma > 0 ? 'rechts tiefer' : 'links tiefer';
   document.getElementById('vBetaDir').textContent  = Math.abs(beta)  < 0.3 ? '' : beta  > 0 ? 'hinten tiefer' : 'vorne tiefer';
-
-  // SVG top-view
   renderWomoSvg(beta, gamma, tol);
 }
 
@@ -1227,21 +1408,16 @@ function renderWomoSvg(beta, gamma, tol) {
   const ids = ['whl-vl','whl-vr','whl-hl','whl-hr'];
   const els = ids.map(i => document.getElementById(i));
   const ok = Math.abs(beta) < tol && Math.abs(gamma) < tol;
-
   if (ok) {
     els.forEach(w => { w.setAttribute('fill','#14532d'); w.setAttribute('stroke','#22c55e'); w.setAttribute('stroke-width','1.5'); });
     return;
   }
-
   els.forEach(w => { w.setAttribute('fill','var(--border)'); w.removeAttribute('stroke'); });
-
   const leftLow  = gamma < -tol;
   const rightLow = gamma >  tol;
   const frontLow = beta  >  tol;
   const backLow  = beta  < -tol;
-
   function mark(w) { w.setAttribute('fill','#7c2d12'); w.setAttribute('stroke','#f59e0b'); w.setAttribute('stroke-width','1.5'); }
-
   if (leftLow)  { mark(els[0]); mark(els[2]); }
   if (rightLow) { mark(els[1]); mark(els[3]); }
   if (frontLow) { mark(els[0]); mark(els[1]); }
@@ -1256,12 +1432,10 @@ function startSensor() {
   } else if ('DeviceOrientationEvent' in window) {
     window.addEventListener('deviceorientation', onOrientation, true);
     document.getElementById('lvlStatusTxt').textContent = 'Sensor aktiv…';
-    document.getElementById('sensorInfo').innerHTML =
-      '<strong>Gyroskop:</strong> initialisiert';
+    document.getElementById('sensorInfo').innerHTML = '<strong>Gyroskop:</strong> initialisiert';
   } else {
     document.getElementById('lvlStatusTxt').textContent = 'Kein Lagesensor gefunden';
-    document.getElementById('sensorInfo').innerHTML =
-      '<strong>Gyroskop:</strong> nicht verfügbar auf diesem Gerät';
+    document.getElementById('sensorInfo').innerHTML = '<strong>Gyroskop:</strong> nicht verfügbar auf diesem Gerät';
   }
 }
 
@@ -1298,13 +1472,8 @@ const CL_DATA = {
 };
 
 let clState = {};
-
-function loadCL() {
-  clState = JSON.parse(localStorage.getItem('wmp_cl') || '{}');
-}
-function saveCL() {
-  localStorage.setItem('wmp_cl', JSON.stringify(clState));
-}
+function loadCL() { clState = JSON.parse(localStorage.getItem('wmp_cl') || '{}'); }
+function saveCL()  { localStorage.setItem('wmp_cl', JSON.stringify(clState)); }
 
 function renderCL() {
   for (const name of ['abfahrt','ankunft','winter']) {
@@ -1363,8 +1532,6 @@ let activeTripId = null;
 function loadTrips() {
   trips = JSON.parse(localStorage.getItem('wmp_trips') || '[]');
   activeTripId = localStorage.getItem('wmp_active_trip') || null;
-
-  // Migration: alte kosten-Daten → erster Trip
   const old = localStorage.getItem('wmp_kosten');
   if (old && !trips.length) {
     const k = JSON.parse(old);
@@ -1443,7 +1610,6 @@ function toggleArchivSection(btn) {
 function renderTripDropdown() {
   const active = trips.filter(t => !t.archiviert);
   const arch   = trips.filter(t =>  t.archiviert);
-
   document.getElementById('tripDropdownItems').innerHTML = active.length
     ? active.map(t => `
       <div class="trip-item${String(t.id)===activeTripId?' is-active':''}">
@@ -1459,7 +1625,6 @@ function renderTripDropdown() {
         </div>
       </div>`).join('')
     : '<div class="no-entries" style="padding:12px">Keine aktiven Urlaube</div>';
-
   document.getElementById('archivItems').innerHTML = arch.length
     ? arch.map(t => `
       <div class="trip-item">
@@ -1521,12 +1686,10 @@ function renderKosten() {
   const trip = getActiveTrip();
   const btn = document.getElementById('tripNameBtn');
   const isArchived = trip && trip.archiviert === true;
-
   document.getElementById('tripNameText').textContent = trip
     ? (trip.name + (isArchived ? ' · Archiviert' : ''))
     : 'Urlaub wählen…';
   btn.classList.toggle('has-trip', !!trip);
-
   const dd = document.getElementById('tripDropdown');
   if (!trip) {
     document.getElementById('tripContent').style.display = 'none';
@@ -1536,12 +1699,7 @@ function renderKosten() {
   }
   document.getElementById('noTripMsg').style.display = 'none';
   if (dd.style.display === 'none') document.getElementById('tripContent').style.display = 'block';
-
-  // Archived view: hide entry forms, no delete buttons
-  document.querySelectorAll('#tripContent .entry-form').forEach(f => {
-    f.style.display = isArchived ? 'none' : '';
-  });
-
+  document.querySelectorAll('#tripContent .entry-form').forEach(f => { f.style.display = isArchived ? 'none' : ''; });
   const archBtn = document.getElementById('archiveBtn');
   if (isArchived) {
     archBtn.textContent = 'Urlaub reaktivieren';
@@ -1554,7 +1712,6 @@ function renderKosten() {
     archBtn.style.color = '';
     archBtn.style.borderColor = '';
   }
-
   const kf = trip.kraftstoff.reduce((s,e) => s+e.l*e.p, 0);
   const sp = trip.stellplatz.reduce((s,e) => s+e.p, 0);
   const so = trip.sonstiges.reduce((s,e) => s+e.b, 0);
@@ -1562,41 +1719,13 @@ function renderKosten() {
   document.getElementById('sk-kf').textContent = kf.toFixed(0) + ' €';
   document.getElementById('sk-sp').textContent = sp.toFixed(0) + ' €';
   document.getElementById('sk-so').textContent = so.toFixed(0) + ' €';
-
   const del = (type, id) => isArchived ? '' : `<button class="ei-del" onclick="delEntry('${type}',${id})">✕</button>`;
-
-  const kfEl = document.getElementById('list-kraftstoff');
-  kfEl.innerHTML = trip.kraftstoff.length ? trip.kraftstoff.map(e =>
-    `<div class="entry-item">
-      <div class="ei-info">
-        <div class="ei-main">${e.l.toFixed(1)} L &times; ${e.p.toFixed(3)} €/L</div>
-        <div class="ei-sub">${e.dat||'–'}${e.km?' &middot; '+e.km.toLocaleString('de-DE')+' km':''}</div>
-      </div>
-      <div class="ei-cost">${(e.l*e.p).toFixed(2)} €</div>
-      ${del('kraftstoff',e.id)}
-    </div>`).join('') : '<div class="no-entries">Noch keine Tankungen</div>';
-
-  const spEl = document.getElementById('list-stellplatz');
-  spEl.innerHTML = trip.stellplatz.length ? trip.stellplatz.map(e =>
-    `<div class="entry-item">
-      <div class="ei-info">
-        <div class="ei-main">${e.name}</div>
-        <div class="ei-sub">${e.dat||'–'} &middot; ${e.n} Nacht/Nächte</div>
-      </div>
-      <div class="ei-cost">${e.p.toFixed(2)} €</div>
-      ${del('stellplatz',e.id)}
-    </div>`).join('') : '<div class="no-entries">Noch keine Stellplätze</div>';
-
-  const soEl = document.getElementById('list-sonstiges');
-  soEl.innerHTML = trip.sonstiges.length ? trip.sonstiges.map(e =>
-    `<div class="entry-item">
-      <div class="ei-info">
-        <div class="ei-main">${e.desc}</div>
-        <div class="ei-sub">${e.dat||'–'}</div>
-      </div>
-      <div class="ei-cost">${e.b.toFixed(2)} €</div>
-      ${del('sonstiges',e.id)}
-    </div>`).join('') : '<div class="no-entries">Noch keine Ausgaben</div>';
+  document.getElementById('list-kraftstoff').innerHTML = trip.kraftstoff.length ? trip.kraftstoff.map(e =>
+    `<div class="entry-item"><div class="ei-info"><div class="ei-main">${e.l.toFixed(1)} L &times; ${e.p.toFixed(3)} €/L</div><div class="ei-sub">${e.dat||'–'}${e.km?' &middot; '+e.km.toLocaleString('de-DE')+' km':''}</div></div><div class="ei-cost">${(e.l*e.p).toFixed(2)} €</div>${del('kraftstoff',e.id)}</div>`).join('') : '<div class="no-entries">Noch keine Tankungen</div>';
+  document.getElementById('list-stellplatz').innerHTML = trip.stellplatz.length ? trip.stellplatz.map(e =>
+    `<div class="entry-item"><div class="ei-info"><div class="ei-main">${e.name}</div><div class="ei-sub">${e.dat||'–'} &middot; ${e.n} Nacht/Nächte</div></div><div class="ei-cost">${e.p.toFixed(2)} €</div>${del('stellplatz',e.id)}</div>`).join('') : '<div class="no-entries">Noch keine Stellplätze</div>';
+  document.getElementById('list-sonstiges').innerHTML = trip.sonstiges.length ? trip.sonstiges.map(e =>
+    `<div class="entry-item"><div class="ei-info"><div class="ei-main">${e.desc}</div><div class="ei-sub">${e.dat||'–'}</div></div><div class="ei-cost">${e.b.toFixed(2)} €</div>${del('sonstiges',e.id)}</div>`).join('') : '<div class="no-entries">Noch keine Ausgaben</div>';
 }
 
 function addKraftstoff() {
@@ -1608,7 +1737,6 @@ function addKraftstoff() {
   document.getElementById('kf-l').value = ''; document.getElementById('kf-p').value = '';
   saveTrips(); renderKosten();
 }
-
 function addStellplatz() {
   const trip = getActiveTrip(); if (!trip) { toast('Zuerst Urlaub wählen'); return; }
   const p = parseFloat(document.getElementById('sp-p').value);
@@ -1617,7 +1745,6 @@ function addStellplatz() {
   document.getElementById('sp-name').value = ''; document.getElementById('sp-p').value = '';
   saveTrips(); renderKosten();
 }
-
 function addSonstiges() {
   const trip = getActiveTrip(); if (!trip) { toast('Zuerst Urlaub wählen'); return; }
   const b = parseFloat(document.getElementById('so-b').value);
@@ -1626,13 +1753,11 @@ function addSonstiges() {
   document.getElementById('so-desc').value = ''; document.getElementById('so-b').value = '';
   saveTrips(); renderKosten();
 }
-
 function delEntry(type, id) {
   const trip = getActiveTrip(); if (!trip) return;
   trip[type] = trip[type].filter(e => e.id !== id);
   saveTrips(); renderKosten();
 }
-
 function switchKosten(name, btn) {
   document.querySelectorAll('#tab-kosten .seg-tab').forEach(b => b.classList.remove('active'));
   document.querySelectorAll('.kosten-panel').forEach(p => p.style.display = 'none');
@@ -1641,11 +1766,299 @@ function switchKosten(name, btn) {
 }
 
 // ══════════════════════════════════
+// WETTER
+// ══════════════════════════════════
+
+// WMO Wettercodes → Emoji + Beschreibung
+function wmoInfo(code, isDay) {
+  const d = isDay !== false;
+  const map = {
+    0:  { icon: d ? '☀️' : '🌙', desc: 'Klar' },
+    1:  { icon: d ? '🌤️' : '🌤️', desc: 'Überwiegend klar' },
+    2:  { icon: '⛅', desc: 'Teilweise bewölkt' },
+    3:  { icon: '☁️', desc: 'Bedeckt' },
+    45: { icon: '🌫️', desc: 'Nebel' },
+    48: { icon: '🌫️', desc: 'Gefrierender Nebel' },
+    51: { icon: '🌦️', desc: 'Leichter Nieselregen' },
+    53: { icon: '🌦️', desc: 'Nieselregen' },
+    55: { icon: '🌧️', desc: 'Starker Nieselregen' },
+    61: { icon: '🌧️', desc: 'Leichter Regen' },
+    63: { icon: '🌧️', desc: 'Regen' },
+    65: { icon: '🌧️', desc: 'Starker Regen' },
+    71: { icon: '🌨️', desc: 'Leichter Schneefall' },
+    73: { icon: '❄️', desc: 'Schneefall' },
+    75: { icon: '❄️', desc: 'Starker Schneefall' },
+    77: { icon: '🌨️', desc: 'Schneegriesel' },
+    80: { icon: '🌦️', desc: 'Leichte Schauer' },
+    81: { icon: '🌧️', desc: 'Schauer' },
+    82: { icon: '⛈️', desc: 'Starke Schauer' },
+    85: { icon: '🌨️', desc: 'Schneeschauer' },
+    86: { icon: '🌨️', desc: 'Starke Schneeschauer' },
+    95: { icon: '⛈️', desc: 'Gewitter' },
+    96: { icon: '⛈️', desc: 'Gewitter mit Hagel' },
+    99: { icon: '⛈️', desc: 'Schweres Gewitter' },
+  };
+  return map[code] || { icon: '🌡️', desc: 'Unbekannt' };
+}
+
+function windDir(deg) {
+  const dirs = ['N','NO','O','SO','S','SW','W','NW'];
+  return dirs[Math.round(deg / 45) % 8];
+}
+
+function beaufort(kmh) {
+  if (kmh < 2) return 0;
+  if (kmh < 6) return 1;
+  if (kmh < 12) return 2;
+  if (kmh < 20) return 3;
+  if (kmh < 29) return 4;
+  if (kmh < 39) return 5;
+  if (kmh < 50) return 6;
+  if (kmh < 62) return 7;
+  return 8;
+}
+
+function camperTips(data) {
+  const tips = [];
+  const cur = data.current;
+  const wmo = cur.weather_code;
+  const wind = cur.wind_speed_10m;
+  const temp = cur.temperature_2m;
+  const precip = cur.precipitation;
+
+  if (wmo >= 95) tips.push({ icon: '⚡', text: '<strong>Gewitter:</strong> Markise einrollen, Sat-Schüssel sichern.' });
+  else if (wmo >= 80) tips.push({ icon: '🌧️', text: '<strong>Schauer:</strong> Markise reinnehmen, Dachfenster schließen.' });
+  else if (wmo >= 61) tips.push({ icon: '🌧️', text: '<strong>Regen:</strong> Zelt/Vorzelt sichern, Ablaufrinne prüfen.' });
+  else if (wmo <= 1 && temp > 22) tips.push({ icon: '☀️', text: '<strong>Sonnig und warm:</strong> Sonnenschutz aufbauen, Dachfenster leicht öffnen.' });
+
+  if (wind > 50) tips.push({ icon: '💨', text: '<strong>Starker Wind (Bft ' + beaufort(wind) + '):</strong> Markise unbedingt einrollen!' });
+  else if (wind > 30) tips.push({ icon: '💨', text: '<strong>Mäßiger Wind (Bft ' + beaufort(wind) + '):</strong> Markise im Auge behalten.' });
+
+  if (temp < 5) tips.push({ icon: '🥶', text: '<strong>Frost-Gefahr:</strong> Heizung laufen lassen, Wasserleitungen schützen.' });
+  else if (temp > 30) tips.push({ icon: '🌡️', text: '<strong>Hitze:</strong> Fenster abdunkeln, Vorzelt für Schatten aufbauen.' });
+
+  if (tips.length === 0) tips.push({ icon: '✅', text: '<strong>Gute Bedingungen</strong> – perfektes Camping-Wetter!' });
+  return tips;
+}
+
+let wetterSearchTimer = null;
+let wetterLocation = null;
+
+function onWetterInput() {
+  clearTimeout(wetterSearchTimer);
+  const val = document.getElementById('wetterSearchInp').value.trim();
+  if (val.length < 2) { hideSuggestions(); return; }
+  wetterSearchTimer = setTimeout(() => fetchGeoSearch(val), 400);
+}
+
+function wetterSearchSubmit() {
+  const val = document.getElementById('wetterSearchInp').value.trim();
+  if (val.length < 2) return;
+  fetchGeoSearch(val);
+}
+
+async function fetchGeoSearch(query) {
+  try {
+    const res = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(query)}&count=5&language=de&format=json`);
+    const data = await res.json();
+    if (!data.results || !data.results.length) { hideSuggestions(); return; }
+    showSuggestions(data.results);
+  } catch(e) {
+    hideSuggestions();
+  }
+}
+
+function showSuggestions(results) {
+  const el = document.getElementById('wetterSuggestions');
+  el.innerHTML = results.map(r => `
+    <div class="wetter-sug-item" onclick="selectLocation(${r.latitude},${r.longitude},'${escHtml(r.name)}','${escHtml((r.admin1||'') + (r.country_code ? ', '+r.country_code : ''))}')">
+      <div>${escHtml(r.name)}</div>
+      <div class="wetter-sug-sub">${escHtml((r.admin1||'')+', '+r.country_code)}</div>
+    </div>`).join('');
+  el.style.display = 'block';
+}
+
+function hideSuggestions() {
+  document.getElementById('wetterSuggestions').style.display = 'none';
+}
+
+function escHtml(s) {
+  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+
+function selectLocation(lat, lon, name, sub) {
+  wetterLocation = { lat, lon, name, sub };
+  document.getElementById('wetterSearchInp').value = name;
+  hideSuggestions();
+  loadWetter(lat, lon, name, sub);
+}
+
+function wetterGPS() {
+  if (!navigator.geolocation) { toast('GPS nicht verfügbar'); return; }
+  setWetterLoading('GPS wird ermittelt…');
+  navigator.geolocation.getCurrentPosition(pos => {
+    const { latitude: lat, longitude: lon } = pos.coords;
+    reverseGeocode(lat, lon);
+  }, () => {
+    setWetterError('GPS-Zugriff verweigert oder nicht verfügbar.');
+  }, { timeout: 10000 });
+}
+
+async function reverseGeocode(lat, lon) {
+  try {
+    const res = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${lat},${lon}&count=1&language=de&format=json`);
+    // Fallback: just use coords directly
+    loadWetter(lat, lon, 'Aktueller Standort', `${lat.toFixed(2)}°N, ${lon.toFixed(2)}°O`);
+  } catch {
+    loadWetter(lat, lon, 'Aktueller Standort', `${lat.toFixed(2)}°N, ${lon.toFixed(2)}°O`);
+  }
+}
+
+function setWetterLoading(msg) {
+  document.getElementById('wetterContent').innerHTML = `<div class="wetter-loading">⏳ ${msg||'Wetterdaten werden geladen…'}</div>`;
+}
+
+function setWetterError(msg) {
+  document.getElementById('wetterContent').innerHTML = `<div class="wetter-error">⚠️ ${msg}</div>`;
+}
+
+async function loadWetter(lat, lon, name, sub) {
+  setWetterLoading();
+  try {
+    const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}`
+      + `&current=temperature_2m,relative_humidity_2m,apparent_temperature,precipitation,weather_code,wind_speed_10m,wind_direction_10m,is_day`
+      + `&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_sum,wind_speed_10m_max`
+      + `&timezone=auto&forecast_days=4`;
+    const res = await fetch(url);
+    const data = await res.json();
+    renderWetter(data, name, sub);
+    // Cache
+    localStorage.setItem('wmp_wetter_cache', JSON.stringify({ lat, lon, name, sub, ts: Date.now(), data }));
+  } catch(e) {
+    setWetterError('Wetterdaten konnten nicht geladen werden. Bitte Internetverbindung prüfen.');
+  }
+}
+
+const WOCHENTAGE = ['So','Mo','Di','Mi','Do','Fr','Sa'];
+
+function renderWetter(data, name, sub) {
+  const cur = data.current;
+  const daily = data.daily;
+  const isDay = cur.is_day === 1;
+  const wmo = wmoInfo(cur.weather_code, isDay);
+  const now = new Date();
+  const updated = now.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
+
+  // Vorschau: Tage 1–3 (heute = 0)
+  const forecastDays = [1, 2, 3].map(i => {
+    const d = new Date(daily.time[i]);
+    const dayName = i === 1 ? 'Morgen' : WOCHENTAGE[d.getDay()];
+    const info = wmoInfo(daily.weather_code[i], true);
+    return `<div class="wetter-day-card">
+      <div class="wetter-day-name">${dayName}</div>
+      <div class="wetter-day-icon">${info.icon}</div>
+      <div class="wetter-day-desc">${info.desc}</div>
+      <div class="wetter-day-temps">
+        <span class="wetter-day-max">${Math.round(daily.temperature_2m_max[i])}°</span>
+        <span class="wetter-day-min">${Math.round(daily.temperature_2m_min[i])}°</span>
+      </div>
+    </div>`;
+  }).join('');
+
+  // Camper-Tipps
+  const tips = camperTips(data);
+  const tipsHtml = tips.map(t =>
+    `<div class="wetter-tip-item"><div class="wetter-tip-icon">${t.icon}</div><div class="wetter-tip-text">${t.text}</div></div>`
+  ).join('');
+
+  document.getElementById('wetterContent').innerHTML = `
+    <div class="wetter-location-card">
+      <div class="wetter-loc-icon">📍</div>
+      <div>
+        <div class="wetter-loc-name">${escHtml(name)}</div>
+        <div class="wetter-loc-sub">${escHtml(sub||'')}</div>
+        <div class="wetter-updated">Aktualisiert: ${updated} · Open-Meteo</div>
+      </div>
+    </div>
+
+    <div class="section-label" style="margin-top:4px">Aktuell</div>
+    <div class="wetter-current">
+      <div class="wetter-cur-top">
+        <div class="wetter-cur-icon">${wmo.icon}</div>
+        <div>
+          <div class="wetter-cur-temp">${Math.round(cur.temperature_2m)}°</div>
+          <div class="wetter-cur-desc">${wmo.desc}</div>
+        </div>
+      </div>
+      <div class="wetter-cur-grid">
+        <div class="wetter-cur-cell">
+          <div class="wetter-cur-cell-lbl">Gefühlt</div>
+          <div class="wetter-cur-cell-val">${Math.round(cur.apparent_temperature)}°C</div>
+        </div>
+        <div class="wetter-cur-cell">
+          <div class="wetter-cur-cell-lbl">Luftfeuchte</div>
+          <div class="wetter-cur-cell-val">${cur.relative_humidity_2m}%</div>
+        </div>
+        <div class="wetter-cur-cell">
+          <div class="wetter-cur-cell-lbl">Niederschlag</div>
+          <div class="wetter-cur-cell-val">${cur.precipitation} mm</div>
+        </div>
+        <div class="wetter-cur-cell">
+          <div class="wetter-cur-cell-lbl">Wind</div>
+          <div class="wetter-cur-cell-val">${Math.round(cur.wind_speed_10m)} km/h</div>
+        </div>
+        <div class="wetter-cur-cell">
+          <div class="wetter-cur-cell-lbl">Windrichtung</div>
+          <div class="wetter-cur-cell-val">${windDir(cur.wind_direction_10m)}</div>
+        </div>
+        <div class="wetter-cur-cell">
+          <div class="wetter-cur-cell-lbl">Beaufort</div>
+          <div class="wetter-cur-cell-val">Bft ${beaufort(cur.wind_speed_10m)}</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-label" style="margin-top:4px">3-Tage Vorschau</div>
+    <div class="wetter-forecast">${forecastDays}</div>
+
+    <div class="section-label" style="margin-top:4px">Camping-Tipps</div>
+    <div class="wetter-tips">
+      <div class="wetter-tips-title">Empfehlungen für deinen Stellplatz</div>
+      ${tipsHtml}
+    </div>
+
+    <button class="btn" style="width:100%;margin-top:4px" onclick="refreshWetter()">🔄 Aktualisieren</button>
+  `;
+}
+
+function refreshWetter() {
+  const cache = JSON.parse(localStorage.getItem('wmp_wetter_cache') || 'null');
+  if (cache) {
+    loadWetter(cache.lat, cache.lon, cache.name, cache.sub);
+  } else {
+    toast('Kein Ort gespeichert');
+  }
+}
+
+function restoreWetterCache() {
+  const cache = JSON.parse(localStorage.getItem('wmp_wetter_cache') || 'null');
+  if (!cache) return;
+  // Only restore if < 30 minutes old
+  if (Date.now() - cache.ts < 30 * 60 * 1000) {
+    document.getElementById('wetterSearchInp').value = cache.name;
+    renderWetter(cache.data, cache.name, cache.sub);
+  } else if (cache.lat) {
+    document.getElementById('wetterSearchInp').value = cache.name;
+    loadWetter(cache.lat, cache.lon, cache.name, cache.sub);
+  }
+}
+
+// ══════════════════════════════════
 // EXPORT / IMPORT
 // ══════════════════════════════════
 function exportData() {
   const blob = new Blob([JSON.stringify({
-    version: '1.0.0', exported: new Date().toISOString(),
+    version: '1.1.0', exported: new Date().toISOString(),
     settings: JSON.parse(localStorage.getItem('wmp_settings')||'{}'),
     calib: JSON.parse(localStorage.getItem('wmp_calib')||'null'),
     checks: clState, trips, activeTripId,
@@ -1705,17 +2118,15 @@ function toast(msg) {
 // ══════════════════════════════════
 (function init() {
   loadTheme();
-
   const today = new Date().toISOString().split('T')[0];
   ['kf-dat','sp-dat','so-dat'].forEach(id => { const el = document.getElementById(id); if (el) el.value = today; });
-
   loadSettings();
   loadCL();
   loadTrips();
   renderCL();
   renderKosten();
   startSensor();
-
+  restoreWetterCache();
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('./sw.js').catch(() => {});
   }

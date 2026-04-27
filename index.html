@@ -1940,6 +1940,8 @@ function renderTripDropdown() {
           ${String(t.id)===activeTripId
             ? '<span class="trip-active-badge">AKTIV</span>'
             : `<button class="btn" style="padding:5px 10px;font-size:0.72rem" onclick="switchTrip(${t.id})">Wählen</button>`}
+          <button class="ei-del" title="Bearbeiten" onclick="editTripById(${t.id})">✎</button>
+          <button class="ei-del" title="Löschen" onclick="deleteTripById(${t.id})">✕</button>
           <button class="ei-del" title="Archivieren" onclick="archiveTripById(${t.id})">▾</button>
         </div>
       </div>`).join('')
@@ -1953,7 +1955,8 @@ function renderTripDropdown() {
         </div>
         <div class="trip-item-actions">
           <button class="btn" style="padding:5px 10px;font-size:0.72rem" onclick="viewArchivedTrip(${t.id})">Ansehen</button>
-          <button class="ei-del" onclick="deleteTripById(${t.id})">✕</button>
+          <button class="ei-del" title="Bearbeiten" onclick="editTripById(${t.id})">✎</button>
+          <button class="ei-del" title="Löschen" onclick="deleteTripById(${t.id})">✕</button>
         </div>
       </div>`).join('')
     : '<div class="no-entries" style="padding:8px 0;font-size:0.8rem">Leer</div>';
@@ -1991,7 +1994,56 @@ function unarchiveTrip(id) {
   toast(`"${trip.name}" reaktiviert`);
 }
 
+function editTripById(id) {
+  const trip = trips.find(t => String(t.id) === String(id));
+  if (!trip) return;
+  const LAENDER = [
+    ['','🌍 Kein Land'],['🇩🇪','🇩🇪 Deutschland'],['🇦🇹','🇦🇹 Österreich'],['🇨🇭','🇨🇭 Schweiz'],
+    ['🇮🇹','🇮🇹 Italien'],['🇫🇷','🇫🇷 Frankreich'],['🇪🇸','🇪🇸 Spanien'],['🇵🇹','🇵🇹 Portugal'],
+    ['🇳🇱','🇳🇱 Niederlande'],['🇧🇪','🇧🇪 Belgien'],['🇱🇺','🇱🇺 Luxemburg'],['🇩🇰','🇩🇰 Dänemark'],
+    ['🇸🇪','🇸🇪 Schweden'],['🇳🇴','🇳🇴 Norwegen'],['🇫🇮','🇫🇮 Finnland'],['🇮🇸','🇮🇸 Island'],
+    ['🇬🇧','🇬🇧 Großbritannien'],['🇮🇪','🇮🇪 Irland'],['🇵🇱','🇵🇱 Polen'],['🇨🇿','🇨🇿 Tschechien'],
+    ['🇸🇰','🇸🇰 Slowakei'],['🇭🇺','🇭🇺 Ungarn'],['🇷🇴','🇷🇴 Rumänien'],['🇧🇬','🇧🇬 Bulgarien'],
+    ['🇬🇷','🇬🇷 Griechenland'],['🇭🇷','🇭🇷 Kroatien'],['🇸🇮','🇸🇮 Slowenien'],['🇷🇸','🇷🇸 Serbien'],
+    ['🇧🇦','🇧🇦 Bosnien'],['🇲🇪','🇲🇪 Montenegro'],['🇦🇱','🇦🇱 Albanien'],['🇲🇰','🇲🇰 Nordmazedonien'],
+    ['🇱🇹','🇱🇹 Litauen'],['🇱🇻','🇱🇻 Lettland'],['🇪🇪','🇪🇪 Estland'],['🇺🇦','🇺🇦 Ukraine'],
+    ['🇲🇹','🇲🇹 Malta'],['🇨🇾','🇨🇾 Zypern'],['🇱🇮','🇱🇮 Liechtenstein'],['🇦🇩','🇦🇩 Andorra'],
+    ['🇲🇨','🇲🇨 Monaco'],['🇸🇲','🇸🇲 San Marino'],['🇹🇷','🇹🇷 Türkei'],['🇲🇦','🇲🇦 Marokko'],['🇹🇳','🇹🇳 Tunesien'],
+  ];
+  const overlay = document.createElement('div');
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:1000;display:flex;align-items:center;justify-content:center;padding:16px';
+  overlay.innerHTML = `
+    <div style="background:var(--panel);border:1px solid var(--border);border-radius:14px;width:100%;max-width:420px;padding:20px">
+      <div style="font-size:0.68rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--accent);margin-bottom:12px">Urlaub bearbeiten</div>
+      <label class="form-lbl">Name</label>
+      <input class="form-inp" id="_editName" value="${trip.name}" style="width:100%;margin-bottom:10px">
+      <label class="form-lbl">Land</label>
+      <select class="form-inp" id="_editLand" style="width:100%;margin-bottom:16px">
+        ${LAENDER.map(([v,l]) => `<option value="${v}"${trip.land===v?' selected':''}>${l}</option>`).join('')}
+      </select>
+      <div style="display:flex;gap:8px">
+        <button class="btn" style="flex:1;background:var(--panel2);color:var(--text);border:1px solid var(--border)" onclick="this.closest('div[style*=fixed]').remove()">Abbrechen</button>
+        <button class="btn btn-primary" style="flex:1" onclick="saveEditTrip('${id}')">Speichern</button>
+      </div>
+    </div>`;
+  document.body.appendChild(overlay);
+}
+
+function saveEditTrip(id) {
+  const trip = trips.find(t => String(t.id) === String(id));
+  if (!trip) return;
+  const name = document.getElementById('_editName').value.trim();
+  if (!name) { toast('Name eingeben'); return; }
+  trip.name = name;
+  trip.land = document.getElementById('_editLand').value;
+  document.querySelector('div[style*="position:fixed"][style*="z-index:1000"]')?.remove();
+  saveTrips(); renderTripDropdown(); renderKosten();
+  toast('Gespeichert');
+}
+
 function deleteTripById(id) {
+  const trip = trips.find(t => String(t.id) === String(id));
+  if (!confirm(`"${trip?.name}" wirklich löschen? Alle Einträge gehen verloren.`)) return;
   trips = trips.filter(t => String(t.id) !== String(id));
   if (activeTripId === String(id)) {
     const next = trips.find(t => !t.archiviert);

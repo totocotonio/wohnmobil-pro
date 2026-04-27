@@ -1976,7 +1976,7 @@ function renderKosten() {
   document.getElementById('sk-so').textContent = so.toFixed(0) + ' €';
   const del = (type, id) => isArchived ? '' : `<button class="ei-del" onclick="delEntry('${type}',${id})">✕</button>`;
   document.getElementById('list-kraftstoff').innerHTML = trip.kraftstoff.length ? trip.kraftstoff.map(e =>
-    `<div class="entry-item"><div class="ei-info"><div class="ei-main">${e.l.toFixed(1)} L &times; ${e.p.toFixed(3)} €/L</div><div class="ei-sub">${e.dat||'–'}${e.km?' &middot; '+e.km.toLocaleString('de-DE')+' km':''}</div></div><div class="ei-cost">${(e.l*e.p).toFixed(2)} €</div>${del('kraftstoff',e.id)}</div>`).join('') : '<div class="no-entries">Noch keine Tankungen</div>';
+    `<div class="entry-item"><div class="ei-info"><div class="ei-main">${e.l.toFixed(1)} L &times; ${e.p.toFixed(3)} €/L${e.verbrauch ? ' &middot; <span style="color:var(--accent)">' + e.verbrauch.toFixed(1) + ' L/100km</span>' : ''}</div><div class="ei-sub">${e.dat||'–'}${e.km?' &middot; '+e.km.toLocaleString('de-DE')+' km':''}</div></div><div class="ei-cost">${(e.l*e.p).toFixed(2)} €</div>${del('kraftstoff',e.id)}</div>`).join('') : '<div class="no-entries">Noch keine Tankungen</div>';
   document.getElementById('list-stellplatz').innerHTML = trip.stellplatz.length ? trip.stellplatz.map(e =>
     `<div class="entry-item"><div class="ei-info"><div class="ei-main">${e.name}</div><div class="ei-sub">${e.dat||'–'} &middot; ${e.n} Nacht/Nächte</div></div><div class="ei-cost">${e.p.toFixed(2)} €</div>${del('stellplatz',e.id)}</div>`).join('') : '<div class="no-entries">Noch keine Stellplätze</div>';
   document.getElementById('list-sonstiges').innerHTML = trip.sonstiges.length ? trip.sonstiges.map(e =>
@@ -1988,7 +1988,12 @@ function addKraftstoff() {
   const l = parseFloat(document.getElementById('kf-l').value);
   const p = parseFloat(document.getElementById('kf-p').value);
   if (!l || !p) { toast('Liter und Preis eingeben'); return; }
-  trip.kraftstoff.unshift({ id: Date.now(), dat: document.getElementById('kf-dat').value, km: +document.getElementById('kf-km').value||0, l, p });
+  const km = +document.getElementById('kf-km').value || 0;
+  // Verbrauch berechnen: vorherige Tankung mit km-Stand suchen
+  const prev = trip.kraftstoff.find(e => e.km > 0);
+  const verbrauch = (km && prev && prev.km && km > prev.km)
+    ? (l / (km - prev.km) * 100) : 0;
+  trip.kraftstoff.unshift({ id: Date.now(), dat: document.getElementById('kf-dat').value, km, l, p, verbrauch });
   document.getElementById('kf-l').value = ''; document.getElementById('kf-p').value = '';
   saveTrips(); renderKosten();
 }

@@ -1330,10 +1330,57 @@
     </div>
     <div class="new-trip-form" id="newTripForm">
       <div class="form-title">Neuer Urlaub</div>
-      <div style="display:flex;gap:8px">
+      <div style="display:flex;gap:8px;margin-bottom:8px">
+        <select class="form-inp" id="newTripLand" style="flex:0 0 auto;width:auto;max-width:160px;font-size:0.95rem">
+          <option value="">🌍 Land</option>
+          <option value="🇩🇪">🇩🇪 Deutschland</option>
+          <option value="🇦🇹">🇦🇹 Österreich</option>
+          <option value="🇨🇭">🇨🇭 Schweiz</option>
+          <option value="🇮🇹">🇮🇹 Italien</option>
+          <option value="🇫🇷">🇫🇷 Frankreich</option>
+          <option value="🇪🇸">🇪🇸 Spanien</option>
+          <option value="🇵🇹">🇵🇹 Portugal</option>
+          <option value="🇳🇱">🇳🇱 Niederlande</option>
+          <option value="🇧🇪">🇧🇪 Belgien</option>
+          <option value="🇱🇺">🇱🇺 Luxemburg</option>
+          <option value="🇩🇰">🇩🇰 Dänemark</option>
+          <option value="🇸🇪">🇸🇪 Schweden</option>
+          <option value="🇳🇴">🇳🇴 Norwegen</option>
+          <option value="🇫🇮">🇫🇮 Finnland</option>
+          <option value="🇮🇸">🇮🇸 Island</option>
+          <option value="🇬🇧">🇬🇧 Großbritannien</option>
+          <option value="🇮🇪">🇮🇪 Irland</option>
+          <option value="🇵🇱">🇵🇱 Polen</option>
+          <option value="🇨🇿">🇨🇿 Tschechien</option>
+          <option value="🇸🇰">🇸🇰 Slowakei</option>
+          <option value="🇭🇺">🇭🇺 Ungarn</option>
+          <option value="🇷🇴">🇷🇴 Rumänien</option>
+          <option value="🇧🇬">🇧🇬 Bulgarien</option>
+          <option value="🇬🇷">🇬🇷 Griechenland</option>
+          <option value="🇭🇷">🇭🇷 Kroatien</option>
+          <option value="🇸🇮">🇸🇮 Slowenien</option>
+          <option value="🇷🇸">🇷🇸 Serbien</option>
+          <option value="🇧🇦">🇧🇦 Bosnien</option>
+          <option value="🇲🇪">🇲🇪 Montenegro</option>
+          <option value="🇦🇱">🇦🇱 Albanien</option>
+          <option value="🇲🇰">🇲🇰 Nordmazedonien</option>
+          <option value="🇱🇹">🇱🇹 Litauen</option>
+          <option value="🇱🇻">🇱🇻 Lettland</option>
+          <option value="🇪🇪">🇪🇪 Estland</option>
+          <option value="🇺🇦">🇺🇦 Ukraine</option>
+          <option value="🇲🇹">🇲🇹 Malta</option>
+          <option value="🇨🇾">🇨🇾 Zypern</option>
+          <option value="🇱🇮">🇱🇮 Liechtenstein</option>
+          <option value="🇦🇩">🇦🇩 Andorra</option>
+          <option value="🇲🇨">🇲🇨 Monaco</option>
+          <option value="🇸🇲">🇸🇲 San Marino</option>
+          <option value="🇹🇷">🇹🇷 Türkei</option>
+          <option value="🇲🇦">🇲🇦 Marokko</option>
+          <option value="🇹🇳">🇹🇳 Tunesien</option>
+        </select>
         <input class="form-inp" type="text" id="newTripName" placeholder="z.B. Südtirol 2026" style="flex:1" onkeydown="if(event.key==='Enter')createTrip()">
-        <button class="btn btn-primary" onclick="createTrip()">Erstellen</button>
       </div>
+      <button class="btn btn-primary" style="width:100%" onclick="createTrip()">Erstellen</button>
     </div>
     <div class="trip-dropdown" id="tripDropdown" style="display:none">
       <div id="tripDropdownItems"></div>
@@ -1826,10 +1873,12 @@ function showNewTrip() {
 function createTrip() {
   const name = document.getElementById('newTripName').value.trim();
   if (!name) { toast('Name eingeben'); return; }
-  const t = { id: Date.now(), name, erstellt: new Date().toISOString().split('T')[0], archiviert: false, kraftstoff: [], stellplatz: [], sonstiges: [] };
+  const land = document.getElementById('newTripLand').value || '';
+  const t = { id: Date.now(), name, land, erstellt: new Date().toISOString().split('T')[0], archiviert: false, kraftstoff: [], stellplatz: [], sonstiges: [] };
   trips.unshift(t);
   activeTripId = String(t.id);
   document.getElementById('newTripName').value = '';
+  document.getElementById('newTripLand').value = '';
   document.getElementById('newTripForm').style.display = 'none';
   saveTrips(); renderKosten();
   toast('Urlaub erstellt');
@@ -1869,7 +1918,7 @@ function renderTripDropdown() {
     ? active.map(t => `
       <div class="trip-item${String(t.id)===activeTripId?' is-active':''}">
         <div style="flex:1;min-width:0">
-          <div class="trip-item-name">${t.name}</div>
+          <div class="trip-item-name">${t.land ? t.land + ' ' : ''}${t.name}</div>
           <div class="trip-item-sub">${t.erstellt} &middot; ${tripTotal(t).toFixed(0)} €</div>
         </div>
         <div class="trip-item-actions">
@@ -1942,7 +1991,7 @@ function renderKosten() {
   const btn = document.getElementById('tripNameBtn');
   const isArchived = trip && trip.archiviert === true;
   document.getElementById('tripNameText').textContent = trip
-    ? (trip.name + (isArchived ? ' · Archiviert' : ''))
+    ? ((trip.land ? trip.land + ' ' : '') + trip.name + (isArchived ? ' · Archiviert' : ''))
     : 'Urlaub wählen…';
   btn.classList.toggle('has-trip', !!trip);
   const dd = document.getElementById('tripDropdown');

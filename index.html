@@ -2064,6 +2064,7 @@ function editTripById(id) {
     ['🇲🇨','🇲🇨 Monaco'],['🇸🇲','🇸🇲 San Marino'],['🇹🇷','🇹🇷 Türkei'],['🇲🇦','🇲🇦 Marokko'],['🇹🇳','🇹🇳 Tunesien'],
   ];
   const overlay = document.createElement('div');
+  overlay.id = 'editTripOverlay';
   overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:1000;display:flex;align-items:center;justify-content:center;padding:16px';
   overlay.innerHTML = `
     <div style="background:var(--panel);border:1px solid var(--border);border-radius:14px;width:100%;max-width:420px;padding:20px">
@@ -2081,7 +2082,7 @@ function editTripById(id) {
         <div style="flex:1"><label class="form-lbl">Bis</label><input class="form-inp" type="date" id="_editBis" value="${trip.bis||''}" style="width:100%"></div>
       </div>
       <div style="display:flex;gap:8px">
-        <button class="btn" style="flex:1;background:var(--panel2);color:var(--text);border:1px solid var(--border)" onclick="this.closest('div[style*=fixed]').remove()">Abbrechen</button>
+        <button class="btn" style="flex:1;background:var(--panel2);color:var(--text);border:1px solid var(--border)" onclick="document.getElementById('editTripOverlay').remove()">Abbrechen</button>
         <button class="btn btn-primary" style="flex:1" onclick="saveEditTrip('${id}')">Speichern</button>
       </div>
     </div>`;
@@ -2099,7 +2100,7 @@ function saveEditTrip(id) {
   trip.von  = document.getElementById('_editVon').value || '';
   trip.bis  = document.getElementById('_editBis').value || '';
   if (newOrt !== (trip.ort||'')) { trip.ort = newOrt; trip.lat = null; trip.lng = null; geocodeTripOrt(trip); }
-  document.querySelector('div[style*="position:fixed"][style*="z-index:1000"]')?.remove();
+  document.getElementById('editTripOverlay')?.remove();
   saveTrips(); renderTripDropdown(); renderKosten();
   toast('Gespeichert');
 }

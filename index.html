@@ -2204,7 +2204,7 @@ function renderWetter(data, name, sub) {
   const updated = now.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
 
   // Vorschau: Tage 1–7 (heute = 0)
-  const forecastDays = [1, 2, 3, 4, 5, 6, 7].filter(i => daily.time[i]).map(i => {
+  _forecastCards = [1, 2, 3, 4, 5, 6, 7].filter(i => daily.time[i]).map(i => {
     const d = new Date(daily.time[i]);
     const dayName = i === 1 ? 'Morgen' : WOCHENTAGE[d.getDay()];
     const info = wmoInfo(daily.weather_code[i], true);
@@ -2217,7 +2217,8 @@ function renderWetter(data, name, sub) {
         <span class="wetter-day-min">${Math.round(daily.temperature_2m_min[i])}°</span>
       </div>
     </div>`;
-  }).join('');
+  });
+  const forecastDays = _forecastCards.slice(0, _forecastDayCount).join('');
 
   // Camper-Tipps
   const tips = camperTips(data);
@@ -2272,8 +2273,14 @@ function renderWetter(data, name, sub) {
       </div>
     </div>
 
-    <div class="section-label" style="margin-top:4px">7-Tage Vorschau</div>
-    <div class="wetter-forecast">${forecastDays}</div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-top:12px;margin-bottom:4px">
+      <div class="section-label" style="margin:0">Vorschau</div>
+      <div style="display:flex;gap:4px">
+        <button id="btn-3d" onclick="setForecastDays(3)" style="padding:4px 12px;border-radius:20px;border:1px solid var(--border);background:var(--accent);color:#fff;font-family:inherit;font-size:0.75rem;font-weight:700;cursor:pointer">3 Tage</button>
+        <button id="btn-7d" onclick="setForecastDays(7)" style="padding:4px 12px;border-radius:20px;border:1px solid var(--border);background:var(--panel2);color:var(--muted);font-family:inherit;font-size:0.75rem;font-weight:700;cursor:pointer">7 Tage</button>
+      </div>
+    </div>
+    <div id="wetter-forecast-container" class="wetter-forecast">${forecastDays}</div>
 
     <div class="section-label" style="margin-top:4px">Camping-Tipps</div>
     <div class="wetter-tips">
@@ -2283,6 +2290,23 @@ function renderWetter(data, name, sub) {
 
     <button class="btn" style="width:100%;margin-top:4px" onclick="refreshWetter()">🔄 Aktualisieren</button>
   `;
+}
+
+let _forecastCards = [];
+let _forecastDayCount = 3;
+
+function setForecastDays(n) {
+  _forecastDayCount = n;
+  const container = document.getElementById('wetter-forecast-container');
+  if (container) container.innerHTML = _forecastCards.slice(0, n).join('');
+  const btn3 = document.getElementById('btn-3d');
+  const btn7 = document.getElementById('btn-7d');
+  if (btn3 && btn7) {
+    btn3.style.background = n === 3 ? 'var(--accent)' : 'var(--panel2)';
+    btn3.style.color = n === 3 ? '#fff' : 'var(--muted)';
+    btn7.style.background = n === 7 ? 'var(--accent)' : 'var(--panel2)';
+    btn7.style.color = n === 7 ? '#fff' : 'var(--muted)';
+  }
 }
 
 function refreshWetter() {

@@ -1917,7 +1917,7 @@ function tripTotal(t) {
 
 function showNewTrip() {
   const f = document.getElementById('newTripForm');
-  const open = f.style.display !== 'none';
+  const open = f.style.display === 'block';
   f.style.display = open ? 'none' : 'block';
   if (!open) { closeTripDropdown(); document.getElementById('newTripName').focus(); }
 }

@@ -1464,13 +1464,16 @@
       </div>
     </div>
     <div class="mehr-block">
-      <div class="section-label">Datensicherung</div>
+      <div class="section-label">Automatische Backups</div>
       <div class="info-card" style="margin-bottom:8px">
-        Alle Daten werden lokal auf dem Gerät gespeichert.<br>
-        Kein Server, keine Cloud. Regelmäßig sichern empfohlen.
+        Beim jedem App-Start wird automatisch ein Snapshot gespeichert (letzte 3).
       </div>
-      <button class="btn" style="width:100%;margin-bottom:8px" onclick="exportData()">💾 Backup erstellen</button>
-      <button class="btn" style="width:100%;background:var(--panel2);color:var(--text);border:1px solid var(--border)" onclick="importData()">📂 Backup wiederherstellen</button>
+      <div id="auto-backup-list"></div>
+    </div>
+    <div class="mehr-block">
+      <div class="section-label">Manuelles Backup</div>
+      <button class="btn" style="width:100%;margin-bottom:8px" onclick="exportData()">💾 Backup als Datei speichern</button>
+      <button class="btn" style="width:100%;background:var(--panel2);color:var(--text);border:1px solid var(--border)" onclick="importData()">📂 Backup aus Datei laden</button>
     </div>
     <div class="mehr-block">
       <div class="section-label">Sensor-Status</div>
@@ -2332,17 +2335,58 @@ function restoreWetterCache() {
 // ══════════════════════════════════
 // EXPORT / IMPORT
 // ══════════════════════════════════
-function exportData() {
-  const blob = new Blob([JSON.stringify({
+function buildSnapshot() {
+  return {
     version: '1.1.0', exported: new Date().toISOString(),
     settings: JSON.parse(localStorage.getItem('wmp_settings')||'{}'),
     calib: JSON.parse(localStorage.getItem('wmp_calib')||'null'),
     checks: clState, trips, activeTripId,
-  }, null, 2)], { type: 'application/json' });
+  };
+}
+
+function autoBackup() {
+  const snap = buildSnapshot();
+  const list = JSON.parse(localStorage.getItem('wmp_auto_backups') || '[]');
+  list.unshift(snap);
+  localStorage.setItem('wmp_auto_backups', JSON.stringify(list.slice(0, 3)));
+}
+
+function exportData() {
+  const snap = buildSnapshot();
+  const blob = new Blob([JSON.stringify(snap, null, 2)], { type: 'application/json' });
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
-  a.download = 'wohnmobil-pro-backup.json';
+  a.download = `wohnmobil-pro-backup-${new Date().toISOString().slice(0,10)}.json`;
   a.click();
+}
+
+function restoreAutoBackup(index) {
+  const list = JSON.parse(localStorage.getItem('wmp_auto_backups') || '[]');
+  const d = list[index];
+  if (!d) return;
+  if (!confirm(`Backup vom ${new Date(d.exported).toLocaleString('de-DE')} wiederherstellen?`)) return;
+  if (d.checks) { clState = d.checks; saveCL(); renderCL(); }
+  if (d.trips)  { trips = d.trips; activeTripId = d.activeTripId || null; saveTrips(); renderKosten(); }
+  if (d.settings) localStorage.setItem('wmp_settings', JSON.stringify(d.settings));
+  if (d.calib)    localStorage.setItem('wmp_calib', JSON.stringify(d.calib));
+  loadSettings();
+  renderAutoBackupList();
+  toast('Backup wiederhergestellt');
+}
+
+function renderAutoBackupList() {
+  const el = document.getElementById('auto-backup-list');
+  if (!el) return;
+  const list = JSON.parse(localStorage.getItem('wmp_auto_backups') || '[]');
+  if (!list.length) { el.innerHTML = '<div style="font-size:0.78rem;color:var(--muted)">Noch kein automatisches Backup vorhanden.</div>'; return; }
+  el.innerHTML = list.map((b, i) => `
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border)">
+      <div>
+        <div style="font-size:0.8rem;color:var(--text)">${new Date(b.exported).toLocaleString('de-DE')}</div>
+        <div style="font-size:0.72rem;color:var(--muted)">${(b.trips||[]).length} Urlaube · ${Object.keys(b.checks||{}).length} Checklisten-Einträge</div>
+      </div>
+      <button onclick="restoreAutoBackup(${i})" style="padding:5px 12px;background:var(--accent);color:#fff;border:none;border-radius:8px;font-family:inherit;font-size:0.75rem;font-weight:700;cursor:pointer">Laden</button>
+    </div>`).join('');
 }
 
 function importData() {
@@ -2454,6 +2498,8 @@ function closeDisclaimer() {
   loadTrips();
   renderCL();
   renderKosten();
+  autoBackup();
+  renderAutoBackupList();
   startSensor();
   restoreWetterCache();
   if ('serviceWorker' in navigator) {

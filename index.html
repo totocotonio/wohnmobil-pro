@@ -1464,15 +1464,13 @@
       </div>
     </div>
     <div class="mehr-block">
-      <div class="section-label">Daten</div>
+      <div class="section-label">Datensicherung</div>
       <div class="info-card" style="margin-bottom:8px">
-        Alle Daten werden lokal auf dem Gerät gespeichert (localStorage).<br>
-        Kein Server, keine Cloud, keine Weitergabe.
+        Alle Daten werden lokal auf dem Gerät gespeichert.<br>
+        Kein Server, keine Cloud. Regelmäßig sichern empfohlen.
       </div>
-      <div class="btn-row">
-        <button class="btn" onclick="exportData()">Export (JSON)</button>
-        <button class="btn" onclick="importData()">Import (JSON)</button>
-      </div>
+      <button class="btn" style="width:100%;margin-bottom:8px" onclick="exportData()">💾 Backup erstellen</button>
+      <button class="btn" style="width:100%;background:var(--panel2);color:var(--text);border:1px solid var(--border)" onclick="importData()">📂 Backup wiederherstellen</button>
     </div>
     <div class="mehr-block">
       <div class="section-label">Sensor-Status</div>
@@ -2321,8 +2319,8 @@ function refreshWetter() {
 function restoreWetterCache() {
   const cache = JSON.parse(localStorage.getItem('wmp_wetter_cache') || 'null');
   if (!cache) return;
-  // Only restore if < 30 minutes old
-  if (Date.now() - cache.ts < 30 * 60 * 1000) {
+  const hasEnoughDays = cache.data?.daily?.time?.length >= 8;
+  if (Date.now() - cache.ts < 30 * 60 * 1000 && hasEnoughDays) {
     document.getElementById('wetterSearchInp').value = cache.name;
     renderWetter(cache.data, cache.name, cache.sub);
   } else if (cache.lat) {

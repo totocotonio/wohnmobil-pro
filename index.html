@@ -2375,10 +2375,10 @@ function shareApp() {
     navigator.share({
       title: 'Wohnmobil Pro',
       text: 'Camping-Werkzeug: Nivellieren, Checkliste, Kosten & Wetter – kostenlos & offline.',
-      url: 'https://totocotonio.github.io/wohnmobil-pro/'
+      url: 'https://wohnmobil-pro.michaely.de/'
     }).catch(() => {});
   } else {
-    navigator.clipboard.writeText('https://totocotonio.github.io/wohnmobil-pro/').then(() => toast('Link kopiert!'));
+    navigator.clipboard.writeText('https://wohnmobil-pro.michaely.de/').then(() => toast('Link kopiert!'));
   }
 }
 

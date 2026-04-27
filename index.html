@@ -1427,6 +1427,12 @@
 
 </div><!-- .main-content -->
 
+<footer style="border-top:1px solid var(--border);background:var(--panel);padding:14px 20px;text-align:center;font-size:0.75rem;color:var(--muted)">
+  &copy; <span id="footer-year">2026</span> Torsten Michaely &nbsp;|&nbsp;
+  <a href="./impressum.html" style="color:var(--muted);text-decoration:none;margin:0 6px">Impressum</a>
+  <a href="./datenschutz.html" style="color:var(--muted);text-decoration:none;margin:0 6px">Datenschutz</a>
+</footer>
+
 <script>
 'use strict';
 
@@ -2273,6 +2279,8 @@ function toast(msg) {
 // ══════════════════════════════════
 (function init() {
   loadTheme();
+  const fy = document.getElementById('footer-year');
+  if (fy) fy.textContent = new Date().getFullYear();
   const today = new Date().toISOString().split('T')[0];
   ['kf-dat','sp-dat','so-dat'].forEach(id => { const el = document.getElementById(id); if (el) el.value = today; });
   loadSettings();

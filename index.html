@@ -2182,7 +2182,7 @@ async function loadWetter(lat, lon, name, sub) {
     const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}`
       + `&current=temperature_2m,relative_humidity_2m,apparent_temperature,precipitation,weather_code,wind_speed_10m,wind_direction_10m,is_day`
       + `&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_sum,wind_speed_10m_max`
-      + `&timezone=auto&forecast_days=4`;
+      + `&timezone=auto&forecast_days=8`;
     const res = await fetch(url);
     const data = await res.json();
     renderWetter(data, name, sub);
@@ -2203,8 +2203,8 @@ function renderWetter(data, name, sub) {
   const now = new Date();
   const updated = now.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
 
-  // Vorschau: Tage 1–3 (heute = 0)
-  const forecastDays = [1, 2, 3].map(i => {
+  // Vorschau: Tage 1–7 (heute = 0)
+  const forecastDays = [1, 2, 3, 4, 5, 6, 7].map(i => {
     const d = new Date(daily.time[i]);
     const dayName = i === 1 ? 'Morgen' : WOCHENTAGE[d.getDay()];
     const info = wmoInfo(daily.weather_code[i], true);
@@ -2272,7 +2272,7 @@ function renderWetter(data, name, sub) {
       </div>
     </div>
 
-    <div class="section-label" style="margin-top:4px">3-Tage Vorschau</div>
+    <div class="section-label" style="margin-top:4px">7-Tage Vorschau</div>
     <div class="wetter-forecast">${forecastDays}</div>
 
     <div class="section-label" style="margin-top:4px">Camping-Tipps</div>

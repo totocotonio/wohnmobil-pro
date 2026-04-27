@@ -108,28 +108,44 @@
     background: var(--bg);
     color: var(--text);
     font-family: 'Rajdhani', system-ui, sans-serif;
-    height: 100%;
-    overflow: hidden;
-    overscroll-behavior: none;
-  }
-
-  .app {
-    display: flex;
-    flex-direction: column;
-    height: 100dvh;
-    height: 100vh;
+    min-height: 100vh;
   }
 
   /* ── HEADER ── */
   .app-header {
     height: var(--header-h);
-    padding: 0 16px;
+    padding: 0 12px;
     background: var(--panel);
     border-bottom: 1px solid var(--border);
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    gap: 8px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    backdrop-filter: blur(10px);
+  }
+  .header-menu-btn {
+    background: none;
+    border: none;
+    color: var(--text);
+    width: 36px; height: 36px;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    font-size: 1.25rem;
+    border-radius: 8px;
     flex-shrink: 0;
+    transition: background 0.15s;
+    line-height: 1;
+  }
+  .header-menu-btn:active { background: var(--panel2); }
+  .header-logo-box {
+    width: 32px; height: 32px;
+    background: linear-gradient(135deg, var(--accent), #16a34a);
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    box-shadow: 0 0 14px rgba(34,197,94,0.3);
   }
   .app-title {
     font-size: 1.15rem;
@@ -150,53 +166,135 @@
     display: block;
   }
 
-  /* ── TAB CONTENT ── */
-  .tab-content {
+  /* ── SECTIONS ── */
+  .wmp-section { display: none; }
+  .wmp-section.active { display: block; animation: fadeIn 0.22s ease; }
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(6px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .main-content {
+    padding: 16px 16px 48px;
+    max-width: 800px;
+    margin: 0 auto;
+  }
+  #back-btn {
     display: none;
-    flex: 1;
-    overflow-y: auto;
-    -webkit-overflow-scrolling: touch;
-    padding: 16px 16px calc(var(--nav-h) + var(--safe-bottom) + 16px);
-  }
-  .tab-content.active { display: block; }
-
-  /* ── BOTTOM NAV ── */
-  .bottom-nav {
-    position: fixed;
-    bottom: 0;
-    left: 0; right: 0;
-    height: calc(var(--nav-h) + var(--safe-bottom));
-    padding-bottom: var(--safe-bottom);
+    width: 100%;
+    padding: 9px 16px;
     background: var(--panel);
-    border-top: 1px solid var(--border);
-    display: flex;
-    z-index: 100;
+    border-bottom: 1px solid var(--border);
+    border-left: none; border-right: none; border-top: none;
+    color: var(--muted);
+    font-family: inherit;
+    font-size: 0.85rem;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+    cursor: pointer;
+    text-align: left;
+    transition: color 0.15s, background 0.15s;
   }
-  .nav-btn {
-    flex: 1;
+  #back-btn:active { color: var(--accent); background: var(--panel2); }
+
+  /* ── NAV DRAWER ── */
+  #nav-overlay {
+    display: none;
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.5);
+    z-index: 300;
+    backdrop-filter: blur(3px);
+  }
+  #nav-drawer {
+    position: fixed;
+    top: 0; left: 0; bottom: 0;
+    width: 272px;
+    background: var(--panel);
+    border-right: 1px solid var(--border);
+    z-index: 400;
+    transform: translateX(-100%);
+    transition: transform 0.3s cubic-bezier(.4,0,.2,1);
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+  }
+  #nav-drawer.open { transform: translateX(0); }
+  .nav-item {
+    background: none;
+    border: none;
+    color: var(--text);
+    font-family: inherit;
+    font-size: 0.95rem;
+    font-weight: 600;
+    text-align: left;
+    padding: 11px 14px;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+    letter-spacing: 0.3px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+  }
+  .nav-item:active { background: var(--panel2); }
+  .nav-item.active { background: rgba(34,197,94,0.1); color: var(--accent); font-weight: 700; }
+  html.light .nav-item.active { background: rgba(22,163,74,0.08); }
+
+  /* ── STARTSEITE ── */
+  .start-hero {
+    text-align: center;
+    padding: 20px 0 16px;
+  }
+  .start-hero-icon {
+    width: 56px; height: 56px;
+    background: linear-gradient(135deg, var(--accent), #16a34a);
+    border-radius: 16px;
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 10px;
+    box-shadow: 0 0 24px rgba(34,197,94,0.35);
+    font-size: 28px;
+  }
+  .start-hero-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--text);
+    margin-bottom: 4px;
+  }
+  .start-hero-title span { color: var(--accent); }
+  .start-hero-sub {
+    font-size: 0.72rem;
+    color: var(--muted);
+    letter-spacing: 1px;
+  }
+  .start-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-top: 4px;
+  }
+  .start-card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 20px 12px 16px;
+    cursor: pointer;
+    transition: all 0.15s;
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
-    gap: 3px;
-    background: none;
-    border: none;
-    color: var(--muted);
-    font-family: inherit;
-    font-size: 0.6rem;
-    font-weight: 600;
-    letter-spacing: 0.05em;
-    cursor: pointer;
-    transition: color 0.2s;
-    padding: 6px 4px;
+    gap: 7px;
+    text-align: center;
+    border-top: 3px solid var(--border);
+    position: relative;
+    overflow: hidden;
   }
-  .nav-btn svg {
-    width: 20px; height: 20px;
-    stroke: currentColor; fill: none;
-    stroke-width: 1.8;
-    stroke-linecap: round; stroke-linejoin: round;
-  }
-  .nav-btn.active { color: var(--accent); }
+  .start-card:active { transform: scale(0.97); opacity: 0.85; }
+  .start-card:hover { border-color: var(--accent); border-top-color: var(--accent); }
+  .start-card-icon { font-size: 2rem; line-height: 1; }
+  .start-card-name { font-size: 0.9rem; font-weight: 700; color: var(--text); letter-spacing: 0.5px; }
+  .start-card-desc { font-size: 0.68rem; color: var(--muted); line-height: 1.4; }
 
   /* ── GEMEINSAME KOMPONENTEN ── */
   .section-label {
@@ -954,32 +1052,99 @@
 </style>
 </head>
 <body>
-<div class="app">
 
-  <!-- ── HEADER ── -->
-  <header class="app-header">
-    <div class="header-left">
-      <div class="header-logo">
-        <svg width="28" height="20" viewBox="0 0 28 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <rect x="1" y="5" width="22" height="11" rx="2" fill="var(--accent)" opacity="0.9"/>
-          <rect x="23" y="8" width="4" height="5" rx="1" fill="var(--accent)" opacity="0.7"/>
-          <rect x="3" y="7" width="7" height="5" rx="1" fill="var(--bg)" opacity="0.5"/>
-          <rect x="12" y="7" width="5" height="5" rx="1" fill="var(--bg)" opacity="0.5"/>
-          <circle cx="6" cy="17" r="3" fill="var(--panel2)" stroke="var(--accent)" stroke-width="1.5"/>
-          <circle cx="6" cy="17" r="1.2" fill="var(--accent)"/>
-          <circle cx="19" cy="17" r="3" fill="var(--panel2)" stroke="var(--accent)" stroke-width="1.5"/>
-          <circle cx="19" cy="17" r="1.2" fill="var(--accent)"/>
-        </svg>
-      </div>
-      <div class="app-title">WOHNMOBIL PRO</div>
+<!-- ── HEADER ── -->
+<header class="app-header">
+  <button class="header-menu-btn" onclick="openMenu()" aria-label="Menü öffnen">☰</button>
+  <div class="header-logo-box">
+    <svg width="20" height="14" viewBox="0 0 28 20" fill="none">
+      <rect x="1" y="5" width="22" height="11" rx="2" fill="white" opacity="0.9"/>
+      <rect x="23" y="8" width="4" height="5" rx="1" fill="white" opacity="0.7"/>
+      <rect x="3" y="7" width="7" height="5" rx="1" fill="#16a34a" opacity="0.6"/>
+      <rect x="12" y="7" width="5" height="5" rx="1" fill="#16a34a" opacity="0.6"/>
+      <circle cx="6" cy="17" r="3" fill="#16a34a" stroke="white" stroke-width="1.5"/>
+      <circle cx="6" cy="17" r="1.2" fill="white"/>
+      <circle cx="19" cy="17" r="3" fill="#16a34a" stroke="white" stroke-width="1.5"/>
+      <circle cx="19" cy="17" r="1.2" fill="white"/>
+    </svg>
+  </div>
+  <div style="flex:1;min-width:0">
+    <div class="app-title">WOHNMOBIL <span style="color:var(--accent)">PRO</span></div>
+    <div style="font-size:0.55rem;color:var(--muted);letter-spacing:0.8px">© TORSTEN MICHAELY</div>
+  </div>
+  <button class="theme-toggle" onclick="toggleTheme()" title="Hell/Dunkel umschalten">
+    <div class="theme-toggle-knob" id="themeKnob">🌙</div>
+  </button>
+</header>
+
+<!-- ZURÜCK-BUTTON -->
+<button id="back-btn" onclick="showSection('start')">← Zurück zur Übersicht</button>
+
+<!-- NAV OVERLAY -->
+<div id="nav-overlay" onclick="closeMenu()"></div>
+
+<!-- NAV DRAWER -->
+<nav id="nav-drawer">
+  <div style="padding:18px 16px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0">
+    <div>
+      <div style="font-size:0.95rem;font-weight:700;letter-spacing:1px;color:var(--text)">WOHNMOBIL <span style="color:var(--accent)">PRO</span></div>
+      <div style="font-size:0.58rem;color:var(--muted);letter-spacing:0.8px;margin-top:2px">© TORSTEN MICHAELY</div>
     </div>
-    <button class="theme-toggle" onclick="toggleTheme()" title="Hell/Dunkel umschalten">
-      <div class="theme-toggle-knob" id="themeKnob">🌙</div>
-    </button>
-  </header>
+    <button onclick="closeMenu()" style="background:var(--panel2);border:1px solid var(--border);color:var(--muted);border-radius:8px;width:32px;height:32px;font-size:1rem;cursor:pointer;display:flex;align-items:center;justify-content:center">✕</button>
+  </div>
+  <div style="flex:1;overflow-y:auto;padding:10px">
+    <button class="nav-item active" id="nav-start" onclick="showSection('start');closeMenu()">🏠 Startseite</button>
+    <button class="nav-item" id="nav-nivellieren" onclick="showSection('nivellieren');closeMenu()">⊙ Nivellieren</button>
+    <button class="nav-item" id="nav-checkliste" onclick="showSection('checkliste');closeMenu()">☑ Checkliste</button>
+    <button class="nav-item" id="nav-kosten" onclick="showSection('kosten');closeMenu()">€ Kosten</button>
+    <button class="nav-item" id="nav-wetter" onclick="showSection('wetter');closeMenu()">🌤 Wetter</button>
+    <div style="border-top:1px solid var(--border);margin:8px 0"></div>
+    <button class="nav-item" id="nav-mehr" onclick="showSection('mehr');closeMenu()">⚙ Einstellungen</button>
+    <div style="padding:12px 4px;display:flex;align-items:center;justify-content:space-between">
+      <span style="font-size:0.85rem;color:var(--muted);font-weight:600">Hell / Dunkel</span>
+      <button class="theme-toggle" onclick="toggleTheme()" style="margin-left:0">
+        <div class="theme-toggle-knob" id="themeKnobMenu">🌙</div>
+      </button>
+    </div>
+  </div>
+</nav>
+
+<!-- MAIN CONTENT -->
+<div class="main-content">
+
+  <!-- ════════════ STARTSEITE ════════════ -->
+  <div class="wmp-section active" id="sec-start">
+    <div class="start-hero">
+      <div class="start-hero-icon">🚐</div>
+      <div class="start-hero-title">WOHNMOBIL <span>PRO</span></div>
+      <div class="start-hero-sub">5 WERKZEUGE · CAMPING · OFFLINE</div>
+    </div>
+    <div class="start-grid">
+      <div class="start-card" onclick="showSection('nivellieren')">
+        <div class="start-card-icon">⊙</div>
+        <div class="start-card-name">Nivellieren</div>
+        <div class="start-card-desc">Wohnmobil mit Gyrosensor perfekt ausrichten</div>
+      </div>
+      <div class="start-card" onclick="showSection('checkliste')">
+        <div class="start-card-icon">☑</div>
+        <div class="start-card-name">Checkliste</div>
+        <div class="start-card-desc">Abfahrt, Ankunft & Winterlager abhaken</div>
+      </div>
+      <div class="start-card" onclick="showSection('kosten')">
+        <div class="start-card-icon">€</div>
+        <div class="start-card-name">Kosten</div>
+        <div class="start-card-desc">Kraftstoff, Stellplatz & Ausgaben pro Urlaub</div>
+      </div>
+      <div class="start-card" onclick="showSection('wetter')">
+        <div class="start-card-icon">🌤</div>
+        <div class="start-card-name">Wetter</div>
+        <div class="start-card-desc">Aktuelles Wetter & 7-Tage-Prognose am Stellplatz</div>
+      </div>
+    </div>
+  </div>
 
   <!-- ════════════ TAB: NIVELLIEREN ════════════ -->
-  <div id="tab-nivellieren" class="tab-content active">
+  <div id="sec-nivellieren" class="wmp-section">
     <div class="level-wrap">
       <div class="perm-banner" id="ios-perm" style="display:none">
         <p>Auf iPhone / iPad muss der Sensorzugriff einmalig freigegeben werden.</p>
@@ -1058,8 +1223,8 @@
     </div>
   </div>
 
-  <!-- ════════════ TAB: CHECKLISTE ════════════ -->
-  <div id="tab-checkliste" class="tab-content">
+  <!-- ════════════ CHECKLISTE ════════════ -->
+  <div id="sec-checkliste" class="wmp-section">
     <div class="seg-tabs">
       <button class="seg-tab active" onclick="switchCL('abfahrt', this)">Abfahrt</button>
       <button class="seg-tab" onclick="switchCL('ankunft', this)">Ankunft</button>
@@ -1088,8 +1253,8 @@
     </div>
   </div>
 
-  <!-- ════════════ TAB: KOSTEN ════════════ -->
-  <div id="tab-kosten" class="tab-content">
+  <!-- ════════════ KOSTEN ════════════ -->
+  <div id="sec-kosten" class="wmp-section">
     <div class="trip-bar">
       <button class="trip-name-btn" id="tripNameBtn" onclick="toggleTripDropdown()">
         <span id="tripNameText">Urlaub wählen…</span>
@@ -1172,8 +1337,8 @@
     </div>
   </div>
 
-  <!-- ════════════ TAB: WETTER ════════════ -->
-  <div id="tab-wetter" class="tab-content">
+  <!-- ════════════ WETTER ════════════ -->
+  <div id="sec-wetter" class="wmp-section">
     <div class="wetter-wrap">
 
       <!-- Suche -->
@@ -1201,8 +1366,8 @@
     </div>
   </div>
 
-  <!-- ════════════ TAB: MEHR ════════════ -->
-  <div id="tab-mehr" class="tab-content">
+  <!-- ════════════ MEHR ════════════ -->
+  <div id="sec-mehr" class="wmp-section">
     <div class="mehr-block">
       <div class="section-label">Version</div>
       <div class="info-card" style="display:flex;align-items:center;gap:14px">
@@ -1260,31 +1425,7 @@
     </div>
   </div>
 
-  <!-- ── BOTTOM NAV ── -->
-  <nav class="bottom-nav">
-    <button class="nav-btn active" onclick="switchTab('nivellieren', this)">
-      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><circle cx="12" cy="12" r="9"/><line x1="3" y1="12" x2="6" y2="12"/><line x1="18" y1="12" x2="21" y2="12"/><line x1="12" y1="3" x2="12" y2="6"/><line x1="12" y1="18" x2="12" y2="21"/></svg>
-      Niveau
-    </button>
-    <button class="nav-btn" onclick="switchTab('checkliste', this)">
-      <svg viewBox="0 0 24 24"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
-      Checkliste
-    </button>
-    <button class="nav-btn" onclick="switchTab('kosten', this)">
-      <svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
-      Kosten
-    </button>
-    <button class="nav-btn" onclick="switchTab('wetter', this)">
-      <svg viewBox="0 0 24 24"><path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"/></svg>
-      Wetter
-    </button>
-    <button class="nav-btn" onclick="switchTab('mehr', this)">
-      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg>
-      Mehr
-    </button>
-  </nav>
-
-</div><!-- .app -->
+</div><!-- .main-content -->
 
 <script>
 'use strict';
@@ -1310,13 +1451,27 @@ function loadTheme() {
 }
 
 // ══════════════════════════════════
-// TAB ROUTING
+// NAVIGATION
 // ══════════════════════════════════
-function switchTab(name, btn) {
-  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-  document.getElementById('tab-' + name).classList.add('active');
-  btn.classList.add('active');
+function showSection(name) {
+  document.querySelectorAll('.wmp-section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
+  document.getElementById('sec-' + name).classList.add('active');
+  const navEl = document.getElementById('nav-' + name);
+  if (navEl) navEl.classList.add('active');
+  const backBtn = document.getElementById('back-btn');
+  backBtn.style.display = name === 'start' ? 'none' : 'block';
+  window.scrollTo(0, 0);
+}
+
+function openMenu() {
+  document.getElementById('nav-drawer').classList.add('open');
+  document.getElementById('nav-overlay').style.display = 'block';
+}
+
+function closeMenu() {
+  document.getElementById('nav-drawer').classList.remove('open');
+  document.getElementById('nav-overlay').style.display = 'none';
 }
 
 // ══════════════════════════════════
@@ -2099,7 +2254,7 @@ function toast(msg) {
     el = document.createElement('div');
     el.id = '_toast';
     Object.assign(el.style, {
-      position:'fixed', bottom:'72px', left:'50%', transform:'translateX(-50%)',
+      position:'fixed', bottom:'20px', left:'50%', transform:'translateX(-50%)',
       background:'#1e2d45', border:'1px solid #22c55e', color:'#e2e8f0',
       padding:'9px 20px', borderRadius:'20px', fontFamily:'inherit',
       fontSize:'0.83rem', fontWeight:'600', zIndex:'999',

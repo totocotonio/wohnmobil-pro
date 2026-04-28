@@ -386,6 +386,8 @@
     border-color: rgba(34,197,94,0.35);
     color: var(--accent);
   }
+  .seg-tab-icon { display: block; font-size: 1rem; margin-bottom: 2px; }
+  .seg-tab-lbl  { display: block; font-size: 0.64rem; }
 
   .hint {
     font-size: 0.73rem;
@@ -729,22 +731,28 @@
     background: var(--panel);
     border: 1px solid var(--border);
     border-radius: 10px;
-    padding: 9px 8px;
+    padding: 9px 6px;
     text-align: center;
   }
+  .sum-card.is-total {
+    background: linear-gradient(135deg, rgba(34,197,94,0.13), rgba(34,197,94,0.04));
+    border-color: rgba(34,197,94,0.3);
+  }
+  .sum-icon { font-size: 1rem; line-height: 1; margin-bottom: 2px; }
   .sum-lbl {
-    font-size: 0.58rem;
+    font-size: 0.52rem;
     color: var(--muted);
-    letter-spacing: 0.07em;
+    letter-spacing: 0.06em;
     text-transform: uppercase;
-    margin-bottom: 3px;
+    margin-bottom: 2px;
   }
   .sum-val {
-    font-size: 1.05rem;
+    font-size: 1rem;
     font-weight: 700;
     color: var(--accent);
     font-variant-numeric: tabular-nums;
   }
+  .sum-card.is-total .sum-val { font-size: 1.1rem; }
 
   .entry-form {
     background: var(--panel);
@@ -781,16 +789,21 @@
   }
   .form-inp:focus { outline: none; border-color: rgba(34,197,94,0.5); }
 
-  .entries-list { display: flex; flex-direction: column; gap: 5px; }
+  .entries-list { display: flex; flex-direction: column; gap: 6px; }
   .entry-item {
     background: var(--panel);
     border: 1px solid var(--border);
+    border-left: 3px solid var(--border);
     border-radius: 8px;
     padding: 9px 11px;
     display: flex;
     align-items: center;
     gap: 8px;
   }
+  .entry-item[data-cat="kraftstoff"] { border-left-color: #f59e0b; }
+  .entry-item[data-cat="stellplatz"] { border-left-color: #3b82f6; }
+  .entry-item[data-cat="sonstiges"]  { border-left-color: #a855f7; }
+  .entry-item[data-cat="etappe"]     { border-left-color: var(--accent); }
   .ei-info { flex: 1; min-width: 0; }
   .ei-main {
     font-size: 0.83rem;
@@ -801,18 +814,35 @@
   .ei-sub { font-size: 0.68rem; color: var(--muted); margin-top: 1px; }
   .ei-cost { font-size: 0.95rem; font-weight: 700; color: var(--accent); flex-shrink: 0; }
   .ei-del {
-    width: 26px; height: 26px;
-    border-radius: 5px;
+    width: 28px; height: 28px;
+    border-radius: 6px;
     background: none;
     border: 1px solid var(--border);
     color: var(--muted);
     cursor: pointer;
     display: flex; align-items: center; justify-content: center;
-    font-size: 0.75rem;
+    font-size: 0.8rem;
     flex-shrink: 0;
     transition: all 0.15s;
   }
   .ei-del:active { border-color: var(--danger); color: var(--danger); }
+  /* Etappen timeline */
+  .etappe-num {
+    width: 26px; height: 26px;
+    border-radius: 50%;
+    background: rgba(34,197,94,0.15);
+    border: 2px solid rgba(34,197,94,0.4);
+    color: var(--accent);
+    font-size: 0.7rem;
+    font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .etappe-num.geocoded {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #fff;
+  }
 
   .no-entries {
     text-align: center;
@@ -1412,16 +1442,16 @@
     <div id="tripContent" style="display:none">
       <div id="tripInfoBar" style="display:none;background:var(--panel2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;margin-bottom:12px;font-size:0.82rem;color:var(--muted)"></div>
       <div class="kosten-sum">
-        <div class="sum-card"><div class="sum-lbl">Gesamt</div><div class="sum-val" id="sk-gesamt">0 €</div></div>
-        <div class="sum-card"><div class="sum-lbl">Kraftstoff</div><div class="sum-val" id="sk-kf">0 €</div></div>
-        <div class="sum-card"><div class="sum-lbl">Stellplatz</div><div class="sum-val" id="sk-sp">0 €</div></div>
-        <div class="sum-card"><div class="sum-lbl">Sonstiges</div><div class="sum-val" id="sk-so">0 €</div></div>
+        <div class="sum-card is-total"><div class="sum-icon">💰</div><div class="sum-lbl">Gesamt</div><div class="sum-val" id="sk-gesamt">0 €</div></div>
+        <div class="sum-card"><div class="sum-icon">⛽</div><div class="sum-lbl">Kraftstoff</div><div class="sum-val" id="sk-kf">0 €</div></div>
+        <div class="sum-card"><div class="sum-icon">🏕️</div><div class="sum-lbl">Stellplatz</div><div class="sum-val" id="sk-sp">0 €</div></div>
+        <div class="sum-card"><div class="sum-icon">🎯</div><div class="sum-lbl">Sonstiges</div><div class="sum-val" id="sk-so">0 €</div></div>
       </div>
       <div class="seg-tabs">
-        <button class="seg-tab active" onclick="switchKosten('kraftstoff', this)">Kraftstoff</button>
-        <button class="seg-tab" onclick="switchKosten('stellplatz', this)">Stellplatz</button>
-        <button class="seg-tab" onclick="switchKosten('sonstiges', this)">Sonstiges</button>
-        <button class="seg-tab" onclick="switchKosten('etappen', this)">Etappen</button>
+        <button class="seg-tab active" onclick="switchKosten('kraftstoff', this)"><span class="seg-tab-icon">⛽</span><span class="seg-tab-lbl">Kraftstoff</span></button>
+        <button class="seg-tab" onclick="switchKosten('stellplatz', this)"><span class="seg-tab-icon">🏕️</span><span class="seg-tab-lbl">Stellplatz</span></button>
+        <button class="seg-tab" onclick="switchKosten('sonstiges', this)"><span class="seg-tab-icon">🎯</span><span class="seg-tab-lbl">Sonstiges</span></button>
+        <button class="seg-tab" onclick="switchKosten('etappen', this)"><span class="seg-tab-icon">🗺️</span><span class="seg-tab-lbl">Etappen</span></button>
       </div>
       <div id="kp-kraftstoff" class="kosten-panel">
         <div class="entry-form">
@@ -2159,18 +2189,18 @@ function renderKosten() {
   if (trip.von || trip.bis) {
     const fmt = d => d ? new Date(d+'T00:00:00').toLocaleDateString('de-DE',{day:'2-digit',month:'2-digit',year:'numeric'}) : '?';
     const tage = (trip.von && trip.bis) ? Math.round((new Date(trip.bis)-new Date(trip.von))/(1000*60*60*24))+1 : null;
-    infoBar.style.display = '';
-    infoBar.innerHTML = `<span style="color:var(--text);font-weight:600">📅 ${fmt(trip.von)} – ${fmt(trip.bis)}</span>${tage ? `<span style="margin-left:10px;color:var(--accent)">${tage} Tage</span>` : ''}`;
+    infoBar.style.cssText = 'display:flex;align-items:center;gap:12px;background:linear-gradient(135deg,rgba(34,197,94,0.1),rgba(34,197,94,0.03));border:1px solid rgba(34,197,94,0.25);border-radius:12px;padding:12px 16px;margin-bottom:14px';
+    infoBar.innerHTML = `<span style="font-size:1.6rem">🏖️</span><div><div style="font-weight:700;color:var(--text);font-size:0.9rem">${trip.land||''} ${trip.name}</div><div style="font-size:0.76rem;color:var(--muted);margin-top:2px">📅 ${fmt(trip.von)} – ${fmt(trip.bis)}${tage ? `<span style="margin-left:8px;color:var(--accent);font-weight:600">${tage} Tage</span>` : ''}</div></div>`;
   } else {
     infoBar.style.display = 'none';
   }
   const del = (type, id) => isArchived ? '' : `<button class="ei-del" onclick="delEntry('${type}',${id})">✕</button>`;
   document.getElementById('list-kraftstoff').innerHTML = trip.kraftstoff.length ? trip.kraftstoff.map(e =>
-    `<div class="entry-item"><div class="ei-info"><div class="ei-main">${e.l.toFixed(1)} L &times; ${e.p.toFixed(3)} €/L${e.verbrauch ? ' &middot; <span style="color:var(--accent)">' + e.verbrauch.toFixed(1) + ' L/100km</span>' : ''}</div><div class="ei-sub">${e.dat||'–'}${e.km?' &middot; '+e.km.toLocaleString('de-DE')+' km':''}</div></div><div class="ei-cost">${(e.l*e.p).toFixed(2)} €</div>${del('kraftstoff',e.id)}</div>`).join('') : '<div class="no-entries">Noch keine Tankungen</div>';
+    `<div class="entry-item" data-cat="kraftstoff"><div class="ei-info"><div class="ei-main">⛽ ${e.l.toFixed(1)} L &times; ${e.p.toFixed(3)} €/L${e.verbrauch ? ' &middot; <span style="color:var(--accent)">' + e.verbrauch.toFixed(1) + ' L/100km</span>' : ''}</div><div class="ei-sub">${e.dat||'–'}${e.km?' &middot; '+e.km.toLocaleString('de-DE')+' km':''}</div></div><div class="ei-cost">${(e.l*e.p).toFixed(2)} €</div>${del('kraftstoff',e.id)}</div>`).join('') : '<div class="no-entries">⛽ Noch keine Tankungen</div>';
   document.getElementById('list-stellplatz').innerHTML = trip.stellplatz.length ? trip.stellplatz.map(e =>
-    `<div class="entry-item"><div class="ei-info"><div class="ei-main">${e.name}</div><div class="ei-sub">${e.dat||'–'} &middot; ${e.n} Nacht/Nächte</div></div><div class="ei-cost">${e.p.toFixed(2)} €</div>${del('stellplatz',e.id)}</div>`).join('') : '<div class="no-entries">Noch keine Stellplätze</div>';
+    `<div class="entry-item" data-cat="stellplatz"><div class="ei-info"><div class="ei-main">🏕️ ${e.name}</div><div class="ei-sub">${e.dat||'–'} &middot; ${e.n} Nacht/Nächte</div></div><div class="ei-cost">${e.p.toFixed(2)} €</div>${del('stellplatz',e.id)}</div>`).join('') : '<div class="no-entries">🏕️ Noch keine Stellplätze</div>';
   document.getElementById('list-sonstiges').innerHTML = trip.sonstiges.length ? trip.sonstiges.map(e =>
-    `<div class="entry-item"><div class="ei-info"><div class="ei-main">${e.desc}</div><div class="ei-sub">${e.dat||'–'}</div></div><div class="ei-cost">${e.b.toFixed(2)} €</div>${del('sonstiges',e.id)}</div>`).join('') : '<div class="no-entries">Noch keine Ausgaben</div>';
+    `<div class="entry-item" data-cat="sonstiges"><div class="ei-info"><div class="ei-main">🎯 ${e.desc}</div><div class="ei-sub">${e.dat||'–'}</div></div><div class="ei-cost">${e.b.toFixed(2)} €</div>${del('sonstiges',e.id)}</div>`).join('') : '<div class="no-entries">🎯 Noch keine Ausgaben</div>';
   renderEtappen(trip, isArchived);
 }
 
@@ -2238,18 +2268,23 @@ function renderEtappen(trip, isArchived) {
   if (!trip.etappen) trip.etappen = [];
   const list = document.getElementById('list-etappen');
   if (!list) return;
-  if (!trip.etappen.length) { list.innerHTML = '<div class="no-entries">Noch keine Etappen</div>'; return; }
+  if (!trip.etappen.length) { list.innerHTML = '<div class="no-entries">🗺️ Noch keine Etappen — füge Stationen hinzu</div>'; return; }
   const fmt = d => d ? new Date(d+'T00:00:00').toLocaleDateString('de-DE',{day:'2-digit',month:'2-digit',year:'numeric'}) : '';
+  const total = trip.etappen.length;
   list.innerHTML = trip.etappen.map((e, i) => {
     const tage = (e.von && e.bis) ? Math.round((new Date(e.bis)-new Date(e.von))/(1000*60*60*24))+1 : null;
-    const datum = e.von ? (fmt(e.von) + (e.bis ? ' – ' + fmt(e.bis) : '') + (tage ? ' ('+tage+' Tage)' : '')) : '';
-    const pinStatus = e.lat ? '📍' : '⏳';
-    return `<div class="entry-item">
-      <div class="ei-info">
-        <div class="ei-main" style="display:flex;align-items:center;gap:6px"><span style="font-size:0.9rem">${pinStatus}</span><strong>${String(i+1).padStart(2,'0')}.</strong> ${e.ort}</div>
-        ${datum ? `<div class="ei-sub">${datum}</div>` : ''}
+    const datum = e.von ? (fmt(e.von) + (e.bis ? ' – ' + fmt(e.bis) : '') + (tage ? `<span style="color:var(--accent);font-weight:600;margin-left:4px">${tage}T</span>` : '')) : '';
+    const connector = i < total-1 ? `<div style="width:2px;height:10px;background:linear-gradient(to bottom,rgba(34,197,94,0.4),rgba(34,197,94,0.1));margin:2px auto;border-radius:1px"></div>` : '';
+    return `<div>
+      <div class="entry-item" data-cat="etappe" style="align-items:flex-start">
+        <div class="${e.lat ? 'etappe-num geocoded' : 'etappe-num'}">${i+1}</div>
+        <div class="ei-info">
+          <div class="ei-main">${e.ort}</div>
+          ${datum ? `<div class="ei-sub">${datum}</div>` : '<div class="ei-sub" style="color:rgba(100,116,139,0.5)">Koordinaten werden geladen…</div>'}
+        </div>
+        ${isArchived ? '' : `<div style="display:flex;gap:4px;flex-shrink:0"><button class="ei-del" title="Bearbeiten" onclick="editEtappe(${trip.id},${e.id})">✎</button><button class="ei-del" onclick="deleteEtappe(${trip.id},${e.id})">✕</button></div>`}
       </div>
-      ${isArchived ? '' : `<div style="display:flex;gap:4px"><button class="ei-del" title="Bearbeiten" onclick="editEtappe(${trip.id},${e.id})">✎</button><button class="ei-del" onclick="deleteEtappe(${trip.id},${e.id})">✕</button></div>`}
+      ${connector}
     </div>`;
   }).join('');
 }

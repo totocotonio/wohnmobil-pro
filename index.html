@@ -2249,7 +2249,7 @@ function renderEtappen(trip, isArchived) {
         <div class="ei-main" style="display:flex;align-items:center;gap:6px"><span style="font-size:0.9rem">${pinStatus}</span><strong>${String(i+1).padStart(2,'0')}.</strong> ${e.ort}</div>
         ${datum ? `<div class="ei-sub">${datum}</div>` : ''}
       </div>
-      ${isArchived ? '' : `<button class="ei-del" onclick="deleteEtappe(${trip.id},${e.id})">✕</button>`}
+      ${isArchived ? '' : `<div style="display:flex;gap:4px"><button class="ei-del" title="Bearbeiten" onclick="editEtappe(${trip.id},${e.id})">✎</button><button class="ei-del" onclick="deleteEtappe(${trip.id},${e.id})">✕</button></div>`}
     </div>`;
   }).join('');
 }
@@ -2259,6 +2259,48 @@ function deleteEtappe(tripId, etappeId) {
   if (!trip || !trip.etappen) return;
   trip.etappen = trip.etappen.filter(e => e.id !== etappeId);
   saveTrips(); renderKosten(); if (_karteMap) renderKartePins();
+}
+
+function editEtappe(tripId, etappeId) {
+  const trip = trips.find(t => String(t.id) === String(tripId));
+  if (!trip) return;
+  const e = trip.etappen.find(x => x.id === etappeId);
+  if (!e) return;
+  const overlay = document.createElement('div');
+  overlay.id = 'editEtappeOverlay';
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:1000;display:flex;align-items:center;justify-content:center;padding:16px';
+  overlay.innerHTML = `
+    <div style="background:var(--panel);border:1px solid var(--border);border-radius:14px;width:100%;max-width:420px;padding:20px">
+      <div style="font-size:0.68rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--accent);margin-bottom:12px">Etappe bearbeiten</div>
+      <label class="form-lbl">Ort / Stellplatz</label>
+      <input class="form-inp" id="_eetOrt" value="${e.ort}" style="width:100%;margin-bottom:10px">
+      <div style="display:flex;gap:8px;margin-bottom:16px">
+        <div style="flex:1"><label class="form-lbl">Von</label><input class="form-inp" type="date" id="_eetVon" value="${e.von||''}" style="width:100%"></div>
+        <div style="flex:1"><label class="form-lbl">Bis</label><input class="form-inp" type="date" id="_eetBis" value="${e.bis||''}" style="width:100%"></div>
+      </div>
+      <div style="display:flex;gap:8px">
+        <button class="btn" style="flex:1;background:var(--panel2);color:var(--text);border:1px solid var(--border)" onclick="document.getElementById('editEtappeOverlay').remove()">Abbrechen</button>
+        <button class="btn btn-primary" style="flex:1" onclick="saveEditEtappe(${tripId},${etappeId})">Speichern</button>
+      </div>
+    </div>`;
+  document.body.appendChild(overlay);
+}
+
+function saveEditEtappe(tripId, etappeId) {
+  const trip = trips.find(t => String(t.id) === String(tripId));
+  if (!trip) return;
+  const e = trip.etappen.find(x => x.id === etappeId);
+  if (!e) return;
+  const newOrt = document.getElementById('_eetOrt').value.trim();
+  if (!newOrt) { toast('Ort eingeben'); return; }
+  const ortChanged = newOrt !== e.ort;
+  e.ort = newOrt;
+  e.von = document.getElementById('_eetVon').value || '';
+  e.bis = document.getElementById('_eetBis').value || '';
+  if (ortChanged) { e.lat = null; e.lng = null; geocodeEtappe(trip, e); }
+  document.getElementById('editEtappeOverlay')?.remove();
+  saveTrips(); renderKosten();
+  toast('Etappe gespeichert');
 }
 
 async function geocodeEtappe(trip, etappe) {

@@ -1474,6 +1474,7 @@
             <div class="form-col"><label class="form-lbl">Nächte</label><input class="form-inp" type="number" id="sp-n" placeholder="1" min="1"></div>
             <div class="form-col full"><label class="form-lbl">Stellplatz / Ort</label><input class="form-inp" type="text" id="sp-name" placeholder="z.B. Campingplatz Bodensee"></div>
             <div class="form-col"><label class="form-lbl">Preis gesamt (€)</label><input class="form-inp" type="number" id="sp-p" placeholder="24.00" step="0.01"></div>
+            <div class="form-col full"><label class="form-lbl">Bemerkung</label><input class="form-inp" type="text" id="sp-bem" placeholder="z.B. Strom inklusive, ruhige Lage"></div>
           </div>
           <button class="btn btn-primary" style="width:100%" onclick="addStellplatz()">+ Eintragen</button>
         </div>
@@ -2198,7 +2199,7 @@ function renderKosten() {
   document.getElementById('list-kraftstoff').innerHTML = trip.kraftstoff.length ? trip.kraftstoff.map(e =>
     `<div class="entry-item" data-cat="kraftstoff"><div class="ei-info"><div class="ei-main">⛽ ${e.l.toFixed(1)} L &times; ${e.p.toFixed(3)} €/L${e.verbrauch ? ' &middot; <span style="color:var(--accent)">' + e.verbrauch.toFixed(1) + ' L/100km</span>' : ''}</div><div class="ei-sub">${e.dat||'–'}${e.km?' &middot; '+e.km.toLocaleString('de-DE')+' km':''}</div></div><div class="ei-cost">${(e.l*e.p).toFixed(2)} €</div>${del('kraftstoff',e.id)}</div>`).join('') : '<div class="no-entries">⛽ Noch keine Tankungen</div>';
   document.getElementById('list-stellplatz').innerHTML = trip.stellplatz.length ? trip.stellplatz.map(e =>
-    `<div class="entry-item" data-cat="stellplatz"><div class="ei-info"><div class="ei-main">🏕️ ${e.name}</div><div class="ei-sub">${e.dat||'–'} &middot; ${e.n} Nacht/Nächte</div></div><div class="ei-cost">${e.p.toFixed(2)} €</div>${del('stellplatz',e.id)}</div>`).join('') : '<div class="no-entries">🏕️ Noch keine Stellplätze</div>';
+    `<div class="entry-item" data-cat="stellplatz"><div class="ei-info"><div class="ei-main">🏕️ ${e.name}</div><div class="ei-sub">${e.dat||'–'} &middot; ${e.n} Nacht/Nächte${e.bem ? ' &middot; ' + e.bem : ''}</div></div><div class="ei-cost">${e.p.toFixed(2)} €</div>${del('stellplatz',e.id)}</div>`).join('') : '<div class="no-entries">🏕️ Noch keine Stellplätze</div>';
   document.getElementById('list-sonstiges').innerHTML = trip.sonstiges.length ? trip.sonstiges.map(e =>
     `<div class="entry-item" data-cat="sonstiges"><div class="ei-info"><div class="ei-main">🎯 ${e.desc}</div><div class="ei-sub">${e.dat||'–'}</div></div><div class="ei-cost">${e.b.toFixed(2)} €</div>${del('sonstiges',e.id)}</div>`).join('') : '<div class="no-entries">🎯 Noch keine Ausgaben</div>';
   renderEtappen(trip, isArchived);
@@ -2222,8 +2223,9 @@ function addStellplatz() {
   const trip = getActiveTrip(); if (!trip) { toast('Zuerst Urlaub wählen'); return; }
   const p = parseFloat(document.getElementById('sp-p').value);
   if (!p) { toast('Preis eingeben'); return; }
-  trip.stellplatz.unshift({ id: Date.now(), dat: document.getElementById('sp-dat').value, name: document.getElementById('sp-name').value||'–', n: +document.getElementById('sp-n').value||1, p });
-  document.getElementById('sp-name').value = ''; document.getElementById('sp-p').value = '';
+  const bem = document.getElementById('sp-bem').value.trim();
+  trip.stellplatz.unshift({ id: Date.now(), dat: document.getElementById('sp-dat').value, name: document.getElementById('sp-name').value||'–', n: +document.getElementById('sp-n').value||1, p, bem });
+  document.getElementById('sp-name').value = ''; document.getElementById('sp-p').value = ''; document.getElementById('sp-bem').value = '';
   saveTrips(); renderKosten();
 }
 function addSonstiges() {

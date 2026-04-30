@@ -1272,6 +1272,7 @@
     <button class="nav-item" id="nav-karte" onclick="showSection('karte');initKarte();closeMenu()">🗺 Reisekarte</button>
     <button class="nav-item" id="nav-statistik" onclick="showSection('statistik');closeMenu()">📊 Statistik</button>
     <button class="nav-item" id="nav-strom" onclick="showSection('strom');closeMenu()">⚡ Strom</button>
+    <button class="nav-item" id="nav-notfall" onclick="showSection('notfall');closeMenu()">🆘 Notfall</button>
     <div style="border-top:1px solid var(--border);margin:8px 0"></div>
     <button class="nav-item" id="nav-mehr" onclick="showSection('mehr');closeMenu()">⚙ Einstellungen</button>
     <div style="padding:12px 4px;display:flex;align-items:center;justify-content:space-between">
@@ -1328,6 +1329,11 @@
         <div class="start-card-icon">⚡</div>
         <div class="start-card-name">Strom</div>
         <div class="start-card-desc">Energiebilanz &amp; Solar planen</div>
+      </div>
+      <div class="start-card" onclick="showSection('notfall')">
+        <div class="start-card-icon">🆘</div>
+        <div class="start-card-name">Notfall</div>
+        <div class="start-card-desc">Notruf &amp; Pannenhilfe je Land</div>
       </div>
     </div>
   </div>
@@ -1840,6 +1846,31 @@
     </div>
   </div>
 
+  <!-- ════════════ NOTFALL ════════════ -->
+  <div id="sec-notfall" class="wmp-section">
+    <div style="text-align:center;padding:24px 0 18px;position:relative">
+      <div style="font-size:2.2rem;margin-bottom:6px">🆘</div>
+      <div style="font-size:1.55rem;font-weight:700;letter-spacing:0.06em;color:var(--text)">NOTFALL<span style="color:var(--accent)">NUMMERN</span></div>
+      <div style="font-size:0.72rem;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-top:4px">Notruf · Pannenhilfe · Offline verfügbar</div>
+      <div style="position:absolute;bottom:0;left:50%;transform:translateX(-50%);width:48px;height:2px;background:linear-gradient(90deg,transparent,var(--accent),transparent);border-radius:2px"></div>
+    </div>
+
+    <!-- EU-112 Banner -->
+    <div style="background:linear-gradient(135deg,rgba(239,68,68,0.12),rgba(239,68,68,0.04));border:1px solid rgba(239,68,68,0.3);border-radius:12px;padding:14px 16px;margin-bottom:16px;display:flex;align-items:center;gap:14px">
+      <a href="tel:112" style="background:#e11d48;color:#fff;font-size:1.3rem;font-weight:800;width:56px;height:56px;border-radius:12px;display:flex;align-items:center;justify-content:center;text-decoration:none;flex-shrink:0;letter-spacing:-1px;box-shadow:0 4px 12px rgba(225,29,72,0.35)">112</a>
+      <div>
+        <div style="font-weight:700;color:var(--text);font-size:0.95rem">Europaweiter Notruf</div>
+        <div style="font-size:0.76rem;color:var(--muted);margin-top:3px;line-height:1.5">Kostenlos aus jedem Netz • Funktioniert in allen EU-Ländern • Auch ohne SIM-Karte</div>
+      </div>
+    </div>
+
+    <!-- Suchfeld -->
+    <input class="form-inp" type="text" id="notfall-search" placeholder="Land suchen…" oninput="filterNotfall(this.value)" style="width:100%;margin-bottom:14px">
+
+    <!-- Länderliste -->
+    <div id="notfall-list"></div>
+  </div>
+
 </div><!-- .main-content -->
 
 <footer style="border-top:1px solid var(--border);background:var(--panel)">
@@ -1911,6 +1942,7 @@ function showSection(name) {
   backBtn.style.display = name === 'start' ? 'none' : 'block';
   window.scrollTo(0, 0);
   if (name === 'statistik') renderStatistik();
+  if (name === 'notfall') renderNotfall();
 }
 
 function openMenu() {
@@ -3467,6 +3499,89 @@ function closeDisclaimer() {
     navigator.serviceWorker.register('./sw.js').catch(() => {});
   }
 })();
+</script>
+
+<script>
+// ══════════════════════════════════
+// NOTFALLNUMMERN
+// ══════════════════════════════════
+const NOTFALL_DATA = [
+  { land:'🇩🇪 Deutschland', notruf:'112', polizei:'110', feuerwehr:'112', pannenhilfe:'0800 5 10 11 12', pannentipp:'ADAC', ambulanz:'112' },
+  { land:'🇦🇹 Österreich',  notruf:'112', polizei:'133', feuerwehr:'122', pannenhilfe:'120',             pannentipp:'ÖAMTC', ambulanz:'144' },
+  { land:'🇨🇭 Schweiz',     notruf:'112', polizei:'117', feuerwehr:'118', pannenhilfe:'140',             pannentipp:'TCS', ambulanz:'144' },
+  { land:'🇮🇹 Italien',     notruf:'112', polizei:'113', feuerwehr:'115', pannenhilfe:'803 116',         pannentipp:'ACI', ambulanz:'118' },
+  { land:'🇫🇷 Frankreich',  notruf:'112', polizei:'17',  feuerwehr:'18',  pannenhilfe:'0800 008 008',    pannentipp:'AXA Assistance', ambulanz:'15' },
+  { land:'🇪🇸 Spanien',     notruf:'112', polizei:'091', feuerwehr:'080', pannenhilfe:'900 365 505',     pannentipp:'RACE', ambulanz:'112' },
+  { land:'🇵🇹 Portugal',    notruf:'112', polizei:'112', feuerwehr:'112', pannenhilfe:'707 509 510',     pannentipp:'ACP', ambulanz:'112' },
+  { land:'🇳🇱 Niederlande', notruf:'112', polizei:'0900 8844', feuerwehr:'112', pannenhilfe:'0800 0503', pannentipp:'ANWB', ambulanz:'112' },
+  { land:'🇧🇪 Belgien',     notruf:'112', polizei:'101', feuerwehr:'100', pannenhilfe:'070 344 777',     pannentipp:'Touring', ambulanz:'100' },
+  { land:'🇩🇰 Dänemark',    notruf:'112', polizei:'114', feuerwehr:'112', pannenhilfe:'70 10 80 90',     pannentipp:'Falck', ambulanz:'112' },
+  { land:'🇸🇪 Schweden',    notruf:'112', polizei:'114 14', feuerwehr:'112', pannenhilfe:'020 912 912',  pannentipp:'Assistancekåren', ambulanz:'112' },
+  { land:'🇳🇴 Norwegen',    notruf:'112', polizei:'02800', feuerwehr:'110', pannenhilfe:'08505',         pannentipp:'NAF', ambulanz:'113' },
+  { land:'🇫🇮 Finnland',    notruf:'112', polizei:'0295 419 800', feuerwehr:'112', pannenhilfe:'0200 8080', pannentipp:'Autoliitto', ambulanz:'112' },
+  { land:'🇭🇷 Kroatien',    notruf:'112', polizei:'192', feuerwehr:'193', pannenhilfe:'1987',            pannentipp:'HAK', ambulanz:'194' },
+  { land:'🇸🇮 Slowenien',   notruf:'112', polizei:'113', feuerwehr:'112', pannenhilfe:'1987',            pannentipp:'AMZS', ambulanz:'112' },
+  { land:'🇬🇷 Griechenland',notruf:'112', polizei:'100', feuerwehr:'199', pannenhilfe:'10400',           pannentipp:'ELPA', ambulanz:'166' },
+  { land:'🇵🇱 Polen',       notruf:'112', polizei:'997', feuerwehr:'998', pannenhilfe:'196 37',          pannentipp:'PZM', ambulanz:'999' },
+  { land:'🇨🇿 Tschechien',  notruf:'112', polizei:'158', feuerwehr:'150', pannenhilfe:'1230',            pannentipp:'ÚAMK', ambulanz:'155' },
+  { land:'🇸🇰 Slowakei',    notruf:'112', polizei:'158', feuerwehr:'150', pannenhilfe:'18124',           pannentipp:'SATC', ambulanz:'155' },
+  { land:'🇭🇺 Ungarn',      notruf:'112', polizei:'107', feuerwehr:'105', pannenhilfe:'188',             pannentipp:'Magyar Autóklub', ambulanz:'104' },
+  { land:'🇷🇴 Rumänien',    notruf:'112', polizei:'112', feuerwehr:'112', pannenhilfe:'9271',            pannentipp:'ACR', ambulanz:'112' },
+  { land:'🇧🇬 Bulgarien',   notruf:'112', polizei:'166', feuerwehr:'160', pannenhilfe:'1286',            pannentipp:'SBA', ambulanz:'150' },
+  { land:'🇷🇸 Serbien',     notruf:'112', polizei:'192', feuerwehr:'193', pannenhilfe:'1987',            pannentipp:'AMSS', ambulanz:'194' },
+  { land:'🇲🇪 Montenegro',  notruf:'112', polizei:'122', feuerwehr:'123', pannenhilfe:'19807',           pannentipp:'AMSCG', ambulanz:'124' },
+  { land:'🇦🇱 Albanien',    notruf:'112', polizei:'129', feuerwehr:'128', pannenhilfe:'04 2223 467',     pannentipp:'ACA', ambulanz:'127' },
+  { land:'🇲🇰 Nordmazedonien', notruf:'112', polizei:'192', feuerwehr:'193', pannenhilfe:'196',          pannentipp:'AMKSM', ambulanz:'194' },
+  { land:'🇬🇧 Großbritannien', notruf:'999', polizei:'999', feuerwehr:'999', pannenhilfe:'0800 887 766', pannentipp:'AA / RAC', ambulanz:'999' },
+  { land:'🇮🇪 Irland',      notruf:'999', polizei:'999', feuerwehr:'999', pannenhilfe:'1800 667 788',    pannentipp:'AA Ireland', ambulanz:'999' },
+  { land:'🇹🇷 Türkei',      notruf:'112', polizei:'155', feuerwehr:'110', pannenhilfe:'444 1 444',       pannentipp:'TTOK', ambulanz:'112' },
+  { land:'🇲🇦 Marokko',     notruf:'15',  polizei:'19',  feuerwehr:'15',  pannenhilfe:'0522 400 400',    pannentipp:'MACM', ambulanz:'15' },
+];
+
+let _notfallRendered = false;
+
+function renderNotfall() {
+  if (_notfallRendered) return;
+  _notfallRendered = true;
+  filterNotfall('');
+}
+
+function filterNotfall(q) {
+  const term = q.toLowerCase().trim();
+  const list = NOTFALL_DATA.filter(d => !term || d.land.toLowerCase().includes(term));
+  const container = document.getElementById('notfall-list');
+  if (!container) return;
+  if (!list.length) { container.innerHTML = '<div class="no-entries">Kein Land gefunden</div>'; return; }
+
+  container.innerHTML = list.map(d => {
+    const tel = n => `<a href="tel:${n.replace(/\s/g,'')}" style="display:inline-flex;align-items:center;gap:6px;padding:7px 12px;background:var(--panel2);border:1px solid var(--border);border-radius:8px;color:var(--text);text-decoration:none;font-weight:700;font-size:0.9rem;font-variant-numeric:tabular-nums;transition:border-color 0.15s" onclick="event.stopPropagation()">${n}</a>`;
+    return `<div style="background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:10px">
+      <div style="font-size:1rem;font-weight:700;color:var(--text);margin-bottom:12px">${d.land}</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+        <div>
+          <div style="font-size:0.58rem;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px">🆘 Notruf</div>
+          ${tel(d.notruf)}
+        </div>
+        <div>
+          <div style="font-size:0.58rem;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px">🚑 Rettung</div>
+          ${tel(d.ambulanz)}
+        </div>
+        <div>
+          <div style="font-size:0.58rem;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px">👮 Polizei</div>
+          ${tel(d.polizei)}
+        </div>
+        <div>
+          <div style="font-size:0.58rem;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px">🚒 Feuerwehr</div>
+          ${tel(d.feuerwehr)}
+        </div>
+        <div style="grid-column:span 2">
+          <div style="font-size:0.58rem;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px">🔧 Pannenhilfe (${d.pannentipp})</div>
+          ${tel(d.pannenhilfe)}
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
 </script>
 </body>
 </html>

@@ -1424,6 +1424,7 @@
       <button class="seg-tab active" onclick="switchCL('abfahrt', this)">Abfahrt</button>
       <button class="seg-tab" onclick="switchCL('ankunft', this)">Ankunft</button>
       <button class="seg-tab" onclick="switchCL('winter', this)">Winterlager</button>
+      <button class="seg-tab" onclick="switchCL('eigen', this)">✏️ Eigene</button>
     </div>
     <div id="cl-abfahrt" class="cl-panel">
       <div id="cl-items-abfahrt"></div>
@@ -1444,6 +1445,17 @@
       <div class="cl-footer">
         <div class="cl-progress">Erledigt: <span id="cl-prog-winter">0/0</span></div>
         <button class="btn-reset" onclick="resetCL('winter')">Zurücksetzen</button>
+      </div>
+    </div>
+    <div id="cl-eigen" class="cl-panel" style="display:none">
+      <div style="display:flex;gap:8px;margin-bottom:14px">
+        <input class="form-inp" type="text" id="cl-eigen-inp" placeholder="Neuer Punkt…" style="flex:1" onkeydown="if(event.key==='Enter')addClEigen()">
+        <button class="btn btn-primary" style="flex-shrink:0;padding:8px 14px" onclick="addClEigen()">+</button>
+      </div>
+      <div id="cl-items-eigen"></div>
+      <div class="cl-footer" id="cl-footer-eigen" style="display:none">
+        <div class="cl-progress">Erledigt: <span id="cl-prog-eigen">0/0</span></div>
+        <button class="btn-reset" onclick="resetClEigen()">Zurücksetzen</button>
       </div>
     </div>
   </div>
@@ -2157,6 +2169,67 @@ function switchCL(name, btn) {
   document.querySelectorAll('.cl-panel').forEach(p => p.style.display = 'none');
   btn.classList.add('active');
   document.getElementById('cl-' + name).style.display = 'block';
+  if (name === 'eigen') renderClEigen();
+}
+
+// ── Eigene Checkliste ──
+function loadClEigen()   { return JSON.parse(localStorage.getItem('wmp_cl_eigen') || '[]'); }
+function saveClEigen(items) { localStorage.setItem('wmp_cl_eigen', JSON.stringify(items)); }
+
+function renderClEigen() {
+  const items = loadClEigen();
+  const el = document.getElementById('cl-items-eigen');
+  const footer = document.getElementById('cl-footer-eigen');
+  if (!items.length) {
+    el.innerHTML = '<div class="no-entries" style="padding:24px 0">Noch keine eigenen Punkte – füge oben einen hinzu.</div>';
+    footer.style.display = 'none';
+    return;
+  }
+  const done = items.filter(i => i.checked).length;
+  document.getElementById('cl-prog-eigen').textContent = done + '/' + items.length;
+  footer.style.display = 'flex';
+  el.innerHTML = items.map(item => `
+    <div class="check-item${item.checked?' checked':''}" style="display:flex;align-items:center;gap:0" onclick="toggleClEigen(${item.id},this)">
+      <div class="check-box" style="flex-shrink:0">
+        <svg class="check-tick" width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="white" stroke-width="2.2"><polyline points="1.5 6 4.5 9.5 10.5 2.5"/></svg>
+      </div>
+      <span class="check-lbl" style="flex:1">${item.text}</span>
+      <button class="ei-del" onclick="event.stopPropagation();deleteClEigen(${item.id})" style="margin-left:6px;flex-shrink:0">✕</button>
+    </div>`).join('');
+}
+
+function addClEigen() {
+  const inp = document.getElementById('cl-eigen-inp');
+  const text = inp.value.trim();
+  if (!text) { toast('Bezeichnung eingeben'); return; }
+  const items = loadClEigen();
+  items.push({ id: Date.now(), text, checked: false });
+  saveClEigen(items);
+  inp.value = '';
+  renderClEigen();
+}
+
+function toggleClEigen(id, el) {
+  const items = loadClEigen();
+  const item = items.find(i => i.id === id);
+  if (!item) return;
+  item.checked = !item.checked;
+  saveClEigen(items);
+  el.classList.toggle('checked', item.checked);
+  const done = items.filter(i => i.checked).length;
+  document.getElementById('cl-prog-eigen').textContent = done + '/' + items.length;
+}
+
+function deleteClEigen(id) {
+  const items = loadClEigen().filter(i => i.id !== id);
+  saveClEigen(items);
+  renderClEigen();
+}
+
+function resetClEigen() {
+  const items = loadClEigen().map(i => ({ ...i, checked: false }));
+  saveClEigen(items);
+  renderClEigen();
 }
 
 // ══════════════════════════════════

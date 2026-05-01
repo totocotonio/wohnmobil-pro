@@ -37,7 +37,7 @@
   </div>
   <div class="card">
     <h2>Lokale Datenspeicherung</h2>
-    <p>Diese App speichert alle Daten ausschließlich lokal auf deinem Gerät (localStorage des Browsers). Es werden keine Daten an Server übertragen, keine Cookies gesetzt und keine Analyse-Tools verwendet.</p>
+    <p>Diese App speichert alle Daten lokal auf deinem Gerät (localStorage des Browsers). Keine Cookies, keine Analyse-Tools. Optional kann die freiwillige Cloud-Sync-Funktion genutzt werden (siehe unten).</p>
     <h2>Gespeicherte Daten</h2>
     <p>Folgende Daten werden lokal gespeichert:</p>
     <p style="margin-top:8px">
@@ -50,8 +50,15 @@
     <p>Die gespeicherten Daten können jederzeit über die Browser-Einstellungen (Websitedaten löschen) oder durch Deinstallation der PWA entfernt werden.</p>
   </div>
   <div class="card">
+    <h2>Cloud-Sync (freiwillig)</h2>
+    <p>Die App bietet eine optionale Cloud-Sync-Funktion. Wird diese genutzt, werden die gespeicherten App-Daten (Fahrzeugdaten, Checklisten, Kosten, Einstellungen) verschlüsselt übertragen und unter einem persönlichen Sync-Code in der Google Firebase Cloud (Firestore) gespeichert. Die Übertragung erfolgt nur auf ausdrücklichen Wunsch durch Tippen auf „Auf Cloud hochladen".</p>
+    <p style="margin-top:8px">Anbieter: Google Ireland Limited, Gordon House, Barrow Street, Dublin 4, Irland.<br>
+    Datenschutz: <a href="https://firebase.google.com/support/privacy" target="_blank" rel="noopener">firebase.google.com/support/privacy</a></p>
+    <p style="margin-top:8px">Die Cloud-Sync-Funktion kann vollständig ignoriert werden – alle anderen Funktionen der App sind davon unabhängig.</p>
+  </div>
+  <div class="card">
     <h2>Externe Dienste</h2>
-    <p>Die App lädt keine externen Ressourcen. Alle Schriftarten und Inhalte sind lokal eingebunden. Es werden keine Verbindungen zu Drittanbietern hergestellt.</p>
+    <p>Alle Schriftarten sind lokal eingebunden. Die App nutzt Google Firebase (nur bei aktiver Cloud-Sync-Nutzung, siehe oben) sowie Leaflet für Kartendarstellungen (OpenStreetMap-Daten, keine Nutzerdaten übertragen).</p>
   </div>
   <div class="card">
     <h2>Gerätesensoren</h2>

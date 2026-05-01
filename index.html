@@ -4088,26 +4088,31 @@ function calcServiceItems(aktkmOverride) {
                  : (parseFloat(document.getElementById('sv-aktkm')?.value) || parseFloat(sv.aktkm) || 0);
   const today  = new Date(); today.setHours(0,0,0,0);
 
+  function toIso(dateObj) {
+    return dateObj.toISOString().split('T')[0];
+  }
   function daysDiff(dateStr) {
     const d = new Date(dateStr); d.setHours(0,0,0,0);
-    return Math.round((d - today) / 86400000);
+    return { days: Math.round((d - today) / 86400000), dateIso: dateStr };
   }
   function monthEnd(ym) {
     const [y,m] = ym.split('-').map(Number);
-    return Math.round((new Date(y, m, 0) - today) / 86400000);
+    const d = new Date(y, m, 0);
+    return { days: Math.round((d - today) / 86400000), dateIso: toIso(d) };
   }
 
   const items = [];
-  if (fz.tuev)        items.push({ label: 'TÜV / HU',               typ:'date', days: monthEnd(fz.tuev) });
-  if (fz['gas-pruef'])items.push({ label: 'Gasuntersuchung (DVGW)', typ:'date', days: monthEnd(fz['gas-pruef']) });
-  if (fz.inspektion)  items.push({ label: 'Inspektion (Datum)',      typ:'date', days: daysDiff(fz.inspektion) });
+  if (fz.tuev)        { const r=monthEnd(fz.tuev);        items.push({ label:'TÜV / HU',               typ:'date', ...r }); }
+  if (fz['gas-pruef']){ const r=monthEnd(fz['gas-pruef']); items.push({ label:'Gasuntersuchung (DVGW)', typ:'date', ...r }); }
+  if (fz.inspektion)  { const r=daysDiff(fz.inspektion);  items.push({ label:'Inspektion (Datum)',      typ:'date', ...r }); }
   if (fz['insp-km'] && aktkm)
     items.push({ label: 'Inspektion (km)', typ:'km', kmLeft: parseFloat(fz['insp-km']) - aktkm });
 
   for (const r of custom) {
-    if (r.typ === 'date' && r.faellig)
-      items.push({ label: r.label, typ:'date', days: daysDiff(r.faellig), id: r.id });
-    else if (r.typ === 'km' && r.faellig_km)
+    if (r.typ === 'date' && r.faellig) {
+      const dd = daysDiff(r.faellig);
+      items.push({ label: r.label, typ:'date', ...dd, id: r.id });
+    } else if (r.typ === 'km' && r.faellig_km)
       items.push({ label: r.label, typ:'km', kmLeft: aktkm ? r.faellig_km - aktkm : null, id: r.id, noKm: !aktkm });
   }
 
@@ -4160,12 +4165,17 @@ function renderService() {
     const del = item.id !== undefined
       ? `<button onclick="deleteSvCustom(${item.id})" style="background:none;border:none;color:var(--danger);cursor:pointer;font-size:1.1rem;padding:0;flex-shrink:0">🗑</button>`
       : '';
-    return `<div style="background:var(--card);border-radius:10px;padding:13px 14px;margin-bottom:8px;border-left:4px solid ${color};display:flex;align-items:center;gap:12px">
+    const calBtn = item.typ === 'date' && item.dateIso
+      ? `<button onclick="addToCalendar('${item.label.replace(/'/g,"\\'")}','${item.dateIso}')"
+           title="In Kalender eintragen"
+           style="background:none;border:1px solid var(--border);border-radius:6px;color:var(--muted);cursor:pointer;font-size:0.72rem;padding:3px 7px;flex-shrink:0;line-height:1.4">📅</button>`
+      : '';
+    return `<div style="background:var(--card);border-radius:10px;padding:13px 14px;margin-bottom:8px;border-left:4px solid ${color};display:flex;align-items:center;gap:8px">
       <div style="font-size:1.35rem;flex-shrink:0">${icon}</div>
       <div style="flex:1;min-width:0">
         <div style="font-weight:700;color:var(--text);font-size:0.93rem">${item.label}</div>
         <div style="font-size:0.8rem;color:${color};margin-top:2px">${sub}</div>
-      </div>${del}
+      </div>${calBtn}${del}
     </div>`;
   }).join('');
 
@@ -4259,6 +4269,54 @@ function addSvCustom() {
 function deleteSvCustom(id) {
   saveSvCustom(loadSvCustom().filter(r => r.id !== id));
   renderService();
+}
+
+function addToCalendar(label, dateIso) {
+  // dateIso = "YYYY-MM-DD"
+  const [y, m, d] = dateIso.split('-');
+  const pad = n => String(n).padStart(2,'0');
+
+  // Folgetag für DTEND (ganztägig)
+  const end = new Date(Number(y), Number(m)-1, Number(d)+1);
+  const dtStart = `${y}${pad(m)}${pad(d)}`;
+  const dtEnd   = `${end.getFullYear()}${pad(end.getMonth()+1)}${pad(end.getDate())}`;
+  const now     = new Date().toISOString().replace(/[-:]/g,'').split('.')[0]+'Z';
+
+  const ics = [
+    'BEGIN:VCALENDAR',
+    'VERSION:2.0',
+    'PRODID:-//Wohnmobil Pro//DE',
+    'CALSCALE:GREGORIAN',
+    'METHOD:PUBLISH',
+    'BEGIN:VEVENT',
+    `UID:wmp-${Date.now()}@wohnmobil-pro`,
+    `DTSTAMP:${now}`,
+    `DTSTART;VALUE=DATE:${dtStart}`,
+    `DTEND;VALUE=DATE:${dtEnd}`,
+    `SUMMARY:${label} – Wohnmobil`,
+    'DESCRIPTION:Erinnerung erstellt mit Wohnmobil Pro',
+    'BEGIN:VALARM',
+    'TRIGGER:-P7D',         // 7 Tage vorher
+    'ACTION:DISPLAY',
+    `DESCRIPTION:${label} in 7 Tagen fällig`,
+    'END:VALARM',
+    'BEGIN:VALARM',
+    'TRIGGER:-P1D',         // 1 Tag vorher
+    'ACTION:DISPLAY',
+    `DESCRIPTION:${label} morgen fällig`,
+    'END:VALARM',
+    'END:VEVENT',
+    'END:VCALENDAR'
+  ].join('\r\n');
+
+  const blob = new Blob([ics], { type: 'text/calendar;charset=utf-8' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href     = url;
+  a.download = `${label.replace(/[^a-z0-9äöü]/gi,'_')}.ics`;
+  document.body.appendChild(a);
+  a.click();
+  setTimeout(() => { document.body.removeChild(a); URL.revokeObjectURL(url); }, 1000);
 }
 
 function loadFahrzeug() {

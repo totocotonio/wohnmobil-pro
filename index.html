@@ -1660,7 +1660,7 @@
         </svg>
         <div>
           <strong>Wohnmobil Pro</strong>
-          <div style="font-size:0.8rem;color:var(--accent);margin-top:2px">v1.1.58</div>
+          <div style="font-size:0.8rem;color:var(--accent);margin-top:2px">v1.1.59</div>
           <div style="font-size:0.72rem;color:var(--muted);margin-top:2px">© 2026 Torsten Michaely</div>
         </div>
       </div>
@@ -1680,6 +1680,12 @@
         Beim jedem App-Start wird automatisch ein Snapshot gespeichert (letzte 3).
       </div>
       <div id="auto-backup-list"></div>
+    </div>
+    <div class="mehr-block">
+      <div class="section-label">☁️ Cloud-Sync</div>
+      <div id="sync-ui">
+        <div style="font-size:0.78rem;color:var(--muted);text-align:center;padding:12px 0">Wird geladen…</div>
+      </div>
     </div>
     <div class="mehr-block">
       <div class="section-label">Manuelles Backup</div>
@@ -2373,7 +2379,7 @@
       </div>
       <div style="font-size:0.7rem;color:var(--muted);text-align:center">
         © <span id="footer-year">2026</span> Torsten Michaely · Alle Rechte vorbehalten &nbsp;·&nbsp;
-        <span id="footer-version" style="color:var(--accent);font-size:0.7rem">v1.1.58</span>
+        <span id="footer-version" style="color:var(--accent);font-size:0.7rem">v1.1.59</span>
         &nbsp;|&nbsp; <a href="./impressum.html" style="color:var(--muted);text-decoration:none">Impressum</a>
         &nbsp;|&nbsp; <a href="./datenschutz.html" style="color:var(--muted);text-decoration:none">Datenschutz</a>
         &nbsp;|&nbsp; <a href="#" onclick="showDisclaimer();return false;" style="color:var(--muted);text-decoration:none">Haftungsausschluss</a>
@@ -3497,8 +3503,13 @@ function restoreWetterCache() {
 function buildSnapshot() {
   return {
     version: '1.1.0', exported: new Date().toISOString(),
-    settings: JSON.parse(localStorage.getItem('wmp_settings')||'{}'),
-    calib: JSON.parse(localStorage.getItem('wmp_calib')||'null'),
+    fahrzeug:       JSON.parse(localStorage.getItem('wmp_fahrzeug')||'{}'),
+    service:        JSON.parse(localStorage.getItem('wmp_service')||'{}'),
+    service_custom: JSON.parse(localStorage.getItem('wmp_service_custom')||'[]'),
+    cl:             JSON.parse(localStorage.getItem('wmp_cl')||'null'),
+    favs:           JSON.parse(localStorage.getItem('wmp_favs')||'[]'),
+    settings:       JSON.parse(localStorage.getItem('wmp_settings')||'{}'),
+    calib:          JSON.parse(localStorage.getItem('wmp_calib')||'null'),
     checks: clState, trips, activeTripId,
   };
 }
@@ -3548,6 +3559,19 @@ function renderAutoBackupList() {
     </div>`).join('');
 }
 
+function restoreSnapshot(d) {
+  if (d.fahrzeug)       localStorage.setItem('wmp_fahrzeug',       JSON.stringify(d.fahrzeug));
+  if (d.service)        localStorage.setItem('wmp_service',        JSON.stringify(d.service));
+  if (d.service_custom) localStorage.setItem('wmp_service_custom', JSON.stringify(d.service_custom));
+  if (d.cl)             localStorage.setItem('wmp_cl',             JSON.stringify(d.cl));
+  if (d.favs)           { localStorage.setItem('wmp_favs', JSON.stringify(d.favs)); wmpFavs = d.favs; }
+  if (d.checks)         { clState = d.checks; saveCL(); renderCL(); }
+  if (d.trips)          { trips = d.trips; activeTripId = d.activeTripId || null; saveTrips(); renderKosten(); }
+  if (d.settings)       localStorage.setItem('wmp_settings', JSON.stringify(d.settings));
+  if (d.calib)          localStorage.setItem('wmp_calib',    JSON.stringify(d.calib));
+  loadSettings();
+}
+
 function importData() {
   const inp = document.createElement('input');
   inp.type = 'file'; inp.accept = '.json';
@@ -3556,11 +3580,7 @@ function importData() {
     fr.onload = ev => {
       try {
         const d = JSON.parse(ev.target.result);
-        if (d.checks) { clState = d.checks; saveCL(); renderCL(); }
-        if (d.trips)  { trips = d.trips; activeTripId = d.activeTripId || null; saveTrips(); renderKosten(); }
-        if (d.settings) localStorage.setItem('wmp_settings', JSON.stringify(d.settings));
-        if (d.calib)    localStorage.setItem('wmp_calib',    JSON.stringify(d.calib));
-        loadSettings();
+        restoreSnapshot(d);
         toast('Import erfolgreich');
       } catch { toast('Fehler beim Import'); }
     };
@@ -5692,7 +5712,112 @@ function filterNotfall(q) {
   }).join('');
 }
 
+// ══════════════════════════════════
+// FIREBASE CLOUD-SYNC
+// ══════════════════════════════════
+const SYNC_CODE_KEY = 'wmp_sync_code';
+const _fbConfig = {
+  apiKey: "AIzaSyB1Wlpaf8dnX0_meSQoO84mSeWP-qIjdgg",
+  authDomain: "wohnmobil-pro.firebaseapp.com",
+  projectId: "wohnmobil-pro",
+  storageBucket: "wohnmobil-pro.firebasestorage.app",
+  messagingSenderId: "562019851678",
+  appId: "1:562019851678:web:444b74e258a07391d14a8f"
+};
+let _fbDb = null;
+function getFB() {
+  if (_fbDb) return _fbDb;
+  try {
+    if (!firebase.apps.length) firebase.initializeApp(_fbConfig);
+    _fbDb = firebase.firestore();
+  } catch(e) { console.warn('Firebase init:', e); }
+  return _fbDb;
+}
+
+function genSyncCode() {
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  let c = '';
+  for (let i = 0; i < 8; i++) c += chars[Math.floor(Math.random() * chars.length)];
+  return c;
+}
+
+function getSyncCode() {
+  let c = localStorage.getItem(SYNC_CODE_KEY);
+  if (!c) { c = genSyncCode(); localStorage.setItem(SYNC_CODE_KEY, c); }
+  return c;
+}
+
+async function syncUpload() {
+  const db = getFB();
+  if (!db) { toast('Firebase nicht verfügbar'); return; }
+  const code = getSyncCode();
+  const btn = document.getElementById('sync-upload-btn');
+  if (btn) { btn.disabled = true; btn.textContent = '⏳ Hochladen…'; }
+  try {
+    const snap = buildSnapshot();
+    await db.collection('syncs').doc(code).set({ data: JSON.stringify(snap), ts: new Date().toISOString() });
+    toast('✅ Erfolgreich hochgeladen');
+    renderSyncUI();
+  } catch(e) {
+    toast('Fehler: ' + e.message);
+    if (btn) { btn.disabled = false; btn.textContent = '☁️ Auf Cloud hochladen'; }
+  }
+}
+
+async function syncDownload() {
+  const db = getFB();
+  if (!db) { toast('Firebase nicht verfügbar'); return; }
+  const inputEl = document.getElementById('sync-input-code');
+  const code = (inputEl?.value.trim().toUpperCase()) || getSyncCode();
+  if (!code || code.length < 4) { toast('Sync-Code eingeben'); return; }
+  const btn = document.getElementById('sync-download-btn');
+  if (btn) { btn.disabled = true; btn.textContent = '⏳ Laden…'; }
+  try {
+    const doc = await db.collection('syncs').doc(code).get();
+    if (!doc.exists) { toast('Kein Datensatz unter diesem Code'); if (btn) { btn.disabled = false; btn.textContent = '📲 Von Cloud laden'; } return; }
+    const d = JSON.parse(doc.data().data);
+    if (!confirm('Alle lokalen Daten mit dem Cloud-Stand ersetzen?')) { if (btn) { btn.disabled = false; btn.textContent = '📲 Von Cloud laden'; } return; }
+    restoreSnapshot(d);
+    toast('✅ Sync erfolgreich');
+    renderStart();
+  } catch(e) {
+    toast('Fehler: ' + e.message);
+    if (btn) { btn.disabled = false; btn.textContent = '📲 Von Cloud laden'; }
+  }
+}
+
+function syncNewCode() {
+  if (!confirm('Neuen Sync-Code erstellen?\nDer alte Code wird ungültig – Cloud-Daten bleiben aber erhalten.')) return;
+  const c = genSyncCode();
+  localStorage.setItem(SYNC_CODE_KEY, c);
+  renderSyncUI();
+}
+
+function renderSyncUI() {
+  const el = document.getElementById('sync-ui');
+  if (!el) return;
+  const code = getSyncCode();
+  el.innerHTML = `
+    <div style="background:var(--panel2);border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:10px">
+      <div style="font-size:0.68rem;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:8px">Dein Sync-Code</div>
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+        <div style="font-size:1.55rem;font-weight:800;letter-spacing:5px;color:var(--accent);font-family:monospace;flex:1">${code}</div>
+        <button onclick="syncNewCode()" style="padding:5px 10px;background:var(--panel);border:1px solid var(--border);border-radius:8px;color:var(--muted);font-size:0.72rem;cursor:pointer;font-family:inherit;white-space:nowrap">🔄 Neu</button>
+      </div>
+      <div style="font-size:0.73rem;color:var(--muted);margin-bottom:12px;line-height:1.5">Diesen Code auf einem anderen Gerät unter <strong style="color:var(--text)">Einstellungen → Cloud-Sync</strong> eingeben und <em>Von Cloud laden</em> tippen.</div>
+      <button id="sync-upload-btn" onclick="syncUpload()" class="btn" style="width:100%">☁️ Auf Cloud hochladen</button>
+    </div>
+    <div style="background:var(--panel2);border:1px solid var(--border);border-radius:10px;padding:14px">
+      <div style="font-size:0.68rem;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:8px">Von anderem Gerät laden</div>
+      <input id="sync-input-code" type="text" maxlength="8" placeholder="SYNC-CODE" style="width:100%;box-sizing:border-box;padding:10px 12px;background:var(--panel);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:monospace;font-size:1.1rem;letter-spacing:4px;text-transform:uppercase;margin-bottom:8px;text-align:center" oninput="this.value=this.value.toUpperCase()">
+      <button id="sync-download-btn" onclick="syncDownload()" class="btn" style="width:100%;background:var(--panel2);color:var(--text);border:1px solid var(--accent-dim)">📲 Von Cloud laden</button>
+    </div>`;
+}
+
+renderSyncUI();
 renderStart();
 </script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
 </body>
 </html>

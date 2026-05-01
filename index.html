@@ -1276,6 +1276,7 @@
     <button class="nav-item" id="nav-tanken" onclick="showSection('tanken');closeMenu()">⛽ Tankpreise</button>
     <button class="nav-item" id="nav-fahrzeug" onclick="showSection('fahrzeug');closeMenu()">🚐 Mein Fahrzeug</button>
     <button class="nav-item" id="nav-satfinder" onclick="showSection('satfinder');closeMenu()">📡 Sat-Finder</button>
+    <button class="nav-item" id="nav-sonne" onclick="showSection('sonne');closeMenu()">🌞 Sonnenausrichtung</button>
     <button class="nav-item" id="nav-vorschriften" onclick="showSection('vorschriften');closeMenu()">📋 Vorschriften</button>
     <div style="border-top:1px solid var(--border);margin:8px 0"></div>
     <button class="nav-item" id="nav-mehr" onclick="showSection('mehr');closeMenu()">⚙ Einstellungen</button>
@@ -1361,6 +1362,11 @@
         <div class="start-card-icon">📡</div>
         <div class="start-card-name">Sat-Finder</div>
         <div class="start-card-desc">Azimut &amp; Elevation für Satellitenschüssel</div>
+      </div>
+      <div class="start-card" onclick="showSection('sonne')">
+        <div class="start-card-icon">🌞</div>
+        <div class="start-card-name">Sonnenausrichtung</div>
+        <div class="start-card-desc">Fahrzeug optimal für Schatten &amp; Solar ausrichten</div>
       </div>
     </div>
   </div>
@@ -2285,6 +2291,87 @@
     </div>
   </div>
 
+  <!-- ════════════ SONNENAUSRICHTUNG ════════════ -->
+  <div id="sec-sonne" class="wmp-section">
+    <div style="text-align:center;padding:24px 0 18px;position:relative">
+      <div style="font-size:2.2rem;margin-bottom:6px">🌞</div>
+      <div style="font-size:1.55rem;font-weight:700;letter-spacing:0.06em;color:var(--text)">SONNEN-<span style="color:var(--accent)">AUSRICHTUNG</span></div>
+      <div style="font-size:0.72rem;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-top:4px">Schatten · Solar · Sonnenstand · Offline</div>
+      <div style="position:absolute;bottom:0;left:50%;transform:translateX(-50%);width:48px;height:2px;background:linear-gradient(90deg,transparent,var(--accent),transparent);border-radius:2px"></div>
+    </div>
+
+    <!-- GPS -->
+    <div style="background:var(--card);border-radius:12px;padding:14px 16px;margin-bottom:14px;display:flex;align-items:center;gap:12px">
+      <div style="flex:1">
+        <div id="so-gps-status" style="font-size:0.82rem;color:var(--muted)">GPS-Position wird benötigt</div>
+        <div id="so-gps-coords" style="font-size:0.72rem;color:var(--muted);margin-top:2px"></div>
+      </div>
+      <button class="btn btn-primary" style="padding:8px 14px;font-size:0.85rem;flex-shrink:0" onclick="soGetGPS()">📍 GPS</button>
+    </div>
+
+    <!-- Ergebnis -->
+    <div id="so-result" style="display:none">
+
+      <!-- Kompass-Canvas -->
+      <div style="text-align:center;margin-bottom:14px">
+        <canvas id="so-canvas" width="260" height="260" style="max-width:100%"></canvas>
+      </div>
+
+      <!-- Aufgang / Untergang / Mittag -->
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:14px">
+        <div style="background:var(--card);border-radius:10px;padding:10px 6px;text-align:center">
+          <div style="font-size:0.58rem;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">🌅 Aufgang</div>
+          <div id="so-sunrise" style="font-size:1.1rem;font-weight:800;color:var(--text)">–</div>
+        </div>
+        <div style="background:var(--card);border-radius:10px;padding:10px 6px;text-align:center">
+          <div style="font-size:0.58rem;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">☀️ Höchststand</div>
+          <div id="so-noon-time" style="font-size:1.1rem;font-weight:800;color:#fbbf24">–</div>
+          <div id="so-noon-el" style="font-size:0.68rem;color:var(--muted)"></div>
+        </div>
+        <div style="background:var(--card);border-radius:10px;padding:10px 6px;text-align:center">
+          <div style="font-size:0.58rem;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">🌇 Untergang</div>
+          <div id="so-sunset" style="font-size:1.1rem;font-weight:800;color:var(--text)">–</div>
+        </div>
+      </div>
+
+      <!-- Aktueller Sonnenstand -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px">
+        <div style="background:var(--card);border-radius:10px;padding:12px;text-align:center">
+          <div style="font-size:0.58rem;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">⬆️ Elevation jetzt</div>
+          <div id="so-el" style="font-size:1.6rem;font-weight:800;color:#fbbf24">–</div>
+        </div>
+        <div style="background:var(--card);border-radius:10px;padding:12px;text-align:center">
+          <div style="font-size:0.58rem;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">🧭 Azimut jetzt</div>
+          <div id="so-az" style="font-size:1.6rem;font-weight:800;color:#fbbf24">–</div>
+        </div>
+      </div>
+
+      <!-- Tagesverlauf -->
+      <div style="background:var(--card);border-radius:10px;padding:12px;margin-bottom:14px">
+        <div style="font-size:0.6rem;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">📈 Sonnenverlauf heute</div>
+        <canvas id="so-chart" height="80" style="width:100%;display:block"></canvas>
+      </div>
+
+      <!-- Fahrzeugausrichtung -->
+      <div style="background:var(--card);border-radius:12px;padding:14px;margin-bottom:14px">
+        <div class="section-label" style="margin-bottom:10px">🚐 Fahrzeug optimal ausrichten</div>
+        <div style="margin-bottom:10px">
+          <label class="form-lbl">Was soll beschattet sein?</label>
+          <select class="form-inp" id="so-ziel" onchange="soUpdateRecommendation()">
+            <option value="links">Linke Fahrzeugseite (Markise)</option>
+            <option value="rechts">Rechte Fahrzeugseite</option>
+            <option value="front">Fahrzeugfront</option>
+            <option value="heck">Fahrzeugheck (Bett hinten)</option>
+          </select>
+        </div>
+        <div style="font-size:0.75rem;color:var(--muted);margin-bottom:8px">Optimale Ausrichtung für Sonnenmittagsstand:</div>
+        <div id="so-rec" style="background:rgba(34,197,94,0.08);border:1px solid rgba(34,197,94,0.25);border-radius:8px;padding:12px 14px;font-size:0.95rem;color:var(--text);text-align:center">–</div>
+        <div style="font-size:0.68rem;color:var(--muted);margin-top:8px;text-align:center">Fahrzeug-Front = Richtung, in die der Bug zeigt</div>
+      </div>
+
+    </div>
+  </div>
+
   <!-- ════════════ LÄNDERVORSCHRIFTEN ════════════ -->
   <div id="sec-vorschriften" class="wmp-section">
     <div style="text-align:center;padding:24px 0 18px;position:relative">
@@ -2374,6 +2461,8 @@ function showSection(name) {
   if (name === 'tanken') tpInit();
   if (name === 'vorschriften') renderVorschriften();
   if (name === 'satfinder' && SAT.lat) satCalc();
+  if (name === 'sonne' && SO.lat) soCalc();
+  if (name !== 'sonne' && SO._timer) { clearInterval(SO._timer); SO._timer = null; }
 }
 
 function openMenu() {
@@ -4757,6 +4846,206 @@ function filterVorschriften(q) {
       </div>
     </div>`;
   }).join('');
+}
+
+// ══════════════════════════════════
+// SONNENAUSRICHTUNG
+// ══════════════════════════════════
+const SO = { lat: null, lon: null, _timer: null, _noonSun: null };
+
+function soGetGPS() {
+  const status = document.getElementById('so-gps-status');
+  status.textContent = '⏳ GPS wird ermittelt…';
+  if (!navigator.geolocation) { status.textContent = '❌ GPS nicht verfügbar'; return; }
+  navigator.geolocation.getCurrentPosition(pos => {
+    SO.lat = pos.coords.latitude;
+    SO.lon = pos.coords.longitude;
+    status.textContent = '✅ GPS-Position ermittelt';
+    const c = document.getElementById('so-gps-coords');
+    if (c) c.textContent = `${SO.lat.toFixed(4)}° N  ${SO.lon.toFixed(4)}° E`;
+    soCalc();
+    if (SO._timer) clearInterval(SO._timer);
+    SO._timer = setInterval(soCalc, 60000);
+  }, () => { status.textContent = '❌ GPS-Zugriff verweigert'; },
+  { enableHighAccuracy: true, timeout: 10000 });
+}
+
+function _sunPos(date, lat, lon) {
+  const R = Math.PI / 180, D = 180 / Math.PI;
+  const JD = date.getTime() / 86400000 + 2440587.5;
+  const JC = (JD - 2451545) / 36525;
+  const L0 = (280.46646 + JC * (36000.76983 + JC * 0.0003032)) % 360;
+  const M  = (357.52911 + JC * (35999.05029 - 0.0001537 * JC)) % 360;
+  const Mr = M * R;
+  const C  = Math.sin(Mr)*(1.914602-JC*(0.004817+0.000014*JC))
+           + Math.sin(2*Mr)*(0.019993-0.000101*JC)
+           + Math.sin(3*Mr)*0.000289;
+  const sl = (L0 + C) * R;
+  const ep = (23.439 - 0.0000004*(JD-2451545)) * R;
+  const decl = Math.asin(Math.sin(ep)*Math.sin(sl));
+  const y = Math.tan(ep/2)**2, ecc = 0.016708634-JC*(0.000042037+0.0000001267*JC);
+  const EoT = 4*D*(y*Math.sin(2*L0*R)-2*ecc*Math.sin(Mr)+4*ecc*y*Math.sin(Mr)*Math.cos(2*L0*R)
+              -0.5*y*y*Math.sin(4*L0*R)-1.25*ecc*ecc*Math.sin(2*Mr));
+  const utcMin = date.getUTCHours()*60+date.getUTCMinutes()+date.getUTCSeconds()/60;
+  const tst = ((utcMin+EoT+lon*4)%1440+1440)%1440;
+  const HA  = (tst/4-180)*R;
+  const lr  = lat*R;
+  const sinEl = Math.sin(lr)*Math.sin(decl)+Math.cos(lr)*Math.cos(decl)*Math.cos(HA);
+  const el  = Math.asin(Math.max(-1,Math.min(1,sinEl)))*D;
+  const cosEl = Math.cos(el*R);
+  let az = 0;
+  if (cosEl > 1e-4) {
+    const caz = (Math.sin(decl)-Math.sin(lr)*sinEl)/(Math.cos(lr)*cosEl);
+    az = Math.acos(Math.max(-1,Math.min(1,caz)))*D;
+    if (HA > 0) az = 360-az;
+  }
+  return { elevation: el, azimuth: az };
+}
+
+function soCalc() {
+  if (!SO.lat) return;
+  const now = new Date();
+  const today = new Date(now); today.setHours(0,0,0,0);
+  const sun = _sunPos(now, SO.lat, SO.lon);
+  const arcPts = [];
+  let maxEl = -90, noonSun = null, sunrise = null, sunset = null;
+  let prevEl = _sunPos(today, SO.lat, SO.lon).elevation;
+  for (let m = 0; m <= 1440; m += 10) {
+    const t = new Date(today.getTime() + m*60000);
+    const s = _sunPos(t, SO.lat, SO.lon);
+    if (s.elevation > 0) {
+      arcPts.push({...s, time: t});
+      if (!sunrise) sunrise = t;
+      if (s.elevation > maxEl) { maxEl = s.elevation; noonSun = {...s, time: t}; }
+    }
+    if (prevEl > 0 && s.elevation <= 0 && sunrise) sunset = t;
+    prevEl = s.elevation;
+  }
+  SO._noonSun = noonSun;
+  const fmt = t => t ? `${String(t.getHours()).padStart(2,'0')}:${String(t.getMinutes()).padStart(2,'0')}` : '–';
+  document.getElementById('so-el').textContent = sun.elevation > 0 ? sun.elevation.toFixed(1)+'°' : '–';
+  document.getElementById('so-az').textContent = sun.elevation > 0 ? sun.azimuth.toFixed(1)+'°' : '–';
+  document.getElementById('so-sunrise').textContent = fmt(sunrise);
+  document.getElementById('so-sunset').textContent  = fmt(sunset);
+  document.getElementById('so-noon-time').textContent = noonSun ? fmt(noonSun.time) : '–';
+  document.getElementById('so-noon-el').textContent   = noonSun ? noonSun.elevation.toFixed(1)+'° max' : '';
+  soDrawCompass(sun, arcPts);
+  soDrawChart(arcPts, now, arcPts.length ? Math.max(...arcPts.map(p=>p.elevation)) : 90);
+  soUpdateRecommendation();
+  document.getElementById('so-result').style.display = 'block';
+}
+
+function soDrawCompass(sun, arcPts) {
+  const canvas = document.getElementById('so-canvas'); if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const W=canvas.width, H=canvas.height, cx=W/2, cy=H/2, r=W/2-8;
+  const dark = !document.documentElement.classList.contains('light');
+  const cBg=dark?'#1e293b':'#f1f5f9', cBd=dark?'#334155':'#cbd5e1', cTx=dark?'#94a3b8':'#64748b';
+  ctx.clearRect(0,0,W,H);
+  ctx.beginPath(); ctx.arc(cx,cy,r,0,Math.PI*2); ctx.fillStyle=cBg; ctx.fill();
+  ctx.strokeStyle=cBd; ctx.lineWidth=2; ctx.stroke();
+  for (let i=0;i<72;i++) {
+    const a=(i*5-90)*Math.PI/180, len=i%18===0?14:i%9===0?9:5;
+    ctx.strokeStyle=cBd; ctx.lineWidth=i%18===0?2:1;
+    ctx.beginPath(); ctx.moveTo(cx+r*Math.cos(a),cy+r*Math.sin(a));
+    ctx.lineTo(cx+(r-len)*Math.cos(a),cy+(r-len)*Math.sin(a)); ctx.stroke();
+  }
+  ctx.font=`bold ${Math.round(W*0.062)}px sans-serif`; ctx.textAlign='center'; ctx.textBaseline='middle';
+  [['N',0],['O',90],['S',180],['W',270]].forEach(([l,d])=>{
+    const a=(d-90)*Math.PI/180;
+    ctx.fillStyle=l==='S'?'#f59e0b':cTx;
+    ctx.fillText(l,cx+(r-22)*Math.cos(a),cy+(r-22)*Math.sin(a));
+  });
+  const arcR = r*0.6;
+  if (arcPts.length>1) {
+    ctx.beginPath();
+    arcPts.forEach((p,i)=>{
+      const a=(p.azimuth-90)*Math.PI/180;
+      const x=cx+arcR*Math.cos(a), y=cy+arcR*Math.sin(a);
+      if(i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+    });
+    ctx.strokeStyle='rgba(251,191,36,0.45)'; ctx.lineWidth=4; ctx.stroke();
+    [[arcPts[0],'🌅'],[arcPts[arcPts.length-1],'🌇']].forEach(([p,emoji])=>{
+      const a=(p.azimuth-90)*Math.PI/180;
+      const x=cx+arcR*Math.cos(a), y=cy+arcR*Math.sin(a);
+      ctx.font='14px serif'; ctx.fillText(emoji,x,y);
+    });
+  }
+  if (sun.elevation>0) {
+    const a=(sun.azimuth-90)*Math.PI/180;
+    const sx=cx+arcR*Math.cos(a), sy=cy+arcR*Math.sin(a);
+    const g=ctx.createRadialGradient(sx,sy,0,sx,sy,20);
+    g.addColorStop(0,'rgba(251,191,36,0.5)'); g.addColorStop(1,'transparent');
+    ctx.beginPath(); ctx.arc(sx,sy,20,0,Math.PI*2); ctx.fillStyle=g; ctx.fill();
+    ctx.beginPath(); ctx.arc(sx,sy,10,0,Math.PI*2);
+    ctx.fillStyle='#fbbf24'; ctx.fill();
+    ctx.strokeStyle='#f59e0b'; ctx.lineWidth=2; ctx.stroke();
+    ctx.strokeStyle='rgba(251,191,36,0.25)'; ctx.lineWidth=1;
+    ctx.setLineDash([3,4]);
+    ctx.beginPath(); ctx.moveTo(cx,cy); ctx.lineTo(sx,sy); ctx.stroke();
+    ctx.setLineDash([]);
+  } else {
+    ctx.font=`${Math.round(W*0.14)}px serif`; ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.fillText('🌙',cx,cy);
+  }
+  ctx.beginPath(); ctx.arc(cx,cy,4,0,Math.PI*2);
+  ctx.fillStyle=dark?'#475569':'#94a3b8'; ctx.fill();
+}
+
+function soDrawChart(arcPts, now, maxEl) {
+  const canvas = document.getElementById('so-chart'); if (!canvas) return;
+  canvas.width = canvas.offsetWidth || 280;
+  const ctx=canvas.getContext('2d'), W=canvas.width, H=canvas.height;
+  const dark=!document.documentElement.classList.contains('light');
+  ctx.clearRect(0,0,W,H);
+  const sh=4, eh=22, th=eh-sh, bH=H-18;
+  ctx.strokeStyle=dark?'rgba(51,65,85,0.5)':'rgba(203,213,225,0.6)'; ctx.lineWidth=1;
+  for (let h=sh;h<=eh;h+=2) {
+    const x=((h-sh)/th)*W;
+    ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,bH); ctx.stroke();
+  }
+  ctx.font=`${Math.round(W*0.032)}px sans-serif`; ctx.fillStyle=dark?'#475569':'#94a3b8'; ctx.textAlign='center';
+  for (let h=sh;h<=eh;h+=2) ctx.fillText(h+'h',((h-sh)/th)*W,H-3);
+  if (arcPts.length>1 && maxEl>0) {
+    const grad=ctx.createLinearGradient(0,0,0,bH);
+    grad.addColorStop(0,'rgba(251,191,36,0.7)'); grad.addColorStop(1,'rgba(251,191,36,0.05)');
+    ctx.beginPath(); ctx.moveTo(0,bH);
+    arcPts.forEach(p=>{
+      const h=p.time.getHours()+p.time.getMinutes()/60;
+      if(h<sh||h>eh) return;
+      ctx.lineTo(((h-sh)/th)*W, bH-(p.elevation/maxEl)*bH*0.88);
+    });
+    ctx.lineTo(W,bH); ctx.closePath(); ctx.fillStyle=grad; ctx.fill();
+    ctx.beginPath(); let first=true;
+    arcPts.forEach(p=>{
+      const h=p.time.getHours()+p.time.getMinutes()/60;
+      if(h<sh||h>eh) return;
+      const x=((h-sh)/th)*W, y=bH-(p.elevation/maxEl)*bH*0.88;
+      if(first){ctx.moveTo(x,y);first=false;}else ctx.lineTo(x,y);
+    });
+    ctx.strokeStyle='#f59e0b'; ctx.lineWidth=2; ctx.stroke();
+  }
+  const nh=now.getHours()+now.getMinutes()/60;
+  if(nh>=sh&&nh<=eh){
+    const x=((nh-sh)/th)*W;
+    ctx.strokeStyle='#ef4444'; ctx.lineWidth=2; ctx.setLineDash([4,3]);
+    ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,bH); ctx.stroke();
+    ctx.setLineDash([]);
+  }
+}
+
+function soUpdateRecommendation() {
+  const ns = SO._noonSun; if (!ns) return;
+  const ziel = document.getElementById('so-ziel')?.value||'links';
+  let heading;
+  if (ziel==='links')  heading=(ns.azimuth-90+360)%360;
+  if (ziel==='rechts') heading=(ns.azimuth+90)%360;
+  if (ziel==='front')  heading=(ns.azimuth+180)%360;
+  if (ziel==='heck')   heading=ns.azimuth%360;
+  const dirs=['N','NNO','NO','ONO','O','OSO','SO','SSO','S','SSW','SW','WSW','W','WNW','NW','NNW'];
+  const dir=dirs[Math.round(heading/22.5)%16];
+  const el=document.getElementById('so-rec');
+  if(el) el.innerHTML=`Fahrzeug-Front nach <strong style="color:var(--accent);font-size:1.1rem">${Math.round(heading)}° (${dir})</strong>`;
 }
 
 // ══════════════════════════════════

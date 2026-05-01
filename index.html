@@ -269,50 +269,22 @@
   html.light .nav-item.active { background: rgba(22,163,74,0.08); }
 
   /* ── STARTSEITE ── */
-  .start-hero {
-    text-align: center;
-    padding: 20px 0 16px;
-  }
-  .start-hero-icon {
-    width: 56px; height: 56px;
-    background: linear-gradient(135deg, var(--accent), #16a34a);
-    border-radius: 16px;
-    display: flex; align-items: center; justify-content: center;
-    margin: 0 auto 10px;
-    box-shadow: 0 0 24px rgba(34,197,94,0.35);
-    font-size: 28px;
-  }
-  .start-hero-title {
-    font-size: 1.5rem;
-    font-weight: 700;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    color: var(--text);
-    margin-bottom: 4px;
-  }
-  .start-hero-title span { color: var(--accent); }
-  .start-hero-sub {
-    font-size: 0.72rem;
-    color: var(--muted);
-    letter-spacing: 1px;
-  }
   .start-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 10px;
-    margin-top: 4px;
   }
   .start-card {
     background: var(--panel);
     border: 1px solid var(--border);
     border-radius: 14px;
-    padding: 20px 12px 16px;
+    padding: 18px 12px 14px;
     cursor: pointer;
     transition: all 0.15s;
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 7px;
+    gap: 6px;
     text-align: center;
     border-top: 3px solid var(--border);
     position: relative;
@@ -320,9 +292,17 @@
   }
   .start-card:active { transform: scale(0.97); opacity: 0.85; }
   .start-card:hover { border-color: var(--accent); border-top-color: var(--accent); }
-  .start-card-icon { font-size: 2rem; line-height: 1; }
-  .start-card-name { font-size: 0.9rem; font-weight: 700; color: var(--text); letter-spacing: 0.5px; }
-  .start-card-desc { font-size: 0.68rem; color: var(--muted); line-height: 1.4; }
+  .start-card.is-fav { border-top-color: var(--accent); }
+  .start-card-icon { font-size: 1.9rem; line-height: 1; }
+  .start-card-name { font-size: 0.88rem; font-weight: 700; color: var(--text); letter-spacing: 0.5px; }
+  .start-card-desc { font-size: 0.66rem; color: var(--muted); line-height: 1.35; }
+  .start-fav-btn {
+    position: absolute; top: 5px; right: 7px;
+    background: none; border: none; padding: 2px 3px;
+    font-size: 0.88rem; line-height: 1; cursor: pointer;
+    color: rgba(245,158,11,0.4); transition: color 0.15s; z-index: 1;
+  }
+  .start-fav-btn:hover, .start-fav-btn.active { color: var(--accent); }
 
   /* ── GEMEINSAME KOMPONENTEN ── */
   .section-label {
@@ -1294,81 +1274,39 @@
 
   <!-- ════════════ STARTSEITE ════════════ -->
   <div class="wmp-section active" id="sec-start">
-    <div class="start-hero">
-      <div class="start-hero-icon">🚐</div>
-      <div class="start-hero-title">WOHNMOBIL <span>PRO</span></div>
-      <div class="start-hero-sub">11 WERKZEUGE · CAMPING · OFFLINE</div>
-    </div>
-    <!-- Service-Alarm Banner (nur wenn kritische Items) -->
-    <div id="sv-start-banner" style="display:none;padding:0 0 4px"></div>
 
-    <div class="start-grid">
-      <div class="start-card" onclick="showSection('nivellieren')">
-        <div class="start-card-icon">⊙</div>
-        <div class="start-card-name">Nivellieren</div>
-        <div class="start-card-desc">Wohnmobil mit Gyrosensor perfekt ausrichten</div>
+    <!-- Hero: Begrüßung + Fahrzeugname -->
+    <div style="padding:18px 0 14px;text-align:center;position:relative">
+      <div id="start-greeting" style="font-size:0.7rem;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:6px">Guten Tag</div>
+      <div style="display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:6px">
+        <div style="width:44px;height:44px;background:linear-gradient(135deg,var(--accent),#16a34a);border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:22px;box-shadow:0 0 20px rgba(34,197,94,0.3);flex-shrink:0">🚐</div>
+        <div style="text-align:left">
+          <div style="font-size:1.35rem;font-weight:700;letter-spacing:1.5px;color:var(--text);line-height:1.1">WOHNMOBIL <span style="color:var(--accent)">PRO</span></div>
+          <div id="start-fahrzeug" style="font-size:0.7rem;color:var(--muted);letter-spacing:0.5px;margin-top:1px">13 Werkzeuge · Camping · Offline</div>
+        </div>
       </div>
-      <div class="start-card" onclick="showSection('checkliste')">
-        <div class="start-card-icon">☑</div>
-        <div class="start-card-name">Checkliste</div>
-        <div class="start-card-desc">Abfahrt, Ankunft & Winterlager abhaken</div>
-      </div>
-      <div class="start-card" onclick="showSection('kosten')">
-        <div class="start-card-icon">€</div>
-        <div class="start-card-name">Kosten</div>
-        <div class="start-card-desc">Kraftstoff, Stellplatz & Ausgaben pro Urlaub</div>
-      </div>
-      <div class="start-card" onclick="showSection('wetter')">
-        <div class="start-card-icon">🌤</div>
-        <div class="start-card-name">Wetter</div>
-        <div class="start-card-desc">Aktuelles Wetter & 7-Tage-Prognose am Stellplatz</div>
-      </div>
-      <div class="start-card" onclick="showSection('karte');initKarte()">
-        <div class="start-card-icon">🗺</div>
-        <div class="start-card-name">Reisekarte</div>
-        <div class="start-card-desc">Alle Urlaube auf der Europakarte</div>
-      </div>
-      <div class="start-card" onclick="showSection('statistik')">
-        <div class="start-card-icon">📊</div>
-        <div class="start-card-name">Statistik</div>
-        <div class="start-card-desc">Alle Reisen im Überblick</div>
-      </div>
-      <div class="start-card" onclick="showSection('strom')">
-        <div class="start-card-icon">⚡</div>
-        <div class="start-card-name">Strom</div>
-        <div class="start-card-desc">Energiebilanz &amp; Solar planen</div>
-      </div>
-      <div class="start-card" onclick="showSection('notfall')">
-        <div class="start-card-icon">🆘</div>
-        <div class="start-card-name">Notfall</div>
-        <div class="start-card-desc">Notruf &amp; Pannenhilfe je Land</div>
-      </div>
-      <div class="start-card" onclick="showSection('tanken')">
-        <div class="start-card-icon">⛽</div>
-        <div class="start-card-name">Tankpreise</div>
-        <div class="start-card-desc">Günstigste Tankstellen in DE, FR &amp; ES</div>
-      </div>
-      <div class="start-card" onclick="showSection('fahrzeug')">
-        <div class="start-card-icon">🚐</div>
-        <div class="start-card-name">Mein Fahrzeug</div>
-        <div class="start-card-desc">Fahrzeugdaten, TÜV, Versicherung &amp; Wartungsprotokoll</div>
-      </div>
-      <div class="start-card" onclick="showSection('vorschriften')">
-        <div class="start-card-icon">📋</div>
-        <div class="start-card-name">Vorschriften</div>
-        <div class="start-card-desc">Promille, Vignetten &amp; Pflichtausrüstung je Land</div>
-      </div>
-      <div class="start-card" onclick="showSection('satfinder')">
-        <div class="start-card-icon">📡</div>
-        <div class="start-card-name">Sat-Finder</div>
-        <div class="start-card-desc">Azimut &amp; Elevation für Satellitenschüssel</div>
-      </div>
-      <div class="start-card" onclick="showSection('sonne')">
-        <div class="start-card-icon">🌞</div>
-        <div class="start-card-name">Sonnenausrichtung</div>
-        <div class="start-card-desc">Fahrzeug optimal für Schatten &amp; Solar ausrichten</div>
-      </div>
+      <div style="width:40px;height:2px;background:linear-gradient(90deg,transparent,var(--accent),transparent);border-radius:2px;margin:0 auto"></div>
     </div>
+
+    <!-- Service-Alarm Banner -->
+    <div id="sv-start-banner" style="display:none;padding:0 0 6px"></div>
+
+    <!-- Favoriten -->
+    <div id="start-fav-section" style="display:none;margin-bottom:14px">
+      <div style="font-size:0.65rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--accent);margin-bottom:8px">⭐ Meine Favoriten</div>
+      <div id="start-fav-grid" class="start-grid"></div>
+    </div>
+
+    <!-- Favoriten-Hinweis (nur ohne Favoriten) -->
+    <div id="start-fav-hint" style="display:flex;align-items:center;gap:8px;background:rgba(245,158,11,0.05);border:1px dashed rgba(245,158,11,0.22);border-radius:10px;padding:9px 13px;margin-bottom:14px">
+      <span style="font-size:1rem;flex-shrink:0">☆</span>
+      <div style="font-size:0.79rem;color:var(--muted);line-height:1.4"><strong style="color:var(--text)">Favoriten:</strong> Stern ☆ auf einer Kachel antippen → erscheint oben fixiert.</div>
+    </div>
+
+    <!-- Alle Werkzeuge -->
+    <div style="font-size:0.65rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:8px">Alle Werkzeuge</div>
+    <div id="start-all-grid" class="start-grid"></div>
+
   </div>
 
   <!-- ════════════ TAB: NIVELLIEREN ════════════ -->
@@ -4091,6 +4029,7 @@ function closeDisclaimer() {
   startSensor();
   restoreWetterCache();
   renderServiceStartBanner();
+  renderStart();
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('./sw.js').catch(() => {});
   }
@@ -4360,6 +4299,88 @@ function renderService() {
   }).join('');
 
   renderServiceStartBanner();
+}
+
+// ══════════════════════════════════
+// STARTSEITE – Begrüßung & Favoriten
+// ══════════════════════════════════
+const WMP_FAVS_KEY = 'wmp_favs';
+let wmpFavs = JSON.parse(localStorage.getItem(WMP_FAVS_KEY) || '[]');
+
+const START_TOOLS = [
+  { id:'nivellieren', icon:'⊙', name:'Nivellieren',      desc:'Wohnmobil mit Gyrosensor perfekt ausrichten',          action:"showSection('nivellieren')" },
+  { id:'checkliste',  icon:'☑', name:'Checkliste',       desc:'Abfahrt, Ankunft & Winterlager abhaken',               action:"showSection('checkliste')" },
+  { id:'kosten',      icon:'€', name:'Kosten',           desc:'Kraftstoff, Stellplatz & Ausgaben pro Urlaub',         action:"showSection('kosten')" },
+  { id:'wetter',      icon:'🌤', name:'Wetter',           desc:'Aktuelles Wetter & 7-Tage-Prognose am Stellplatz',    action:"showSection('wetter')" },
+  { id:'karte',       icon:'🗺', name:'Reisekarte',       desc:'Alle Urlaube auf der Europakarte',                    action:"showSection('karte');initKarte()" },
+  { id:'statistik',   icon:'📊', name:'Statistik',        desc:'Alle Reisen im Überblick',                            action:"showSection('statistik')" },
+  { id:'strom',       icon:'⚡', name:'Strom',            desc:'Energiebilanz & Solar planen',                        action:"showSection('strom')" },
+  { id:'notfall',     icon:'🆘', name:'Notfall',          desc:'Notruf & Pannenhilfe je Land',                        action:"showSection('notfall')" },
+  { id:'tanken',      icon:'⛽', name:'Tankpreise',       desc:'Günstigste Tankstellen in DE, FR & ES',               action:"showSection('tanken')" },
+  { id:'fahrzeug',    icon:'🚐', name:'Mein Fahrzeug',    desc:'Fahrzeugdaten, TÜV, Versicherung & Wartungsprotokoll', action:"showSection('fahrzeug')" },
+  { id:'vorschriften',icon:'📋', name:'Vorschriften',     desc:'Promille, Vignetten & Pflichtausrüstung je Land',     action:"showSection('vorschriften')" },
+  { id:'satfinder',   icon:'📡', name:'Sat-Finder',       desc:'Azimut & Elevation für Satellitenschüssel',           action:"showSection('satfinder')" },
+  { id:'sonne',       icon:'🌞', name:'Sonnenausrichtung',desc:'Fahrzeug optimal für Schatten & Solar ausrichten',    action:"showSection('sonne')" },
+];
+
+function toggleStartFav(id, e) {
+  e.stopPropagation();
+  const idx = wmpFavs.indexOf(id);
+  if (idx > -1) wmpFavs.splice(idx, 1); else wmpFavs.push(id);
+  localStorage.setItem(WMP_FAVS_KEY, JSON.stringify(wmpFavs));
+  renderStart();
+}
+
+function makeStartCard(tool) {
+  const isFav = wmpFavs.includes(tool.id);
+  return `<div class="start-card${isFav?' is-fav':''}" onclick="${tool.action}"
+    onmouseover="this.style.borderColor='var(--accent)';this.style.borderTopColor='var(--accent)'"
+    onmouseout="this.style.borderColor='${isFav?'var(--accent)':'var(--border)'}';this.style.borderTopColor='${isFav?'var(--accent)':'var(--border)'}'">
+    <button class="start-fav-btn${isFav?' active':''}" onclick="toggleStartFav('${tool.id}',event)" title="${isFav?'Favorit entfernen':'Als Favorit merken'}">${isFav?'⭐':'☆'}</button>
+    <div class="start-card-icon">${tool.icon}</div>
+    <div class="start-card-name">${tool.name}</div>
+    <div class="start-card-desc">${tool.desc}</div>
+  </div>`;
+}
+
+function renderStart() {
+  // Begrüßung
+  const h = new Date().getHours();
+  const greet = h < 11 ? '☀️ Guten Morgen' : h < 18 ? '🌤 Guten Tag' : '🌙 Guten Abend';
+  const gEl = document.getElementById('start-greeting');
+  if (gEl) gEl.textContent = greet;
+
+  // Fahrzeugname
+  const fzEl = document.getElementById('start-fahrzeug');
+  if (fzEl) {
+    try {
+      const fz = JSON.parse(localStorage.getItem('wmp_fahrzeug') || '{}');
+      const name = (fz.hersteller && fz.modell) ? `${fz.hersteller} ${fz.modell}` : fz.typ || null;
+      fzEl.textContent = name ? `🚐 ${name}` : '13 Werkzeuge · Camping · Offline';
+    } catch(e) { fzEl.textContent = '13 Werkzeuge · Camping · Offline'; }
+  }
+
+  // Favoriten-Grid
+  const favSection = document.getElementById('start-fav-section');
+  const favGrid    = document.getElementById('start-fav-grid');
+  const favHint    = document.getElementById('start-fav-hint');
+  if (favSection && favGrid && favHint) {
+    if (wmpFavs.length > 0) {
+      favSection.style.display = 'block';
+      favHint.style.display = 'none';
+      favGrid.innerHTML = wmpFavs.map(id => {
+        const t = START_TOOLS.find(x => x.id === id);
+        return t ? makeStartCard(t) : '';
+      }).join('');
+    } else {
+      favSection.style.display = 'none';
+      favHint.style.display = 'flex';
+    }
+  }
+
+  // Alle Werkzeuge
+  const allGrid = document.getElementById('start-all-grid');
+  if (allGrid) allGrid.innerHTML = START_TOOLS.map(t => makeStartCard(t)).join('');
 }
 
 function renderServiceStartBanner() {

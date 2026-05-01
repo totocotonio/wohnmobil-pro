@@ -1273,8 +1273,7 @@
     <button class="nav-item" id="nav-statistik" onclick="showSection('statistik');closeMenu()">📊 Statistik</button>
     <button class="nav-item" id="nav-strom" onclick="showSection('strom');closeMenu()">⚡ Strom</button>
     <button class="nav-item" id="nav-notfall" onclick="showSection('notfall');closeMenu()">🆘 Notfall</button>
-    <button class="nav-item" id="nav-fahrzeug" onclick="showSection('fahrzeug');closeMenu()">🚐 Fahrzeugdaten</button>
-    <button class="nav-item" id="nav-wartung" onclick="showSection('wartung');closeMenu()">🔧 Wartung</button>
+    <button class="nav-item" id="nav-fahrzeug" onclick="showSection('fahrzeug');closeMenu()">🚐 Mein Fahrzeug</button>
     <button class="nav-item" id="nav-vorschriften" onclick="showSection('vorschriften');closeMenu()">📋 Vorschriften</button>
     <div style="border-top:1px solid var(--border);margin:8px 0"></div>
     <button class="nav-item" id="nav-mehr" onclick="showSection('mehr');closeMenu()">⚙ Einstellungen</button>
@@ -1295,7 +1294,7 @@
     <div class="start-hero">
       <div class="start-hero-icon">🚐</div>
       <div class="start-hero-title">WOHNMOBIL <span>PRO</span></div>
-      <div class="start-hero-sub">11 WERKZEUGE · CAMPING · OFFLINE</div>
+      <div class="start-hero-sub">10 WERKZEUGE · CAMPING · OFFLINE</div>
     </div>
     <div class="start-grid">
       <div class="start-card" onclick="showSection('nivellieren')">
@@ -1340,13 +1339,8 @@
       </div>
       <div class="start-card" onclick="showSection('fahrzeug')">
         <div class="start-card-icon">🚐</div>
-        <div class="start-card-name">Fahrzeugdaten</div>
-        <div class="start-card-desc">FIN, TÜV, Versicherung &amp; Reifenmaß</div>
-      </div>
-      <div class="start-card" onclick="showSection('wartung')">
-        <div class="start-card-icon">🔧</div>
-        <div class="start-card-name">Wartung</div>
-        <div class="start-card-desc">Ölwechsel, Inspektion &amp; Reparaturen tracken</div>
+        <div class="start-card-name">Mein Fahrzeug</div>
+        <div class="start-card-desc">Fahrzeugdaten, TÜV, Versicherung &amp; Wartungsprotokoll</div>
       </div>
       <div class="start-card" onclick="showSection('vorschriften')">
         <div class="start-card-icon">📋</div>
@@ -1902,113 +1896,113 @@
   </div>
 
 
-  <!-- ════════════ FAHRZEUGDATEN ════════════ -->
+  <!-- ════════════ MEIN FAHRZEUG (Fahrzeugdaten + Wartung) ════════════ -->
   <div id="sec-fahrzeug" class="wmp-section">
-    <div style="text-align:center;padding:24px 0 18px;position:relative">
+    <div style="text-align:center;padding:24px 0 14px;position:relative">
       <div style="font-size:2.2rem;margin-bottom:6px">🚐</div>
-      <div style="font-size:1.55rem;font-weight:700;letter-spacing:0.06em;color:var(--text)">FAHRZEUG<span style="color:var(--accent)">DATEN</span></div>
-      <div style="font-size:0.72rem;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-top:4px">Offline gespeichert · Immer verfügbar</div>
+      <div style="font-size:1.55rem;font-weight:700;letter-spacing:0.06em;color:var(--text)">MEIN <span style="color:var(--accent)">FAHRZEUG</span></div>
+      <div style="font-size:0.72rem;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-top:4px">Fahrzeugdaten · Wartung · Offline</div>
       <div style="position:absolute;bottom:0;left:50%;transform:translateX(-50%);width:48px;height:2px;background:linear-gradient(90deg,transparent,var(--accent),transparent);border-radius:2px"></div>
     </div>
 
-    <div id="tuev-banner" style="margin-bottom:14px"></div>
-
-    <div class="section-label">Fahrzeuginfo</div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">
-      <div><label class="form-lbl">Fahrzeugtyp</label><input class="form-inp" id="fz-typ" placeholder="Kastenwagen, Alkoven…"></div>
-      <div><label class="form-lbl">Kennzeichen</label><input class="form-inp" id="fz-kz" placeholder="AB-CD 1234" style="text-transform:uppercase"></div>
-      <div><label class="form-lbl">Hersteller</label><input class="form-inp" id="fz-hersteller" placeholder="Fiat, Mercedes…"></div>
-      <div><label class="form-lbl">Modell</label><input class="form-inp" id="fz-modell" placeholder="Ducato, Sprinter…"></div>
-      <div style="grid-column:span 2"><label class="form-lbl">FIN / VIN (Fahrgestellnummer)</label><input class="form-inp" id="fz-fin" placeholder="WF0XXXXXXXXXXXX" style="font-family:monospace;letter-spacing:1px"></div>
-      <div><label class="form-lbl">Erstzulassung</label><input class="form-inp" type="date" id="fz-ez"></div>
-      <div><label class="form-lbl">Baujahr</label><input class="form-inp" type="number" id="fz-bj" placeholder="2020" min="1980" max="2040"></div>
+    <div class="seg-tabs" style="margin-top:14px">
+      <button class="seg-tab active" id="fz-tab-daten" onclick="switchFahrzeugTab('daten',this)">🚐 Fahrzeugdaten</button>
+      <button class="seg-tab" id="fz-tab-wartung" onclick="switchFahrzeugTab('wartung',this)">🔧 Wartung</button>
     </div>
 
-    <div class="section-label">Wichtige Termine</div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">
-      <div><label class="form-lbl">TÜV / HU fällig</label><input class="form-inp" type="month" id="fz-tuev" oninput="saveFahrzeugSilent();renderTuevBanner()"></div>
-      <div><label class="form-lbl">AU fällig</label><input class="form-inp" type="month" id="fz-au"></div>
-      <div><label class="form-lbl">Nächste Inspektion</label><input class="form-inp" type="date" id="fz-inspektion"></div>
-      <div><label class="form-lbl">Inspektion bei km</label><input class="form-inp" type="number" id="fz-insp-km" placeholder="15000"></div>
-    </div>
+    <!-- ── Panel: Fahrzeugdaten ── -->
+    <div id="fz-panel-daten" class="fz-panel">
+      <div id="tuev-banner" style="margin-bottom:14px;margin-top:14px"></div>
 
-    <div class="section-label">Versicherung</div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">
-      <div><label class="form-lbl">Versicherung</label><input class="form-inp" id="fz-vers-name" placeholder="ADAC, HUK…"></div>
-      <div><label class="form-lbl">Vers.-Nummer</label><input class="form-inp" id="fz-vers-nr" placeholder="123456789"></div>
-      <div style="grid-column:span 2">
-        <label class="form-lbl">Pannenhilfe / Notrufnummer</label>
-        <input class="form-inp" id="fz-vers-tel" placeholder="+49 800 1234567" oninput="saveFahrzeugSilent()">
-        <a id="fz-vers-tel-link" style="display:none;margin-top:6px;padding:9px 14px;background:rgba(34,197,94,0.1);border:1px solid rgba(34,197,94,0.3);border-radius:8px;color:var(--accent);text-decoration:none;font-weight:700;font-size:0.88rem;width:100%;text-align:center;box-sizing:border-box"></a>
+      <div class="section-label">Fahrzeuginfo</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">
+        <div><label class="form-lbl">Fahrzeugtyp</label><input class="form-inp" id="fz-typ" placeholder="Kastenwagen, Alkoven…"></div>
+        <div><label class="form-lbl">Kennzeichen</label><input class="form-inp" id="fz-kz" placeholder="AB-CD 1234" style="text-transform:uppercase"></div>
+        <div><label class="form-lbl">Hersteller</label><input class="form-inp" id="fz-hersteller" placeholder="Fiat, Mercedes…"></div>
+        <div><label class="form-lbl">Modell</label><input class="form-inp" id="fz-modell" placeholder="Ducato, Sprinter…"></div>
+        <div style="grid-column:span 2"><label class="form-lbl">FIN / VIN (Fahrgestellnummer)</label><input class="form-inp" id="fz-fin" placeholder="WF0XXXXXXXXXXXX" style="font-family:monospace;letter-spacing:1px"></div>
+        <div><label class="form-lbl">Erstzulassung</label><input class="form-inp" type="date" id="fz-ez"></div>
+        <div><label class="form-lbl">Baujahr</label><input class="form-inp" type="number" id="fz-bj" placeholder="2020" min="1980" max="2040"></div>
       </div>
-    </div>
 
-    <div class="section-label">Technisches</div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">
-      <div><label class="form-lbl">Reifengröße</label><input class="form-inp" id="fz-reifen" placeholder="225/75 R16C"></div>
-      <div><label class="form-lbl">Reifendruck (bar)</label><input class="form-inp" id="fz-druck" placeholder="4.0 / 4.5"></div>
-      <div><label class="form-lbl">Motoröl-Spezifikation</label><input class="form-inp" id="fz-oel" placeholder="5W-30, 10W-40…"></div>
-      <div><label class="form-lbl">Tankinhalt (L)</label><input class="form-inp" type="number" id="fz-tank" placeholder="90"></div>
-      <div><label class="form-lbl">Zul. Gesamtgewicht</label><input class="form-inp" id="fz-zgg" placeholder="3500 kg"></div>
-      <div><label class="form-lbl">Leergewicht</label><input class="form-inp" id="fz-leer" placeholder="2800 kg"></div>
-    </div>
-
-    <div class="section-label">Notizen</div>
-    <textarea class="form-inp" id="fz-notiz" placeholder="Wichtige Infos, Besonderheiten, Codes…" style="width:100%;min-height:80px;resize:vertical;margin-bottom:14px;box-sizing:border-box"></textarea>
-
-    <div class="section-label">Foto Fahrzeugschein / Zulassung</div>
-    <input type="file" id="fz-foto-inp" accept="image/*" style="display:none" onchange="onFzFotoSelect(this)">
-    <div id="fz-foto-preview" style="margin-bottom:14px">
-      <div id="fz-foto-placeholder" style="border:2px dashed var(--border);border-radius:10px;padding:28px;text-align:center;cursor:pointer;color:var(--muted)" onclick="document.getElementById('fz-foto-inp').click()">
-        <div style="font-size:2rem;margin-bottom:6px">📄</div>
-        <div style="font-size:0.82rem">Tippen zum Foto auswählen</div>
+      <div class="section-label">Wichtige Termine</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">
+        <div><label class="form-lbl">TÜV / HU fällig</label><input class="form-inp" type="month" id="fz-tuev" oninput="saveFahrzeugSilent();renderTuevBanner()"></div>
+        <div><label class="form-lbl">AU fällig</label><input class="form-inp" type="month" id="fz-au"></div>
+        <div><label class="form-lbl">Nächste Inspektion</label><input class="form-inp" type="date" id="fz-inspektion"></div>
+        <div><label class="form-lbl">Inspektion bei km</label><input class="form-inp" type="number" id="fz-insp-km" placeholder="15000"></div>
       </div>
-      <div id="fz-foto-img-wrap" style="display:none;position:relative">
-        <img id="fz-foto-img" src="" alt="Zulassung" onclick="showFzFotoFull()" style="width:100%;border-radius:10px;border:1px solid var(--border);cursor:zoom-in;display:block">
-        <button onclick="removeFzFoto()" style="position:absolute;top:8px;right:8px;background:rgba(0,0,0,0.6);border:none;color:#fff;border-radius:50%;width:28px;height:28px;font-size:0.9rem;cursor:pointer;display:flex;align-items:center;justify-content:center">✕</button>
-        <button onclick="document.getElementById('fz-foto-inp').click()" style="position:absolute;top:8px;right:44px;background:rgba(0,0,0,0.6);border:none;color:#fff;border-radius:50%;width:28px;height:28px;font-size:0.9rem;cursor:pointer;display:flex;align-items:center;justify-content:center">📷</button>
-      </div>
-    </div>
 
-    <button class="btn btn-primary" style="width:100%;padding:13px;font-size:1rem;font-weight:700" onclick="saveFahrzeug()">💾 Speichern</button>
-  </div>
-
-  <!-- ════════════ WARTUNGSPROTOKOLL ════════════ -->
-  <div id="sec-wartung" class="wmp-section">
-    <div style="text-align:center;padding:24px 0 18px;position:relative">
-      <div style="font-size:2.2rem;margin-bottom:6px">🔧</div>
-      <div style="font-size:1.55rem;font-weight:700;letter-spacing:0.06em;color:var(--text)">WARTUNGS<span style="color:var(--accent)">PROTOKOLL</span></div>
-      <div style="font-size:0.72rem;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-top:4px">Service · Reparaturen · Pflege</div>
-      <div style="position:absolute;bottom:0;left:50%;transform:translateX(-50%);width:48px;height:2px;background:linear-gradient(90deg,transparent,var(--accent),transparent);border-radius:2px"></div>
-    </div>
-
-    <div class="entry-form" style="margin-bottom:16px">
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
-        <div>
-          <label class="form-lbl">Kategorie</label>
-          <select class="form-inp" id="wt-kat">
-            <option value="oel">🛢 Ölwechsel</option>
-            <option value="inspektion">🔍 Inspektion</option>
-            <option value="reifen">🔄 Reifenwechsel</option>
-            <option value="bremsen">🛑 Bremsen</option>
-            <option value="filter">🌀 Filter</option>
-            <option value="zahnriemen">⚙️ Zahnriemen</option>
-            <option value="tuev">🔖 TÜV / HU</option>
-            <option value="reparatur">🔨 Reparatur</option>
-            <option value="sonstiges">📝 Sonstiges</option>
-          </select>
+      <div class="section-label">Versicherung</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">
+        <div><label class="form-lbl">Versicherung</label><input class="form-inp" id="fz-vers-name" placeholder="ADAC, HUK…"></div>
+        <div><label class="form-lbl">Vers.-Nummer</label><input class="form-inp" id="fz-vers-nr" placeholder="123456789"></div>
+        <div style="grid-column:span 2">
+          <label class="form-lbl">Pannenhilfe / Notrufnummer</label>
+          <input class="form-inp" id="fz-vers-tel" placeholder="+49 800 1234567" oninput="saveFahrzeugSilent()">
+          <a id="fz-vers-tel-link" style="display:none;margin-top:6px;padding:9px 14px;background:rgba(34,197,94,0.1);border:1px solid rgba(34,197,94,0.3);border-radius:8px;color:var(--accent);text-decoration:none;font-weight:700;font-size:0.88rem;width:100%;text-align:center;box-sizing:border-box"></a>
         </div>
-        <div><label class="form-lbl">Datum</label><input class="form-inp" type="date" id="wt-dat"></div>
-        <div><label class="form-lbl">km-Stand</label><input class="form-inp" type="number" id="wt-km" placeholder="45000"></div>
-        <div><label class="form-lbl">Kosten (€)</label><input class="form-inp" type="number" id="wt-kosten" placeholder="0.00" step="0.01"></div>
-        <div style="grid-column:span 2"><label class="form-lbl">Notiz / Werkstatt</label><input class="form-inp" id="wt-notiz" placeholder="z.B. Werkstatt Müller, nächster Wechsel bei 60.000 km"></div>
       </div>
-      <button class="btn btn-primary" style="width:100%;padding:12px;font-weight:700" onclick="addWartung()">+ Eintrag hinzufügen</button>
+
+      <div class="section-label">Technisches</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">
+        <div><label class="form-lbl">Reifengröße</label><input class="form-inp" id="fz-reifen" placeholder="225/75 R16C"></div>
+        <div><label class="form-lbl">Reifendruck (bar)</label><input class="form-inp" id="fz-druck" placeholder="4.0 / 4.5"></div>
+        <div><label class="form-lbl">Motoröl-Spezifikation</label><input class="form-inp" id="fz-oel" placeholder="5W-30, 10W-40…"></div>
+        <div><label class="form-lbl">Tankinhalt (L)</label><input class="form-inp" type="number" id="fz-tank" placeholder="90"></div>
+        <div><label class="form-lbl">Zul. Gesamtgewicht</label><input class="form-inp" id="fz-zgg" placeholder="3500 kg"></div>
+        <div><label class="form-lbl">Leergewicht</label><input class="form-inp" id="fz-leer" placeholder="2800 kg"></div>
+      </div>
+
+      <div class="section-label">Notizen</div>
+      <textarea class="form-inp" id="fz-notiz" placeholder="Wichtige Infos, Besonderheiten, Codes…" style="width:100%;min-height:80px;resize:vertical;margin-bottom:14px;box-sizing:border-box"></textarea>
+
+      <div class="section-label">Foto Fahrzeugschein / Zulassung</div>
+      <input type="file" id="fz-foto-inp" accept="image/*" style="display:none" onchange="onFzFotoSelect(this)">
+      <div id="fz-foto-preview" style="margin-bottom:14px">
+        <div id="fz-foto-placeholder" style="border:2px dashed var(--border);border-radius:10px;padding:28px;text-align:center;cursor:pointer;color:var(--muted)" onclick="document.getElementById('fz-foto-inp').click()">
+          <div style="font-size:2rem;margin-bottom:6px">📄</div>
+          <div style="font-size:0.82rem">Tippen zum Foto auswählen</div>
+        </div>
+        <div id="fz-foto-img-wrap" style="display:none;position:relative">
+          <img id="fz-foto-img" src="" alt="Zulassung" onclick="showFzFotoFull()" style="width:100%;border-radius:10px;border:1px solid var(--border);cursor:zoom-in;display:block">
+          <button onclick="removeFzFoto()" style="position:absolute;top:8px;right:8px;background:rgba(0,0,0,0.6);border:none;color:#fff;border-radius:50%;width:28px;height:28px;font-size:0.9rem;cursor:pointer;display:flex;align-items:center;justify-content:center">✕</button>
+          <button onclick="document.getElementById('fz-foto-inp').click()" style="position:absolute;top:8px;right:44px;background:rgba(0,0,0,0.6);border:none;color:#fff;border-radius:50%;width:28px;height:28px;font-size:0.9rem;cursor:pointer;display:flex;align-items:center;justify-content:center">📷</button>
+        </div>
+      </div>
+
+      <button class="btn btn-primary" style="width:100%;padding:13px;font-size:1rem;font-weight:700" onclick="saveFahrzeug()">💾 Speichern</button>
     </div>
 
-    <div id="wt-summary" style="display:none;margin-bottom:16px"></div>
-    <div class="section-label">Einträge</div>
-    <div id="wt-list"></div>
+    <!-- ── Panel: Wartung ── -->
+    <div id="fz-panel-wartung" class="fz-panel" style="display:none;padding-top:14px">
+      <div class="entry-form" style="margin-bottom:16px">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
+          <div>
+            <label class="form-lbl">Kategorie</label>
+            <select class="form-inp" id="wt-kat">
+              <option value="oel">🛢 Ölwechsel</option>
+              <option value="inspektion">🔍 Inspektion</option>
+              <option value="reifen">🔄 Reifenwechsel</option>
+              <option value="bremsen">🛑 Bremsen</option>
+              <option value="filter">🌀 Filter</option>
+              <option value="zahnriemen">⚙️ Zahnriemen</option>
+              <option value="tuev">🔖 TÜV / HU</option>
+              <option value="reparatur">🔨 Reparatur</option>
+              <option value="sonstiges">📝 Sonstiges</option>
+            </select>
+          </div>
+          <div><label class="form-lbl">Datum</label><input class="form-inp" type="date" id="wt-dat"></div>
+          <div><label class="form-lbl">km-Stand</label><input class="form-inp" type="number" id="wt-km" placeholder="45000"></div>
+          <div><label class="form-lbl">Kosten (€)</label><input class="form-inp" type="number" id="wt-kosten" placeholder="0.00" step="0.01"></div>
+          <div style="grid-column:span 2"><label class="form-lbl">Notiz / Werkstatt</label><input class="form-inp" id="wt-notiz" placeholder="z.B. Werkstatt Müller, nächster Wechsel bei 60.000 km"></div>
+        </div>
+        <button class="btn btn-primary" style="width:100%;padding:12px;font-weight:700" onclick="addWartung()">+ Eintrag hinzufügen</button>
+      </div>
+      <div id="wt-summary" style="display:none;margin-bottom:16px"></div>
+      <div class="section-label">Einträge</div>
+      <div id="wt-list"></div>
+    </div>
   </div>
 
   <!-- ════════════ LÄNDERVORSCHRIFTEN ════════════ -->
@@ -2096,8 +2090,7 @@ function showSection(name) {
   window.scrollTo(0, 0);
   if (name === 'statistik') renderStatistik();
   if (name === 'notfall') renderNotfall();
-  if (name === 'fahrzeug') { loadFahrzeug(); }
-  if (name === 'wartung') renderWartung();
+  if (name === 'fahrzeug') { loadFahrzeug(); renderWartung(); }
   if (name === 'vorschriften') renderVorschriften();
 }
 
@@ -3759,6 +3752,13 @@ const NOTFALL_DATA = [
 // FAHRZEUGDATEN
 // ══════════════════════════════════
 const FZ_FIELDS = ['typ','kz','hersteller','modell','fin','ez','bj','tuev','au','inspektion','insp-km','vers-name','vers-nr','vers-tel','reifen','druck','oel','tank','zgg','leer','notiz'];
+
+function switchFahrzeugTab(name, btn) {
+  document.querySelectorAll('#sec-fahrzeug .seg-tab').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.fz-panel').forEach(p => p.style.display = 'none');
+  btn.classList.add('active');
+  document.getElementById('fz-panel-' + name).style.display = 'block';
+}
 
 function loadFahrzeug() {
   const d = JSON.parse(localStorage.getItem('wmp_fahrzeug') || '{}');

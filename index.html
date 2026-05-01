@@ -1944,7 +1944,7 @@
       <div class="section-label">Wichtige Termine</div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">
         <div><label class="form-lbl">TÜV / HU fällig</label><input class="form-inp" type="month" id="fz-tuev" oninput="saveFahrzeugSilent();renderTuevBanner()"></div>
-        <div><label class="form-lbl">AU fällig</label><input class="form-inp" type="month" id="fz-au"></div>
+        <div><label class="form-lbl">Gasuntersuchung fällig</label><input class="form-inp" type="month" id="fz-gas-pruef"></div>
         <div><label class="form-lbl">Nächste Inspektion</label><input class="form-inp" type="date" id="fz-inspektion"></div>
         <div><label class="form-lbl">Inspektion bei km</label><input class="form-inp" type="number" id="fz-insp-km" placeholder="15000"></div>
       </div>
@@ -3953,7 +3953,7 @@ const NOTFALL_DATA = [
 // ══════════════════════════════════
 // FAHRZEUGDATEN
 // ══════════════════════════════════
-const FZ_FIELDS = ['typ','kz','hersteller','modell','fin','ez','bj','tuev','au','inspektion','insp-km','vers-name','vers-nr','vers-tel','reifen','druck','oel','tank','zgg','leer','notiz'];
+const FZ_FIELDS = ['typ','kz','hersteller','modell','fin','ez','bj','tuev','gas-pruef','inspektion','insp-km','vers-name','vers-nr','vers-tel','reifen','druck','oel','tank','zgg','leer','notiz'];
 
 function switchFahrzeugTab(name, btn) {
   document.querySelectorAll('#sec-fahrzeug .seg-tab').forEach(b => b.classList.remove('active'));
@@ -4102,12 +4102,12 @@ function renderService() {
     items.push({ label: 'TÜV / HU', typ: 'date', days });
   }
 
-  // AU
-  if (fz.au) {
-    const [y,m] = fz.au.split('-').map(Number);
+  // Gasuntersuchung
+  if (fz['gas-pruef']) {
+    const [y,m] = fz['gas-pruef'].split('-').map(Number);
     const d = new Date(y, m, 0);
     const days = Math.round((d - today) / 86400000);
-    items.push({ label: 'AU (Abgasuntersuchung)', typ: 'date', days });
+    items.push({ label: 'Gasuntersuchung (DVGW)', typ: 'date', days });
   }
 
   // Inspektion nach Datum

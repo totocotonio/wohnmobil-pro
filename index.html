@@ -4878,7 +4878,7 @@ function filterVorschriften(q) {
 // ══════════════════════════════════
 // SONNENAUSRICHTUNG
 // ══════════════════════════════════
-const SO = { lat: null, lon: null, _timer: null, _noonSun: null, _arcPts: null, _sun: null, _heading: 0, _compassActive: false, _compassHandler: null };
+const SO = { lat: null, lon: null, _timer: null, _noonSun: null, _arcPts: null, _sun: null, _heading: 0, _compassActive: false, _compassHandler: null, _recHeading: null };
 
 function soGetGPS() {
   const status = document.getElementById('so-gps-status');
@@ -5037,11 +5037,19 @@ function soDrawCompass(sun, arcPts) {
     ctx.beginPath(); ctx.moveTo(cx+r*Math.cos(a),cy+r*Math.sin(a));
     ctx.lineTo(cx+(r-len)*Math.cos(a),cy+(r-len)*Math.sin(a)); ctx.stroke();
   }
+  // Haupthimmelsrichtungen (N/O/S/W)
   ctx.font=`bold ${Math.round(W*0.062)}px sans-serif`; ctx.textAlign='center'; ctx.textBaseline='middle';
   [['N',0],['O',90],['S',180],['W',270]].forEach(([l,d])=>{
     const a=(d-90)*Math.PI/180;
     ctx.fillStyle=l==='N'?(SO._compassActive?'#ef4444':cTx):l==='S'?'#f59e0b':cTx;
     ctx.fillText(l,cx+(r-22)*Math.cos(a),cy+(r-22)*Math.sin(a));
+  });
+  // Interkardinalrichtungen (NO/SO/SW/NW) – kleiner
+  ctx.font=`${Math.round(W*0.038)}px sans-serif`;
+  [['NO',45],['SO',135],['SW',225],['NW',315]].forEach(([l,d])=>{
+    const a=(d-90)*Math.PI/180;
+    ctx.fillStyle=cTx;
+    ctx.fillText(l,cx+(r-20)*Math.cos(a),cy+(r-20)*Math.sin(a));
   });
   const arcR = r*0.6;
   if (arcPts.length>1) {
@@ -5076,6 +5084,33 @@ function soDrawCompass(sun, arcPts) {
     ctx.fillText('🌙',cx,cy);
   }
   ctx.restore();
+
+  // Empfohlener Fahrzeugkurs – grüner Pfeil, mit Rotation mitdrehend
+  if (SO._recHeading !== null) {
+    const recAngle = (SO._recHeading - SO._heading - 90) * Math.PI / 180;
+    const rr = r * 0.82;
+    const rx = cx + rr * Math.cos(recAngle);
+    const ry = cy + rr * Math.sin(recAngle);
+    ctx.save();
+    ctx.translate(cx, cy);
+    ctx.rotate(recAngle + Math.PI/2);
+    // Pfeil
+    ctx.beginPath();
+    ctx.moveTo(0, -(rr-8));
+    ctx.lineTo(7, -(rr-22));
+    ctx.lineTo(3, -(rr-22));
+    ctx.lineTo(3, -(r*0.18));
+    ctx.lineTo(-3, -(r*0.18));
+    ctx.lineTo(-3, -(rr-22));
+    ctx.lineTo(-7, -(rr-22));
+    ctx.closePath();
+    ctx.fillStyle = 'rgba(34,197,94,0.85)';
+    ctx.shadowColor = 'rgba(0,0,0,0.3)'; ctx.shadowBlur = 4;
+    ctx.fill();
+    ctx.shadowBlur = 0;
+    ctx.strokeStyle = 'rgba(255,255,255,0.4)'; ctx.lineWidth = 0.8; ctx.stroke();
+    ctx.restore();
+  }
 
   // Kompassnadel – zeigt immer nach oben (= Geräterichtung), außerhalb der Rotation
   if (SO._compassActive) {
@@ -5162,10 +5197,12 @@ function soUpdateRecommendation() {
   if (ziel==='rechts') heading=(ns.azimuth+90)%360;
   if (ziel==='front')  heading=(ns.azimuth+180)%360;
   if (ziel==='heck')   heading=ns.azimuth%360;
+  SO._recHeading = heading;
   const dirs=['N','NNO','NO','ONO','O','OSO','SO','SSO','S','SSW','SW','WSW','W','WNW','NW','NNW'];
   const dir=dirs[Math.round(heading/22.5)%16];
   const el=document.getElementById('so-rec');
   if(el) el.innerHTML=`Fahrzeug-Front nach <strong style="color:var(--accent);font-size:1.1rem">${Math.round(heading)}° (${dir})</strong>`;
+  soRedrawCompass();
 }
 
 // ══════════════════════════════════

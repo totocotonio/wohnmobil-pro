@@ -124,15 +124,20 @@
   .app-header {
     height: var(--header-h);
     padding: 0 12px;
-    background: var(--panel);
-    border-bottom: 1px solid var(--border);
+    background: rgba(17,22,32,0.75);
+    border-bottom: 1px solid rgba(255,255,255,0.06);
     display: flex;
     align-items: center;
     gap: 8px;
     position: sticky;
     top: 0;
     z-index: 100;
-    backdrop-filter: blur(10px);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+  }
+  html.light .app-header {
+    background: rgba(240,244,248,0.8);
+    border-bottom: 1px solid rgba(0,0,0,0.07);
   }
   .header-menu-btn {
     background: none;
@@ -274,37 +279,60 @@
   .start-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 10px;
+    gap: 12px;
   }
   .start-card {
-    background: var(--panel);
+    background: linear-gradient(145deg, var(--panel) 0%, var(--panel2) 100%);
     border: 1px solid var(--border);
-    border-radius: 14px;
-    padding: 18px 12px 14px;
+    border-radius: 20px;
+    padding: 20px 12px 16px;
     cursor: pointer;
-    transition: all 0.15s;
+    transition: transform 0.2s cubic-bezier(.34,1.56,.64,1), box-shadow 0.2s, border-color 0.2s;
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 6px;
+    gap: 8px;
     text-align: center;
-    border-top: 3px solid var(--border);
     position: relative;
     overflow: hidden;
   }
-  .start-card:active { transform: scale(0.97); opacity: 0.85; }
-  .start-card:hover { border-color: var(--accent); border-top-color: var(--accent); }
-  .start-card.is-fav { border-top-color: var(--accent); }
-  .start-card-icon { font-size: 1.9rem; line-height: 1; }
-  .start-card-name { font-size: 0.88rem; font-weight: 700; color: var(--text); letter-spacing: 0.5px; }
-  .start-card-desc { font-size: 0.66rem; color: var(--muted); line-height: 1.35; }
+  .start-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 20px;
+    background: linear-gradient(135deg, var(--accent-dim) 0%, transparent 65%);
+    opacity: 0;
+    transition: opacity 0.25s;
+    pointer-events: none;
+  }
+  .start-card:hover { transform: translateY(-3px) scale(1.02); border-color: var(--accent); box-shadow: 0 12px 40px rgba(0,0,0,0.25), 0 0 0 1px var(--accent-dim), 0 0 24px var(--accent-dim); }
+  .start-card:hover::before { opacity: 1; }
+  .start-card:active { transform: scale(0.95); box-shadow: none; }
+  .start-card.is-fav { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent-dim), 0 4px 20px rgba(0,0,0,0.15); }
+  .start-card.is-fav::before { opacity: 1; }
+  .start-card-icon-wrap {
+    width: 52px; height: 52px;
+    background: var(--accent-dim);
+    border-radius: 16px;
+    display: flex; align-items: center; justify-content: center;
+    transition: box-shadow 0.2s, transform 0.2s;
+    position: relative; z-index: 1;
+    flex-shrink: 0;
+  }
+  .start-card:hover .start-card-icon-wrap { box-shadow: 0 0 20px var(--accent-dim); transform: scale(1.08); }
+  .start-card.is-fav .start-card-icon-wrap { box-shadow: 0 0 16px var(--accent-dim); }
+  .start-card-icon { font-size: 1.7rem; line-height: 1; position: relative; z-index: 1; }
+  .start-card-name { font-size: 0.9rem; font-weight: 700; color: var(--text); letter-spacing: 0.5px; position: relative; z-index: 1; }
+  .start-card-desc { font-size: 0.67rem; color: var(--muted); line-height: 1.35; position: relative; z-index: 1; }
   .start-fav-btn {
-    position: absolute; top: 5px; right: 7px;
+    position: absolute; top: 7px; right: 9px;
     background: none; border: none; padding: 2px 3px;
     font-size: 0.88rem; line-height: 1; cursor: pointer;
-    color: rgba(245,158,11,0.4); transition: color 0.15s; z-index: 1;
+    color: rgba(245,158,11,0.35); transition: color 0.15s, transform 0.15s; z-index: 2;
   }
-  .start-fav-btn:hover, .start-fav-btn.active { color: var(--accent); }
+  .start-fav-btn:hover { transform: scale(1.2); }
+  .start-fav-btn.active { color: #f59e0b; }
 
   /* ── GEMEINSAME KOMPONENTEN ── */
   .section-label {
@@ -1278,26 +1306,29 @@
   <div class="wmp-section active" id="sec-start">
 
     <!-- Hero: Begrüßung + Fahrzeugname -->
-    <div style="padding:18px 0 14px;text-align:center;position:relative">
-      <div id="start-greeting" style="font-size:0.7rem;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:6px">Guten Tag</div>
-      <div style="display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:6px">
-        <div style="width:44px;height:44px;background:linear-gradient(135deg,var(--accent),#16a34a);border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:22px;box-shadow:0 0 20px rgba(34,197,94,0.3);flex-shrink:0">🚐</div>
-        <div style="text-align:left">
-          <div style="font-size:1.35rem;font-weight:700;letter-spacing:1.5px;color:var(--text);line-height:1.1">WOHNMOBIL <span style="color:var(--accent)">PRO</span></div>
-          <div id="start-fahrzeug" style="font-size:0.7rem;color:var(--muted);letter-spacing:0.5px;margin-top:1px">13 Werkzeuge · Camping · Offline</div>
-        </div>
+    <div style="margin:-16px -16px 16px;padding:28px 20px 24px;text-align:center;position:relative;background:linear-gradient(160deg,var(--panel2) 0%,var(--bg) 100%);border-bottom:1px solid var(--border);overflow:hidden">
+      <!-- Hintergrund-Glow -->
+      <div style="position:absolute;top:-30px;left:50%;transform:translateX(-50%);width:200px;height:200px;background:radial-gradient(circle,var(--accent-dim) 0%,transparent 70%);pointer-events:none"></div>
+      <div id="start-greeting" style="font-size:0.65rem;color:var(--muted);letter-spacing:3px;text-transform:uppercase;margin-bottom:14px;position:relative">Guten Tag</div>
+      <div style="position:relative;display:inline-block;margin-bottom:12px">
+        <div style="width:64px;height:64px;background:linear-gradient(135deg,var(--accent),var(--accent2,#38bdf8));border-radius:20px;display:flex;align-items:center;justify-content:center;font-size:30px;box-shadow:0 0 32px var(--accent-dim),0 8px 24px rgba(0,0,0,0.3);margin:0 auto">🚐</div>
       </div>
-      <div style="width:40px;height:2px;background:linear-gradient(90deg,transparent,var(--accent),transparent);border-radius:2px;margin:0 auto"></div>
+      <div style="font-size:1.6rem;font-weight:800;letter-spacing:2px;color:var(--text);line-height:1;margin-bottom:4px;position:relative">WOHNMOBIL <span style="color:var(--accent)">PRO</span></div>
+      <div id="start-fahrzeug" style="font-size:0.72rem;color:var(--muted);letter-spacing:0.5px;position:relative">13 Werkzeuge · Camping · Offline</div>
     </div>
 
     <!-- Service-Alarm Banner -->
     <div id="sv-start-banner" style="display:none;padding:0 0 6px"></div>
 
     <!-- Willkommen-Box -->
-    <div style="background:rgba(245,158,11,0.07);border:1px solid rgba(245,158,11,0.2);border-radius:12px;padding:12px 16px;margin-bottom:14px;font-size:0.84rem;line-height:1.6;color:var(--text)">
-      Willkommen bei <strong>Wohnmobil Pro</strong> – deinem digitalen Begleiter für Camping &amp; Reise.<br>
-      <span style="color:var(--muted);font-size:0.8rem">Nivellieren · Wetter · Checkliste · Kosten · Solar · Sat-Finder &amp; mehr</span>
-      <div style="margin-top:6px;font-size:0.8rem;color:var(--muted)">⭐ Stern auf einer Kachel antippen zum Fixieren &nbsp;·&nbsp; ☰ Alle Werkzeuge unten</div>
+    <div style="background:linear-gradient(135deg,rgba(245,158,11,0.08),rgba(245,158,11,0.03));border:1px solid rgba(245,158,11,0.18);border-radius:16px;padding:14px 16px;margin-bottom:16px;position:relative;overflow:hidden">
+      <div style="position:absolute;top:0;right:0;width:80px;height:80px;background:radial-gradient(circle,rgba(245,158,11,0.08),transparent);pointer-events:none"></div>
+      <div style="font-size:0.72rem;font-weight:700;color:#f59e0b;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:5px">Dein Reisebegleiter</div>
+      <div style="font-size:0.83rem;line-height:1.55;color:var(--text)">Nivellieren · Wetter · Checkliste · Kosten · Solar · Sat-Finder &amp; mehr</div>
+      <div style="margin-top:8px;display:flex;gap:12px;font-size:0.75rem;color:var(--muted)">
+        <span>⭐ Kachel antippen = Favorit</span>
+        <span>☰ Alle Werkzeuge unten</span>
+      </div>
     </div>
 
     <!-- Schnellzugriff (4 Tools / Favoriten) -->
@@ -1306,10 +1337,10 @@
 
     <!-- Alle Werkzeuge (einklappbar) -->
     <button id="start-all-btn" onclick="toggleAllTools()"
-      style="width:100%;display:flex;align-items:center;justify-content:space-between;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:13px 16px;font-family:inherit;font-size:0.9rem;font-weight:600;color:var(--text);cursor:pointer;margin-bottom:8px;transition:border-color 0.15s"
-      onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='var(--border)'">
+      style="width:100%;display:flex;align-items:center;justify-content:space-between;background:linear-gradient(135deg,var(--panel),var(--panel2));border:1px solid var(--border);border-radius:16px;padding:14px 18px;font-family:inherit;font-size:0.9rem;font-weight:700;color:var(--text);cursor:pointer;margin-bottom:10px;transition:all 0.2s;letter-spacing:0.5px"
+      onmouseover="this.style.borderColor='var(--accent)';this.style.boxShadow='0 4px 20px rgba(0,0,0,0.15)'" onmouseout="this.style.borderColor='var(--border)';this.style.boxShadow='none'">
       <span>☰ Alle Werkzeuge</span>
-      <span id="start-all-arrow" style="font-size:0.8rem;color:var(--muted);transition:transform 0.2s">▾</span>
+      <span id="start-all-arrow" style="font-size:0.85rem;color:var(--accent);transition:transform 0.3s;font-weight:700">▾</span>
     </button>
     <div id="start-all-grid" class="start-grid" style="display:none"></div>
 
@@ -1662,7 +1693,7 @@
         </svg>
         <div>
           <strong>Wohnmobil Pro</strong>
-          <div style="font-size:0.8rem;color:var(--accent);margin-top:2px">v1.1.67</div>
+          <div style="font-size:0.8rem;color:var(--accent);margin-top:2px">v1.1.68</div>
           <div style="font-size:0.72rem;color:var(--muted);margin-top:2px">© 2026 Torsten Michaely</div>
         </div>
       </div>
@@ -2385,7 +2416,7 @@
       </div>
       <div style="font-size:0.7rem;color:var(--muted);text-align:center">
         © <span id="footer-year">2026</span> Torsten Michaely · Alle Rechte vorbehalten &nbsp;·&nbsp;
-        <span id="footer-version" style="color:var(--accent);font-size:0.7rem">v1.1.67</span>
+        <span id="footer-version" style="color:var(--accent);font-size:0.7rem">v1.1.68</span>
         &nbsp;|&nbsp; <a href="./impressum.html" style="color:var(--muted);text-decoration:none">Impressum</a>
         &nbsp;|&nbsp; <a href="./datenschutz.html" style="color:var(--muted);text-decoration:none">Datenschutz</a>
         &nbsp;|&nbsp; <a href="#" onclick="showDisclaimer();return false;" style="color:var(--muted);text-decoration:none">Haftungsausschluss</a>
@@ -4411,11 +4442,11 @@ function toggleStartFav(id, e) {
 
 function makeStartCard(tool) {
   const isFav = wmpFavs.includes(tool.id);
-  return `<div class="start-card${isFav?' is-fav':''}" onclick="${tool.action}"
-    onmouseover="this.style.borderColor='var(--accent)';this.style.borderTopColor='var(--accent)'"
-    onmouseout="this.style.borderColor='${isFav?'var(--accent)':'var(--border)'}';this.style.borderTopColor='${isFav?'var(--accent)':'var(--border)'}'">
+  return `<div class="start-card${isFav?' is-fav':''}" onclick="${tool.action}">
     <button class="start-fav-btn${isFav?' active':''}" onclick="toggleStartFav('${tool.id}',event)" title="${isFav?'Favorit entfernen':'Als Favorit merken'}">${isFav?'⭐':'☆'}</button>
-    <div class="start-card-icon">${tool.icon}</div>
+    <div class="start-card-icon-wrap">
+      <div class="start-card-icon">${tool.icon}</div>
+    </div>
     <div class="start-card-name">${tool.name}</div>
     <div class="start-card-desc">${tool.desc}</div>
   </div>`;

@@ -1273,6 +1273,7 @@
     <button class="nav-item" id="nav-statistik" onclick="showSection('statistik');closeMenu()">📊 Statistik</button>
     <button class="nav-item" id="nav-strom" onclick="showSection('strom');closeMenu()">⚡ Strom</button>
     <button class="nav-item" id="nav-notfall" onclick="showSection('notfall');closeMenu()">🆘 Notfall</button>
+    <button class="nav-item" id="nav-tanken" onclick="showSection('tanken');closeMenu()">⛽ Tankpreise</button>
     <button class="nav-item" id="nav-fahrzeug" onclick="showSection('fahrzeug');closeMenu()">🚐 Mein Fahrzeug</button>
     <button class="nav-item" id="nav-vorschriften" onclick="showSection('vorschriften');closeMenu()">📋 Vorschriften</button>
     <div style="border-top:1px solid var(--border);margin:8px 0"></div>
@@ -1294,7 +1295,7 @@
     <div class="start-hero">
       <div class="start-hero-icon">🚐</div>
       <div class="start-hero-title">WOHNMOBIL <span>PRO</span></div>
-      <div class="start-hero-sub">10 WERKZEUGE · CAMPING · OFFLINE</div>
+      <div class="start-hero-sub">11 WERKZEUGE · CAMPING · OFFLINE</div>
     </div>
     <div class="start-grid">
       <div class="start-card" onclick="showSection('nivellieren')">
@@ -1336,6 +1337,11 @@
         <div class="start-card-icon">🆘</div>
         <div class="start-card-name">Notfall</div>
         <div class="start-card-desc">Notruf &amp; Pannenhilfe je Land</div>
+      </div>
+      <div class="start-card" onclick="showSection('tanken')">
+        <div class="start-card-icon">⛽</div>
+        <div class="start-card-name">Tankpreise</div>
+        <div class="start-card-desc">Günstigste Tankstellen in DE, FR &amp; ES</div>
       </div>
       <div class="start-card" onclick="showSection('fahrzeug')">
         <div class="start-card-icon">🚐</div>
@@ -2005,6 +2011,56 @@
     </div>
   </div>
 
+  <!-- ════════════ TANKPREISE ════════════ -->
+  <div id="sec-tanken" class="wmp-section">
+    <div style="text-align:center;padding:24px 0 18px;position:relative">
+      <div style="font-size:2.2rem;margin-bottom:6px">⛽</div>
+      <div style="font-size:1.55rem;font-weight:700;letter-spacing:0.06em;color:var(--text)">TANK<span style="color:var(--accent)">PREISE</span></div>
+      <div style="font-size:0.72rem;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-top:4px">Günstigste Tankstellen in der Nähe</div>
+      <div style="position:absolute;bottom:0;left:50%;transform:translateX(-50%);width:48px;height:2px;background:linear-gradient(90deg,transparent,var(--accent),transparent);border-radius:2px"></div>
+    </div>
+
+    <!-- Standort -->
+    <div style="display:flex;gap:8px;align-items:stretch;margin-bottom:14px">
+      <div style="flex:1;background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:10px 14px;font-size:0.82rem;color:var(--muted);display:flex;align-items:center" id="tp-loc-txt">📍 Kein Standort ermittelt</div>
+      <button class="btn btn-primary" style="flex-shrink:0;padding:10px 16px;font-weight:700" id="tp-loc-btn" onclick="tpGetLocation()">Standort</button>
+    </div>
+
+    <!-- Land-Tabs -->
+    <div class="seg-tabs" style="margin-bottom:14px">
+      <button class="seg-tab active" id="tp-tab-de" onclick="switchTpLand('de',this)">🇩🇪 Deutschland</button>
+      <button class="seg-tab" id="tp-tab-fr" onclick="switchTpLand('fr',this)">🇫🇷 Frankreich</button>
+      <button class="seg-tab" id="tp-tab-es" onclick="switchTpLand('es',this)">🇪🇸 Spanien</button>
+    </div>
+
+    <!-- Filter -->
+    <div style="display:grid;grid-template-columns:1fr 1fr auto;gap:8px;align-items:end;margin-bottom:14px">
+      <div>
+        <label class="form-lbl">Kraftstoff</label>
+        <select class="form-inp" id="tp-kraftstoff">
+          <option value="diesel">🛢 Diesel</option>
+          <option value="e5">🟢 Super E5</option>
+          <option value="e10">🟡 Super E10</option>
+        </select>
+      </div>
+      <div>
+        <label class="form-lbl">Umkreis</label>
+        <select class="form-inp" id="tp-radius">
+          <option value="5">5 km</option>
+          <option value="10">10 km</option>
+          <option value="20">20 km</option>
+        </select>
+      </div>
+      <button class="btn btn-primary" style="padding:0 16px;height:42px;font-size:1.1rem" onclick="tpSearch()">🔍</button>
+    </div>
+
+    <!-- DE Key Notice -->
+    <div id="tp-de-notice" style="display:none;margin-bottom:14px"></div>
+
+    <!-- Ergebnisse -->
+    <div id="tp-results"></div>
+  </div>
+
   <!-- ════════════ LÄNDERVORSCHRIFTEN ════════════ -->
   <div id="sec-vorschriften" class="wmp-section">
     <div style="text-align:center;padding:24px 0 18px;position:relative">
@@ -2091,6 +2147,7 @@ function showSection(name) {
   if (name === 'statistik') renderStatistik();
   if (name === 'notfall') renderNotfall();
   if (name === 'fahrzeug') { loadFahrzeug(); renderWartung(); }
+  if (name === 'tanken') tpInit();
   if (name === 'vorschriften') renderVorschriften();
 }
 
@@ -4095,6 +4152,205 @@ function filterVorschriften(q) {
       </div>
     </div>`;
   }).join('');
+}
+
+// ══════════════════════════════════
+// TANKPREISE
+// ══════════════════════════════════
+const TP = { lat: null, lng: null, land: 'de' };
+
+function tpInit() {
+  const key = localStorage.getItem('wmp_tk_key');
+  if (TP.land === 'de') tpShowDeNotice(key);
+}
+
+function switchTpLand(land, btn) {
+  document.querySelectorAll('#sec-tanken .seg-tab').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  TP.land = land;
+  document.getElementById('tp-de-notice').style.display = land === 'de' ? 'block' : 'none';
+  if (land === 'de') tpShowDeNotice(localStorage.getItem('wmp_tk_key'));
+  document.getElementById('tp-results').innerHTML = '';
+}
+
+function tpShowDeNotice(key) {
+  const el = document.getElementById('tp-de-notice');
+  if (!el) return;
+  el.style.display = 'block';
+  if (key) {
+    el.innerHTML = `<div style="background:rgba(34,197,94,0.08);border:1px solid rgba(34,197,94,0.25);border-radius:10px;padding:10px 14px;display:flex;align-items:center;justify-content:space-between;gap:10px">
+      <span style="font-size:0.8rem;color:var(--muted)">✅ Tankerkönig API-Key gespeichert</span>
+      <button onclick="tpRemoveTKKey()" style="background:none;border:none;color:var(--danger);cursor:pointer;font-size:0.78rem;font-weight:700">Entfernen</button>
+    </div>`;
+  } else {
+    el.innerHTML = `<div style="background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.3);border-radius:10px;padding:14px">
+      <div style="font-weight:700;color:var(--text);margin-bottom:6px;font-size:0.9rem">⚠️ Tankerkönig API-Key benötigt</div>
+      <div style="font-size:0.75rem;color:var(--muted);margin-bottom:10px;line-height:1.5">Kostenlos registrieren auf <strong style="color:var(--text)">creativecommons.tankerkoenig.de</strong> → API-Key kopieren → hier einfügen.</div>
+      <div style="display:flex;gap:8px">
+        <input class="form-inp" id="tp-tk-inp" placeholder="API-Key einfügen…" style="flex:1">
+        <button class="btn btn-primary" style="flex-shrink:0;padding:0 14px" onclick="tpSaveTKKey()">Speichern</button>
+      </div>
+    </div>`;
+  }
+}
+
+function tpSaveTKKey() {
+  const val = document.getElementById('tp-tk-inp')?.value?.trim();
+  if (!val) return;
+  localStorage.setItem('wmp_tk_key', val);
+  tpShowDeNotice(val);
+  toast('API-Key gespeichert');
+}
+
+function tpRemoveTKKey() {
+  localStorage.removeItem('wmp_tk_key');
+  tpShowDeNotice(null);
+}
+
+async function tpGetLocation() {
+  const btn = document.getElementById('tp-loc-btn');
+  const txt = document.getElementById('tp-loc-txt');
+  btn.disabled = true;
+  txt.textContent = '⏳ Standort wird ermittelt…';
+  try {
+    const pos = await new Promise((res, rej) =>
+      navigator.geolocation.getCurrentPosition(res, rej, { timeout: 12000, enableHighAccuracy: true }));
+    TP.lat = pos.coords.latitude;
+    TP.lng = pos.coords.longitude;
+    txt.textContent = `📍 ${TP.lat.toFixed(5)}, ${TP.lng.toFixed(5)}`;
+    toast('Standort ermittelt');
+  } catch(e) {
+    txt.textContent = '📍 Kein Standort – GPS nicht verfügbar';
+    toast('GPS-Fehler: ' + (e.message || 'Unbekannt'));
+  }
+  btn.disabled = false;
+}
+
+async function tpSearch() {
+  if (!TP.lat) { toast('Zuerst Standort ermitteln'); return; }
+  const kraftstoff = document.getElementById('tp-kraftstoff').value;
+  const radius     = parseInt(document.getElementById('tp-radius').value);
+  const resultEl   = document.getElementById('tp-results');
+  resultEl.innerHTML = '<div style="text-align:center;padding:28px;color:var(--muted);font-size:0.9rem">⏳ Lade Tankstellen…</div>';
+  try {
+    if (TP.land === 'de') await tpSearchDE(kraftstoff, radius, resultEl);
+    else if (TP.land === 'fr') await tpSearchFR(kraftstoff, radius, resultEl);
+    else if (TP.land === 'es') await tpSearchES(kraftstoff, radius, resultEl);
+  } catch(e) {
+    resultEl.innerHTML = `<div class="no-entries">Fehler: ${e.message}</div>`;
+  }
+}
+
+// ── Deutschland (Tankerkönig) ──
+async function tpSearchDE(kraftstoff, radius, resultEl) {
+  const key = localStorage.getItem('wmp_tk_key');
+  if (!key) { resultEl.innerHTML = '<div class="no-entries">Bitte zuerst API-Key eingeben</div>'; return; }
+  const url = `https://creativecommons.tankerkoenig.de/json/list.php?lat=${TP.lat}&lng=${TP.lng}&rad=${radius}&sort=price&type=${kraftstoff}&apikey=${key}`;
+  const res  = await fetch(url);
+  const data = await res.json();
+  if (!data.ok) throw new Error(data.message || 'API-Fehler');
+  if (!data.stations?.length) { resultEl.innerHTML = '<div class="no-entries">Keine Tankstellen gefunden</div>'; return; }
+  tpRenderResults(data.stations.slice(0,15).map(s => ({
+    name: s.brand || s.name,
+    adresse: `${s.street} ${s.houseNumber}, ${s.postCode} ${s.place}`,
+    preis: s.price,
+    dist: s.dist,
+    lat: s.lat, lng: s.lng,
+    offen: s.isOpen,
+  })), kraftstoff, resultEl);
+}
+
+// ── Frankreich (data.economie.gouv.fr) ──
+async function tpSearchFR(kraftstoff, radius, resultEl) {
+  const typeMap = { diesel: 'Gazole', e5: 'SP95', e10: 'E10' };
+  const typeFR  = typeMap[kraftstoff];
+  const where   = encodeURIComponent(`distance(geom, GEOM'POINT(${TP.lng} ${TP.lat})', ${radius}km)`);
+  const url = `https://data.economie.gouv.fr/api/explore/v2.1/catalog/datasets/prix-des-carburants-en-france-flux-instantane-v2/records?limit=20&where=${where}&order_by=prix_valeur+asc&refine=prix_nom%3A${encodeURIComponent(typeFR)}`;
+  const res  = await fetch(url);
+  const data = await res.json();
+  if (!data.results?.length) { resultEl.innerHTML = '<div class="no-entries">Keine Tankstellen gefunden</div>'; return; }
+  tpRenderResults(data.results.map(s => {
+    const slat = s.geom?.lat ?? s.geo_point_2d?.lat;
+    const slng = s.geom?.lon ?? s.geo_point_2d?.lon;
+    return {
+      name: s.ensigne || s.id || '–',
+      adresse: `${s.adresse || ''}, ${s.cp || ''} ${s.ville || ''}`.trim().replace(/^,\s*/, ''),
+      preis: s.prix_valeur ? parseFloat(s.prix_valeur) : null,
+      dist: slat ? tpHaversine(TP.lat, TP.lng, slat, slng).toFixed(1) : '?',
+      lat: slat, lng: slng,
+      offen: true,
+    };
+  }), kraftstoff, resultEl);
+}
+
+// ── Spanien (MINETUR) ──
+async function tpSearchES(kraftstoff, radius, resultEl) {
+  const fieldMap = { diesel: 'Precio Gasoleo A', e5: 'Precio Gasolina 95 E5', e10: 'Precio Gasolina 95 E10' };
+  const field    = fieldMap[kraftstoff];
+  const url      = 'https://sedeaplicaciones.minetur.gob.es/ServiciosRESTCarburantes/PreciosCarburantes/EstacionesTerrestres/';
+  let res;
+  try { res = await fetch(url); } catch(e) {
+    resultEl.innerHTML = `<div style="background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:16px;text-align:center">
+      <div style="font-size:1.5rem;margin-bottom:8px">🇪🇸</div>
+      <div style="font-weight:700;color:var(--text);margin-bottom:6px">Direktzugriff gesperrt (CORS)</div>
+      <div style="font-size:0.78rem;color:var(--muted);margin-bottom:12px">Die spanische API erlaubt keinen direkten Browser-Zugriff.</div>
+      <a href="https://geoportalgasolineras.es/" target="_blank" style="display:inline-block;padding:10px 20px;background:var(--accent);color:#fff;border-radius:8px;text-decoration:none;font-weight:700;font-size:0.88rem">🔗 Geoportal Gasolineras öffnen</a>
+    </div>`;
+    return;
+  }
+  const data = await res.json();
+  const stations = (data.ListaEESSPrecio || [])
+    .map(s => {
+      const slat = parseFloat((s['Latitud'] || '').replace(',', '.'));
+      const slng = parseFloat((s['Longitud (WGS84)'] || s['Longitud'] || '').replace(',', '.'));
+      const preis = parseFloat((s[field] || '').replace(',', '.')) || null;
+      const dist  = (!isNaN(slat) && !isNaN(slng)) ? tpHaversine(TP.lat, TP.lng, slat, slng) : 99999;
+      return { name: s['Rótulo'] || '–', adresse: `${s['Dirección'] || ''}, ${s['Municipio'] || ''}`, preis, dist: dist.toFixed(1), distNum: dist, lat: slat, lng: slng, offen: s['Horario']?.toLowerCase().includes('24') };
+    })
+    .filter(s => s.distNum <= radius && s.preis)
+    .sort((a, b) => a.preis - b.preis)
+    .slice(0, 15);
+  if (!stations.length) { resultEl.innerHTML = '<div class="no-entries">Keine Tankstellen gefunden</div>'; return; }
+  tpRenderResults(stations, kraftstoff, resultEl);
+}
+
+// ── Ergebnisse rendern ──
+function tpRenderResults(stations, kraftstoff, resultEl) {
+  const typeLabel = { diesel: 'Diesel', e5: 'Super E5', e10: 'Super E10' }[kraftstoff];
+  const minPreis  = Math.min(...stations.filter(s => s.preis).map(s => s.preis));
+  resultEl.innerHTML = `<div style="font-size:0.7rem;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:10px">${stations.length} Tankstellen · ${typeLabel} · sortiert nach Preis</div>`
+    + stations.map((s, i) => {
+    const isCheap = s.preis && s.preis <= minPreis + 0.002;
+    const preisColor = isCheap ? 'var(--accent)' : s.preis > minPreis + 0.05 ? 'var(--danger)' : 'var(--text)';
+    const mapsUrl = (s.lat && s.lng) ? `https://maps.google.com/maps?q=${s.lat},${s.lng}` : null;
+    return `<div style="background:var(--panel);border:1px solid ${isCheap ? 'rgba(34,197,94,0.4)' : 'var(--border)'};border-radius:12px;padding:12px 14px;margin-bottom:8px${isCheap ? ';box-shadow:0 0 0 1px rgba(34,197,94,0.15)' : ''}">
+      <div style="display:flex;align-items:flex-start;gap:10px">
+        <div style="background:var(--panel2);border-radius:8px;width:28px;height:28px;display:flex;align-items:center;justify-content:center;font-size:0.8rem;font-weight:800;color:var(--muted);flex-shrink:0">${i+1}</div>
+        <div style="flex:1;min-width:0">
+          <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px">
+            <div>
+              <div style="font-weight:700;color:var(--text);font-size:0.92rem">${s.name}${isCheap ? ' <span style="font-size:0.65rem;background:rgba(34,197,94,0.15);color:var(--accent);border-radius:4px;padding:1px 5px;font-weight:700">GÜNSTIGSTE</span>' : ''}</div>
+              <div style="font-size:0.72rem;color:var(--muted);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:180px">${s.adresse}</div>
+            </div>
+            <div style="text-align:right;flex-shrink:0">
+              <div style="font-size:1.45rem;font-weight:800;color:${preisColor};line-height:1">${s.preis ? s.preis.toFixed(3) + ' €' : '–'}</div>
+              <div style="font-size:0.68rem;color:var(--muted);margin-top:2px">${s.dist} km entfernt</div>
+            </div>
+          </div>
+          <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap">
+            ${s.offen !== undefined ? `<span style="font-size:0.7rem;padding:2px 8px;border-radius:6px;font-weight:700;background:${s.offen ? 'rgba(34,197,94,0.12)' : 'rgba(239,68,68,0.1)'};color:${s.offen ? 'var(--accent)' : 'var(--danger)'}">${s.offen ? '● Geöffnet' : '● Geschlossen'}</span>` : ''}
+            ${mapsUrl ? `<a href="${mapsUrl}" target="_blank" style="font-size:0.7rem;padding:2px 8px;border-radius:6px;background:var(--panel2);border:1px solid var(--border);color:var(--text);text-decoration:none;font-weight:700">🗺 Navigation</a>` : ''}
+          </div>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function tpHaversine(lat1, lng1, lat2, lng2) {
+  const R = 6371, dLat = (lat2-lat1)*Math.PI/180, dLng = (lng2-lng1)*Math.PI/180;
+  const a = Math.sin(dLat/2)**2 + Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLng/2)**2;
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
 }
 
 let _notfallRendered = false;

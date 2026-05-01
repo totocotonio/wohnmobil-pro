@@ -2315,6 +2315,13 @@
       <!-- Kompass-Canvas -->
       <div style="text-align:center;margin-bottom:14px">
         <canvas id="so-canvas" width="260" height="260" style="max-width:100%"></canvas>
+        <div style="margin-top:10px">
+          <button id="so-compass-btn" class="btn" onclick="soStartCompass()"
+            style="padding:8px 18px;font-size:0.82rem;border:1px solid var(--border);border-radius:20px;background:var(--card);color:var(--muted);cursor:pointer;transition:all 0.2s">
+            🧭 Kompass
+          </button>
+          <div style="font-size:0.65rem;color:var(--muted);margin-top:5px">Gerät Richtung Fahrbahn halten · N dreht zu echtem Norden</div>
+        </div>
       </div>
 
       <!-- Aufgang / Untergang / Mittag -->
@@ -4851,7 +4858,7 @@ function filterVorschriften(q) {
 // ══════════════════════════════════
 // SONNENAUSRICHTUNG
 // ══════════════════════════════════
-const SO = { lat: null, lon: null, _timer: null, _noonSun: null };
+const SO = { lat: null, lon: null, _timer: null, _noonSun: null, _arcPts: null, _sun: null, _heading: 0, _compassActive: false, _compassHandler: null };
 
 function soGetGPS() {
   const status = document.getElementById('so-gps-status');
@@ -4922,6 +4929,8 @@ function soCalc() {
     prevEl = s.elevation;
   }
   SO._noonSun = noonSun;
+  SO._arcPts = arcPts;
+  SO._sun = sun;
   const fmt = t => t ? `${String(t.getHours()).padStart(2,'0')}:${String(t.getMinutes()).padStart(2,'0')}` : '–';
   document.getElementById('so-el').textContent = sun.elevation > 0 ? sun.elevation.toFixed(1)+'°' : '–';
   document.getElementById('so-az').textContent = sun.elevation > 0 ? sun.azimuth.toFixed(1)+'°' : '–';
@@ -4935,6 +4944,57 @@ function soCalc() {
   document.getElementById('so-result').style.display = 'block';
 }
 
+function soRedrawCompass() {
+  if (SO._sun !== null && SO._arcPts !== null) soDrawCompass(SO._sun, SO._arcPts);
+}
+
+function soStartCompass() {
+  if (SO._compassActive) { soStopCompass(); return; }
+  const handler = e => {
+    let h = null;
+    if (e.webkitCompassHeading !== undefined && e.webkitCompassHeading !== null) {
+      h = e.webkitCompassHeading; // iOS: absolutes Heading in Grad
+    } else if (e.alpha !== null && e.alpha !== undefined) {
+      h = (360 - e.alpha) % 360; // Android: alpha = Drehung weg von Nord
+    }
+    if (h !== null) { SO._heading = h; soRedrawCompass(); }
+  };
+  SO._compassHandler = handler;
+  const startListening = () => {
+    SO._compassActive = true;
+    window.addEventListener('deviceorientationabsolute', handler, true);
+    window.addEventListener('deviceorientation', handler, true);
+    const btn = document.getElementById('so-compass-btn');
+    if (btn) {
+      btn.textContent = '🧭 Kompass aktiv';
+      btn.style.background = 'rgba(34,197,94,0.15)';
+      btn.style.borderColor = 'rgba(34,197,94,0.5)';
+      btn.style.color = '#22c55e';
+    }
+  };
+  if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
+    DeviceOrientationEvent.requestPermission().then(state => {
+      if (state === 'granted') startListening();
+      else { alert('Kompass-Zugriff verweigert. Bitte in den iOS-Einstellungen erlauben.'); }
+    }).catch(() => startListening());
+  } else {
+    startListening();
+  }
+}
+
+function soStopCompass() {
+  if (SO._compassHandler) {
+    window.removeEventListener('deviceorientationabsolute', SO._compassHandler, true);
+    window.removeEventListener('deviceorientation', SO._compassHandler, true);
+    SO._compassHandler = null;
+  }
+  SO._compassActive = false;
+  SO._heading = 0;
+  const btn = document.getElementById('so-compass-btn');
+  if (btn) { btn.textContent = '🧭 Kompass'; btn.style.background = ''; btn.style.borderColor = ''; btn.style.color = ''; }
+  soRedrawCompass();
+}
+
 function soDrawCompass(sun, arcPts) {
   const canvas = document.getElementById('so-canvas'); if (!canvas) return;
   const ctx = canvas.getContext('2d');
@@ -4942,6 +5002,13 @@ function soDrawCompass(sun, arcPts) {
   const dark = !document.documentElement.classList.contains('light');
   const cBg=dark?'#1e293b':'#f1f5f9', cBd=dark?'#334155':'#cbd5e1', cTx=dark?'#94a3b8':'#64748b';
   ctx.clearRect(0,0,W,H);
+
+  // Kompassrose rotieren: -heading dreht N zu echtem Norden
+  ctx.save();
+  ctx.translate(cx, cy);
+  ctx.rotate(-SO._heading * Math.PI / 180);
+  ctx.translate(-cx, -cy);
+
   ctx.beginPath(); ctx.arc(cx,cy,r,0,Math.PI*2); ctx.fillStyle=cBg; ctx.fill();
   ctx.strokeStyle=cBd; ctx.lineWidth=2; ctx.stroke();
   for (let i=0;i<72;i++) {
@@ -4953,7 +5020,7 @@ function soDrawCompass(sun, arcPts) {
   ctx.font=`bold ${Math.round(W*0.062)}px sans-serif`; ctx.textAlign='center'; ctx.textBaseline='middle';
   [['N',0],['O',90],['S',180],['W',270]].forEach(([l,d])=>{
     const a=(d-90)*Math.PI/180;
-    ctx.fillStyle=l==='S'?'#f59e0b':cTx;
+    ctx.fillStyle=l==='N'?(SO._compassActive?'#ef4444':cTx):l==='S'?'#f59e0b':cTx;
     ctx.fillText(l,cx+(r-22)*Math.cos(a),cy+(r-22)*Math.sin(a));
   });
   const arcR = r*0.6;
@@ -4988,8 +5055,41 @@ function soDrawCompass(sun, arcPts) {
     ctx.font=`${Math.round(W*0.14)}px serif`; ctx.textAlign='center'; ctx.textBaseline='middle';
     ctx.fillText('🌙',cx,cy);
   }
-  ctx.beginPath(); ctx.arc(cx,cy,4,0,Math.PI*2);
-  ctx.fillStyle=dark?'#475569':'#94a3b8'; ctx.fill();
+  ctx.restore();
+
+  // Kompassnadel – zeigt immer nach oben (= Geräterichtung), außerhalb der Rotation
+  if (SO._compassActive) {
+    const nl = r * 0.40;
+    ctx.save();
+    ctx.translate(cx, cy);
+    // Rote Spitze nach oben (Geräte-Fahrtrichtung)
+    ctx.beginPath();
+    ctx.moveTo(0, -nl); ctx.lineTo(7, 4); ctx.lineTo(0, nl*0.28); ctx.lineTo(-7, 4);
+    ctx.closePath();
+    ctx.fillStyle = '#ef4444';
+    ctx.shadowColor = 'rgba(0,0,0,0.4)'; ctx.shadowBlur = 4;
+    ctx.fill();
+    ctx.shadowBlur = 0;
+    ctx.strokeStyle = 'rgba(0,0,0,0.2)'; ctx.lineWidth = 0.8; ctx.stroke();
+    // Blauer Schaft nach unten
+    ctx.beginPath();
+    ctx.moveTo(0, nl*0.28); ctx.lineTo(6, 4); ctx.lineTo(0, nl); ctx.lineTo(-6, 4);
+    ctx.closePath();
+    ctx.fillStyle = '#3b82f6';
+    ctx.shadowColor = 'rgba(0,0,0,0.3)'; ctx.shadowBlur = 4;
+    ctx.fill();
+    ctx.shadowBlur = 0;
+    ctx.stroke();
+    // Mittelpunkt-Kreis
+    ctx.beginPath(); ctx.arc(0,0,5,0,Math.PI*2);
+    ctx.fillStyle = dark?'#1e293b':'#fff'; ctx.fill();
+    ctx.strokeStyle = dark?'#94a3b8':'#64748b'; ctx.lineWidth=1.5; ctx.stroke();
+    ctx.restore();
+  } else {
+    // Normaler Mittelpunkt ohne Kompass
+    ctx.beginPath(); ctx.arc(cx,cy,4,0,Math.PI*2);
+    ctx.fillStyle=dark?'#475569':'#94a3b8'; ctx.fill();
+  }
 }
 
 function soDrawChart(arcPts, now, maxEl) {

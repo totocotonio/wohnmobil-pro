@@ -1662,7 +1662,7 @@
         </svg>
         <div>
           <strong>Wohnmobil Pro</strong>
-          <div style="font-size:0.8rem;color:var(--accent);margin-top:2px">v1.1.63</div>
+          <div style="font-size:0.8rem;color:var(--accent);margin-top:2px">v1.1.64</div>
           <div style="font-size:0.72rem;color:var(--muted);margin-top:2px">© 2026 Torsten Michaely</div>
         </div>
       </div>
@@ -2381,7 +2381,7 @@
       </div>
       <div style="font-size:0.7rem;color:var(--muted);text-align:center">
         © <span id="footer-year">2026</span> Torsten Michaely · Alle Rechte vorbehalten &nbsp;·&nbsp;
-        <span id="footer-version" style="color:var(--accent);font-size:0.7rem">v1.1.63</span>
+        <span id="footer-version" style="color:var(--accent);font-size:0.7rem">v1.1.64</span>
         &nbsp;|&nbsp; <a href="./impressum.html" style="color:var(--muted);text-decoration:none">Impressum</a>
         &nbsp;|&nbsp; <a href="./datenschutz.html" style="color:var(--muted);text-decoration:none">Datenschutz</a>
         &nbsp;|&nbsp; <a href="#" onclick="showDisclaimer();return false;" style="color:var(--muted);text-decoration:none">Haftungsausschluss</a>
@@ -5807,6 +5807,16 @@ function renderSyncUI() {
   if (!el) return;
   const code = getSyncCode();
   el.innerHTML = `
+    <div style="background:rgba(34,197,94,0.06);border:1px solid rgba(34,197,94,0.15);border-radius:10px;padding:12px 14px;margin-bottom:12px;font-size:0.78rem;color:var(--muted);line-height:1.6">
+      <div style="font-weight:700;color:var(--text);margin-bottom:6px">ℹ️ Nur bei mehreren Geräten nötig</div>
+      Nutz du die App nur auf einem Gerät? Dann brauchst du das hier nicht.<br>
+      Für zwei Geräte (z.B. iPhone + iPad):
+      <ol style="margin:6px 0 0 16px;padding:0">
+        <li>Auf <strong style="color:var(--text)">Gerät 1</strong> → „Auf Cloud hochladen"</li>
+        <li>Auf <strong style="color:var(--text)">Gerät 2</strong> → Sync-Code von Gerät 1 eingeben → „Von Cloud laden"</li>
+      </ol>
+      <div style="margin-top:6px">Der Sync passiert nicht automatisch – nur wenn du den Button drückst.</div>
+    </div>
     <div style="background:var(--panel2);border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:10px">
       <div style="font-size:0.68rem;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:8px">Dein Sync-Code</div>
       <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">

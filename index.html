@@ -2368,6 +2368,25 @@
 <script>
 'use strict';
 
+// Startseite: Favoriten
+const WMP_FAVS_KEY = 'wmp_favs';
+let wmpFavs = JSON.parse(localStorage.getItem(WMP_FAVS_KEY) || '[]');
+const START_TOOLS = [
+  { id:'nivellieren', icon:'⊙', name:'Nivellieren',       desc:'Wohnmobil mit Gyrosensor perfekt ausrichten',           action:"showSection('nivellieren')" },
+  { id:'checkliste',  icon:'☑', name:'Checkliste',        desc:'Abfahrt, Ankunft & Winterlager abhaken',                action:"showSection('checkliste')" },
+  { id:'kosten',      icon:'€', name:'Kosten',            desc:'Kraftstoff, Stellplatz & Ausgaben pro Urlaub',          action:"showSection('kosten')" },
+  { id:'wetter',      icon:'🌤', name:'Wetter',            desc:'Aktuelles Wetter & 7-Tage-Prognose am Stellplatz',     action:"showSection('wetter')" },
+  { id:'karte',       icon:'🗺', name:'Reisekarte',        desc:'Alle Urlaube auf der Europakarte',                     action:"showSection('karte');initKarte()" },
+  { id:'statistik',   icon:'📊', name:'Statistik',         desc:'Alle Reisen im Überblick',                             action:"showSection('statistik')" },
+  { id:'strom',       icon:'⚡', name:'Strom',             desc:'Energiebilanz & Solar planen',                         action:"showSection('strom')" },
+  { id:'notfall',     icon:'🆘', name:'Notfall',           desc:'Notruf & Pannenhilfe je Land',                         action:"showSection('notfall')" },
+  { id:'tanken',      icon:'⛽', name:'Tankpreise',        desc:'Günstigste Tankstellen in DE, FR & ES',                action:"showSection('tanken')" },
+  { id:'fahrzeug',    icon:'🚐', name:'Mein Fahrzeug',     desc:'Fahrzeugdaten, TÜV, Versicherung & Wartungsprotokoll', action:"showSection('fahrzeug')" },
+  { id:'vorschriften',icon:'📋', name:'Vorschriften',      desc:'Promille, Vignetten & Pflichtausrüstung je Land',      action:"showSection('vorschriften')" },
+  { id:'satfinder',   icon:'📡', name:'Sat-Finder',        desc:'Azimut & Elevation für Satellitenschüssel',            action:"showSection('satfinder')" },
+  { id:'sonne',       icon:'🌞', name:'Sonnenausrichtung', desc:'Fahrzeug optimal für Schatten & Solar ausrichten',     action:"showSection('sonne')" },
+];
+
 // ══════════════════════════════════
 // THEME
 // ══════════════════════════════════
@@ -4304,25 +4323,6 @@ function renderService() {
 // ══════════════════════════════════
 // STARTSEITE – Begrüßung & Favoriten
 // ══════════════════════════════════
-const WMP_FAVS_KEY = 'wmp_favs';
-let wmpFavs = JSON.parse(localStorage.getItem(WMP_FAVS_KEY) || '[]');
-
-const START_TOOLS = [
-  { id:'nivellieren', icon:'⊙', name:'Nivellieren',      desc:'Wohnmobil mit Gyrosensor perfekt ausrichten',          action:"showSection('nivellieren')" },
-  { id:'checkliste',  icon:'☑', name:'Checkliste',       desc:'Abfahrt, Ankunft & Winterlager abhaken',               action:"showSection('checkliste')" },
-  { id:'kosten',      icon:'€', name:'Kosten',           desc:'Kraftstoff, Stellplatz & Ausgaben pro Urlaub',         action:"showSection('kosten')" },
-  { id:'wetter',      icon:'🌤', name:'Wetter',           desc:'Aktuelles Wetter & 7-Tage-Prognose am Stellplatz',    action:"showSection('wetter')" },
-  { id:'karte',       icon:'🗺', name:'Reisekarte',       desc:'Alle Urlaube auf der Europakarte',                    action:"showSection('karte');initKarte()" },
-  { id:'statistik',   icon:'📊', name:'Statistik',        desc:'Alle Reisen im Überblick',                            action:"showSection('statistik')" },
-  { id:'strom',       icon:'⚡', name:'Strom',            desc:'Energiebilanz & Solar planen',                        action:"showSection('strom')" },
-  { id:'notfall',     icon:'🆘', name:'Notfall',          desc:'Notruf & Pannenhilfe je Land',                        action:"showSection('notfall')" },
-  { id:'tanken',      icon:'⛽', name:'Tankpreise',       desc:'Günstigste Tankstellen in DE, FR & ES',               action:"showSection('tanken')" },
-  { id:'fahrzeug',    icon:'🚐', name:'Mein Fahrzeug',    desc:'Fahrzeugdaten, TÜV, Versicherung & Wartungsprotokoll', action:"showSection('fahrzeug')" },
-  { id:'vorschriften',icon:'📋', name:'Vorschriften',     desc:'Promille, Vignetten & Pflichtausrüstung je Land',     action:"showSection('vorschriften')" },
-  { id:'satfinder',   icon:'📡', name:'Sat-Finder',       desc:'Azimut & Elevation für Satellitenschüssel',           action:"showSection('satfinder')" },
-  { id:'sonne',       icon:'🌞', name:'Sonnenausrichtung',desc:'Fahrzeug optimal für Schatten & Solar ausrichten',    action:"showSection('sonne')" },
-];
-
 function toggleStartFav(id, e) {
   e.stopPropagation();
   const idx = wmpFavs.indexOf(id);

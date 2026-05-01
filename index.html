@@ -1273,6 +1273,9 @@
     <button class="nav-item" id="nav-statistik" onclick="showSection('statistik');closeMenu()">📊 Statistik</button>
     <button class="nav-item" id="nav-strom" onclick="showSection('strom');closeMenu()">⚡ Strom</button>
     <button class="nav-item" id="nav-notfall" onclick="showSection('notfall');closeMenu()">🆘 Notfall</button>
+    <button class="nav-item" id="nav-fahrzeug" onclick="showSection('fahrzeug');closeMenu()">🚐 Fahrzeugdaten</button>
+    <button class="nav-item" id="nav-wartung" onclick="showSection('wartung');closeMenu()">🔧 Wartung</button>
+    <button class="nav-item" id="nav-vorschriften" onclick="showSection('vorschriften');closeMenu()">📋 Vorschriften</button>
     <div style="border-top:1px solid var(--border);margin:8px 0"></div>
     <button class="nav-item" id="nav-mehr" onclick="showSection('mehr');closeMenu()">⚙ Einstellungen</button>
     <div style="padding:12px 4px;display:flex;align-items:center;justify-content:space-between">
@@ -1292,7 +1295,7 @@
     <div class="start-hero">
       <div class="start-hero-icon">🚐</div>
       <div class="start-hero-title">WOHNMOBIL <span>PRO</span></div>
-      <div class="start-hero-sub">5 WERKZEUGE · CAMPING · OFFLINE</div>
+      <div class="start-hero-sub">11 WERKZEUGE · CAMPING · OFFLINE</div>
     </div>
     <div class="start-grid">
       <div class="start-card" onclick="showSection('nivellieren')">
@@ -1334,6 +1337,21 @@
         <div class="start-card-icon">🆘</div>
         <div class="start-card-name">Notfall</div>
         <div class="start-card-desc">Notruf &amp; Pannenhilfe je Land</div>
+      </div>
+      <div class="start-card" onclick="showSection('fahrzeug')">
+        <div class="start-card-icon">🚐</div>
+        <div class="start-card-name">Fahrzeugdaten</div>
+        <div class="start-card-desc">FIN, TÜV, Versicherung &amp; Reifenmaß</div>
+      </div>
+      <div class="start-card" onclick="showSection('wartung')">
+        <div class="start-card-icon">🔧</div>
+        <div class="start-card-name">Wartung</div>
+        <div class="start-card-desc">Ölwechsel, Inspektion &amp; Reparaturen tracken</div>
+      </div>
+      <div class="start-card" onclick="showSection('vorschriften')">
+        <div class="start-card-icon">📋</div>
+        <div class="start-card-name">Vorschriften</div>
+        <div class="start-card-desc">Promille, Vignetten &amp; Pflichtausrüstung je Land</div>
       </div>
     </div>
   </div>
@@ -1883,6 +1901,115 @@
     <div id="notfall-list"></div>
   </div>
 
+
+  <!-- ════════════ FAHRZEUGDATEN ════════════ -->
+  <div id="sec-fahrzeug" class="wmp-section">
+    <div style="text-align:center;padding:24px 0 18px;position:relative">
+      <div style="font-size:2.2rem;margin-bottom:6px">🚐</div>
+      <div style="font-size:1.55rem;font-weight:700;letter-spacing:0.06em;color:var(--text)">FAHRZEUG<span style="color:var(--accent)">DATEN</span></div>
+      <div style="font-size:0.72rem;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-top:4px">Offline gespeichert · Immer verfügbar</div>
+      <div style="position:absolute;bottom:0;left:50%;transform:translateX(-50%);width:48px;height:2px;background:linear-gradient(90deg,transparent,var(--accent),transparent);border-radius:2px"></div>
+    </div>
+
+    <div id="tuev-banner" style="margin-bottom:14px"></div>
+
+    <div class="section-label">Fahrzeuginfo</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">
+      <div><label class="form-lbl">Fahrzeugtyp</label><input class="form-inp" id="fz-typ" placeholder="Kastenwagen, Alkoven…"></div>
+      <div><label class="form-lbl">Kennzeichen</label><input class="form-inp" id="fz-kz" placeholder="AB-CD 1234" style="text-transform:uppercase"></div>
+      <div><label class="form-lbl">Hersteller</label><input class="form-inp" id="fz-hersteller" placeholder="Fiat, Mercedes…"></div>
+      <div><label class="form-lbl">Modell</label><input class="form-inp" id="fz-modell" placeholder="Ducato, Sprinter…"></div>
+      <div style="grid-column:span 2"><label class="form-lbl">FIN / VIN (Fahrgestellnummer)</label><input class="form-inp" id="fz-fin" placeholder="WF0XXXXXXXXXXXX" style="font-family:monospace;letter-spacing:1px"></div>
+      <div><label class="form-lbl">Erstzulassung</label><input class="form-inp" type="date" id="fz-ez"></div>
+      <div><label class="form-lbl">Baujahr</label><input class="form-inp" type="number" id="fz-bj" placeholder="2020" min="1980" max="2040"></div>
+    </div>
+
+    <div class="section-label">Wichtige Termine</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">
+      <div><label class="form-lbl">TÜV / HU fällig</label><input class="form-inp" type="month" id="fz-tuev" oninput="saveFahrzeugSilent();renderTuevBanner()"></div>
+      <div><label class="form-lbl">AU fällig</label><input class="form-inp" type="month" id="fz-au"></div>
+      <div><label class="form-lbl">Nächste Inspektion</label><input class="form-inp" type="date" id="fz-inspektion"></div>
+      <div><label class="form-lbl">Inspektion bei km</label><input class="form-inp" type="number" id="fz-insp-km" placeholder="15000"></div>
+    </div>
+
+    <div class="section-label">Versicherung</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">
+      <div><label class="form-lbl">Versicherung</label><input class="form-inp" id="fz-vers-name" placeholder="ADAC, HUK…"></div>
+      <div><label class="form-lbl">Vers.-Nummer</label><input class="form-inp" id="fz-vers-nr" placeholder="123456789"></div>
+      <div style="grid-column:span 2">
+        <label class="form-lbl">Pannenhilfe / Notrufnummer</label>
+        <input class="form-inp" id="fz-vers-tel" placeholder="+49 800 1234567" oninput="saveFahrzeugSilent()">
+        <a id="fz-vers-tel-link" style="display:none;margin-top:6px;padding:9px 14px;background:rgba(34,197,94,0.1);border:1px solid rgba(34,197,94,0.3);border-radius:8px;color:var(--accent);text-decoration:none;font-weight:700;font-size:0.88rem;width:100%;text-align:center;box-sizing:border-box"></a>
+      </div>
+    </div>
+
+    <div class="section-label">Technisches</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">
+      <div><label class="form-lbl">Reifengröße</label><input class="form-inp" id="fz-reifen" placeholder="225/75 R16C"></div>
+      <div><label class="form-lbl">Reifendruck (bar)</label><input class="form-inp" id="fz-druck" placeholder="4.0 / 4.5"></div>
+      <div><label class="form-lbl">Motoröl-Spezifikation</label><input class="form-inp" id="fz-oel" placeholder="5W-30, 10W-40…"></div>
+      <div><label class="form-lbl">Tankinhalt (L)</label><input class="form-inp" type="number" id="fz-tank" placeholder="90"></div>
+      <div><label class="form-lbl">Zul. Gesamtgewicht</label><input class="form-inp" id="fz-zgg" placeholder="3500 kg"></div>
+      <div><label class="form-lbl">Leergewicht</label><input class="form-inp" id="fz-leer" placeholder="2800 kg"></div>
+    </div>
+
+    <div class="section-label">Notizen</div>
+    <textarea class="form-inp" id="fz-notiz" placeholder="Wichtige Infos, Besonderheiten, Codes…" style="width:100%;min-height:80px;resize:vertical;margin-bottom:14px;box-sizing:border-box"></textarea>
+
+    <button class="btn btn-primary" style="width:100%;padding:13px;font-size:1rem;font-weight:700" onclick="saveFahrzeug()">💾 Speichern</button>
+  </div>
+
+  <!-- ════════════ WARTUNGSPROTOKOLL ════════════ -->
+  <div id="sec-wartung" class="wmp-section">
+    <div style="text-align:center;padding:24px 0 18px;position:relative">
+      <div style="font-size:2.2rem;margin-bottom:6px">🔧</div>
+      <div style="font-size:1.55rem;font-weight:700;letter-spacing:0.06em;color:var(--text)">WARTUNGS<span style="color:var(--accent)">PROTOKOLL</span></div>
+      <div style="font-size:0.72rem;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-top:4px">Service · Reparaturen · Pflege</div>
+      <div style="position:absolute;bottom:0;left:50%;transform:translateX(-50%);width:48px;height:2px;background:linear-gradient(90deg,transparent,var(--accent),transparent);border-radius:2px"></div>
+    </div>
+
+    <div class="entry-form" style="margin-bottom:16px">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
+        <div>
+          <label class="form-lbl">Kategorie</label>
+          <select class="form-inp" id="wt-kat">
+            <option value="oel">🛢 Ölwechsel</option>
+            <option value="inspektion">🔍 Inspektion</option>
+            <option value="reifen">🔄 Reifenwechsel</option>
+            <option value="bremsen">🛑 Bremsen</option>
+            <option value="filter">🌀 Filter</option>
+            <option value="zahnriemen">⚙️ Zahnriemen</option>
+            <option value="tuev">🔖 TÜV / HU</option>
+            <option value="reparatur">🔨 Reparatur</option>
+            <option value="sonstiges">📝 Sonstiges</option>
+          </select>
+        </div>
+        <div><label class="form-lbl">Datum</label><input class="form-inp" type="date" id="wt-dat"></div>
+        <div><label class="form-lbl">km-Stand</label><input class="form-inp" type="number" id="wt-km" placeholder="45000"></div>
+        <div><label class="form-lbl">Kosten (€)</label><input class="form-inp" type="number" id="wt-kosten" placeholder="0.00" step="0.01"></div>
+        <div style="grid-column:span 2"><label class="form-lbl">Notiz / Werkstatt</label><input class="form-inp" id="wt-notiz" placeholder="z.B. Werkstatt Müller, nächster Wechsel bei 60.000 km"></div>
+      </div>
+      <button class="btn btn-primary" style="width:100%;padding:12px;font-weight:700" onclick="addWartung()">+ Eintrag hinzufügen</button>
+    </div>
+
+    <div id="wt-summary" style="display:none;margin-bottom:16px"></div>
+    <div class="section-label">Einträge</div>
+    <div id="wt-list"></div>
+  </div>
+
+  <!-- ════════════ LÄNDERVORSCHRIFTEN ════════════ -->
+  <div id="sec-vorschriften" class="wmp-section">
+    <div style="text-align:center;padding:24px 0 18px;position:relative">
+      <div style="font-size:2.2rem;margin-bottom:6px">📋</div>
+      <div style="font-size:1.55rem;font-weight:700;letter-spacing:0.06em;color:var(--text)">LÄNDER<span style="color:var(--accent)">VORSCHRIFTEN</span></div>
+      <div style="font-size:0.72rem;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-top:4px">Promille · Vignetten · Pflichtausrüstung · Offline</div>
+      <div style="position:absolute;bottom:0;left:50%;transform:translateX(-50%);width:48px;height:2px;background:linear-gradient(90deg,transparent,var(--accent),transparent);border-radius:2px"></div>
+    </div>
+    <div style="background:linear-gradient(135deg,rgba(245,158,11,0.1),rgba(245,158,11,0.03));border:1px solid rgba(245,158,11,0.25);border-radius:10px;padding:10px 14px;margin-bottom:14px;font-size:0.72rem;color:var(--muted)">⚠️ Angaben ohne Gewähr – vor Reiseantritt beim ADAC oder offiziellen Stellen prüfen.</div>
+    <input class="form-inp" type="text" id="vors-search" placeholder="Land suchen…" oninput="filterVorschriften(this.value)" style="width:100%;margin-bottom:14px">
+    <div id="vors-list"></div>
+  </div>
+
 </div><!-- .main-content -->
 
 <footer style="border-top:1px solid var(--border);background:var(--panel)">
@@ -1955,6 +2082,9 @@ function showSection(name) {
   window.scrollTo(0, 0);
   if (name === 'statistik') renderStatistik();
   if (name === 'notfall') renderNotfall();
+  if (name === 'fahrzeug') { loadFahrzeug(); }
+  if (name === 'wartung') renderWartung();
+  if (name === 'vorschriften') renderVorschriften();
 }
 
 function openMenu() {
@@ -3557,7 +3687,7 @@ function closeDisclaimer() {
   const fy = document.getElementById('footer-year');
   if (fy) fy.textContent = new Date().getFullYear();
   const today = new Date().toISOString().split('T')[0];
-  ['kf-dat','sp-dat','so-dat','tb-dat'].forEach(id => { const el = document.getElementById(id); if (el) el.value = today; });
+  ['kf-dat','sp-dat','so-dat','tb-dat','wt-dat'].forEach(id => { const el = document.getElementById(id); if (el) el.value = today; });
   renderEbConsumers();
   loadSettings();
   loadCL();
@@ -3610,6 +3740,251 @@ const NOTFALL_DATA = [
   { land:'🇹🇷 Türkei',      notruf:'112', polizei:'155', feuerwehr:'110', pannenhilfe:'444 1 444',       pannentipp:'TTOK', ambulanz:'112' },
   { land:'🇲🇦 Marokko',     notruf:'15',  polizei:'19',  feuerwehr:'15',  pannenhilfe:'0522 400 400',    pannentipp:'MACM', ambulanz:'15' },
 ];
+
+// ══════════════════════════════════
+// FAHRZEUGDATEN
+// ══════════════════════════════════
+const FZ_FIELDS = ['typ','kz','hersteller','modell','fin','ez','bj','tuev','au','inspektion','insp-km','vers-name','vers-nr','vers-tel','reifen','druck','oel','tank','zgg','leer','notiz'];
+
+function loadFahrzeug() {
+  const d = JSON.parse(localStorage.getItem('wmp_fahrzeug') || '{}');
+  FZ_FIELDS.forEach(f => {
+    const el = document.getElementById('fz-' + f);
+    if (el && d[f] !== undefined) el.value = d[f];
+  });
+  renderTuevBanner();
+  renderVersTelLink();
+}
+
+function saveFahrzeugSilent() {
+  const d = {};
+  FZ_FIELDS.forEach(f => { const el = document.getElementById('fz-' + f); if (el) d[f] = el.value; });
+  localStorage.setItem('wmp_fahrzeug', JSON.stringify(d));
+  renderVersTelLink();
+}
+
+function saveFahrzeug() {
+  saveFahrzeugSilent();
+  renderTuevBanner();
+  toast('Fahrzeugdaten gespeichert');
+}
+
+function renderTuevBanner() {
+  const tuev = document.getElementById('fz-tuev')?.value;
+  const banner = document.getElementById('tuev-banner');
+  if (!banner) return;
+  if (!tuev) { banner.innerHTML = ''; return; }
+  const parts = tuev.split('-');
+  const tuevEnd = new Date(parseInt(parts[0]), parseInt(parts[1]), 0);
+  const now = new Date();
+  const diff = Math.floor((tuevEnd - now) / (1000 * 60 * 60 * 24));
+  let bg, border, icon, msg;
+  if (diff < 0) {
+    bg = 'rgba(239,68,68,0.12)'; border = 'rgba(239,68,68,0.4)'; icon = '🚨';
+    msg = `TÜV / HU abgelaufen vor ${Math.abs(diff)} Tagen!`;
+  } else if (diff <= 30) {
+    bg = 'rgba(245,158,11,0.12)'; border = 'rgba(245,158,11,0.45)'; icon = '⚠️';
+    msg = `TÜV / HU läuft in ${diff} Tagen ab!`;
+  } else if (diff <= 90) {
+    bg = 'rgba(245,158,11,0.07)'; border = 'rgba(245,158,11,0.25)'; icon = '📅';
+    msg = `TÜV / HU in ${diff} Tagen fällig`;
+  } else {
+    banner.innerHTML = ''; return;
+  }
+  banner.innerHTML = `<div style="background:${bg};border:1px solid ${border};border-radius:12px;padding:13px 16px;display:flex;align-items:center;gap:12px">
+    <span style="font-size:1.6rem;flex-shrink:0">${icon}</span>
+    <div>
+      <div style="font-weight:700;color:var(--text);font-size:0.92rem">${msg}</div>
+      <div style="font-size:0.7rem;color:var(--muted);margin-top:2px">Fällig: ${parts[1]}/${parts[0]}</div>
+    </div>
+  </div>`;
+}
+
+function renderVersTelLink() {
+  const tel = document.getElementById('fz-vers-tel')?.value?.trim();
+  const link = document.getElementById('fz-vers-tel-link');
+  if (!link) return;
+  if (tel) {
+    link.style.display = 'block';
+    link.href = 'tel:' + tel.replace(/\s/g,'');
+    link.textContent = '📞 ' + tel + ' anrufen';
+  } else {
+    link.style.display = 'none';
+  }
+}
+
+// ══════════════════════════════════
+// WARTUNGSPROTOKOLL
+// ══════════════════════════════════
+const WT_KAT = {
+  oel:        { icon:'🛢', label:'Ölwechsel',     color:'#f59e0b' },
+  inspektion: { icon:'🔍', label:'Inspektion',    color:'#38bdf8' },
+  reifen:     { icon:'🔄', label:'Reifenwechsel', color:'#8b5cf6' },
+  bremsen:    { icon:'🛑', label:'Bremsen',       color:'#ef4444' },
+  filter:     { icon:'🌀', label:'Filter',        color:'#22c55e' },
+  zahnriemen: { icon:'⚙️', label:'Zahnriemen',   color:'#f97316' },
+  tuev:       { icon:'🔖', label:'TÜV / HU',      color:'#22c55e' },
+  reparatur:  { icon:'🔨', label:'Reparatur',     color:'#ef4444' },
+  sonstiges:  { icon:'📝', label:'Sonstiges',     color:'#8da0b5' },
+};
+
+function loadWartung()        { return JSON.parse(localStorage.getItem('wmp_wartung') || '[]'); }
+function saveWartung(list)    { localStorage.setItem('wmp_wartung', JSON.stringify(list)); }
+
+function addWartung() {
+  const kat    = document.getElementById('wt-kat').value;
+  const dat    = document.getElementById('wt-dat').value;
+  const km     = document.getElementById('wt-km').value;
+  const kosten = document.getElementById('wt-kosten').value;
+  const notiz  = document.getElementById('wt-notiz').value.trim();
+  if (!dat) { toast('Datum fehlt'); return; }
+  const list = loadWartung();
+  list.push({ id: Date.now(), kat, dat, km: km ? parseInt(km) : null, kosten: kosten ? parseFloat(kosten) : null, notiz });
+  list.sort((a, b) => b.dat.localeCompare(a.dat));
+  saveWartung(list);
+  document.getElementById('wt-km').value = '';
+  document.getElementById('wt-kosten').value = '';
+  document.getElementById('wt-notiz').value = '';
+  renderWartung();
+  toast('Eintrag gespeichert');
+}
+
+function deleteWartung(id) {
+  if (!confirm('Eintrag löschen?')) return;
+  saveWartung(loadWartung().filter(e => e.id !== id));
+  renderWartung();
+}
+
+function renderWartung() {
+  const list  = loadWartung();
+  const listEl = document.getElementById('wt-list');
+  const summEl = document.getElementById('wt-summary');
+  if (!listEl) return;
+  if (!list.length) {
+    listEl.innerHTML = '<div class="no-entries">Noch keine Einträge</div>';
+    if (summEl) summEl.style.display = 'none';
+    return;
+  }
+  if (summEl) {
+    const total  = list.reduce((s, e) => s + (e.kosten || 0), 0);
+    const maxKm  = list.filter(e => e.km).sort((a,b) => b.km - a.km)[0];
+    summEl.style.cssText = 'display:grid;grid-template-columns:1fr 1fr;gap:10px';
+    summEl.innerHTML = `
+      <div style="background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:12px;text-align:center">
+        <div style="font-size:0.58rem;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px">Einträge</div>
+        <div style="font-size:1.5rem;font-weight:800;color:var(--text)">${list.length}</div>
+      </div>
+      <div style="background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:12px;text-align:center">
+        <div style="font-size:0.58rem;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px">Gesamtkosten</div>
+        <div style="font-size:1.5rem;font-weight:800;color:var(--warn)">${total.toFixed(0)} €</div>
+      </div>
+      ${maxKm ? `<div style="background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:12px;text-align:center;grid-column:span 2">
+        <div style="font-size:0.58rem;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px">Letzter erfasster km-Stand</div>
+        <div style="font-size:1.5rem;font-weight:800;color:var(--text)">${maxKm.km.toLocaleString('de-DE')} km</div>
+      </div>` : ''}`;
+  }
+  listEl.innerHTML = list.map(e => {
+    const k = WT_KAT[e.kat] || WT_KAT.sonstiges;
+    return `<div class="entry-item" style="border-left:3px solid ${k.color};margin-bottom:8px">
+      <div style="display:flex;align-items:flex-start;gap:10px">
+        <span style="font-size:1.5rem;flex-shrink:0;line-height:1.2">${k.icon}</span>
+        <div style="flex:1;min-width:0">
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:8px">
+            <span style="font-weight:700;color:var(--text);font-size:0.95rem">${k.label}</span>
+            <button onclick="deleteWartung(${e.id})" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:1rem;padding:0;flex-shrink:0">🗑</button>
+          </div>
+          <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:4px">
+            <span style="font-size:0.75rem;color:var(--muted)">📅 ${e.dat.split('-').reverse().join('.')}</span>
+            ${e.km ? `<span style="font-size:0.75rem;color:var(--muted)">🚗 ${e.km.toLocaleString('de-DE')} km</span>` : ''}
+            ${e.kosten ? `<span style="font-size:0.75rem;color:var(--warn)">💶 ${e.kosten.toFixed(2)} €</span>` : ''}
+          </div>
+          ${e.notiz ? `<div style="font-size:0.78rem;color:var(--muted);margin-top:5px">${e.notiz}</div>` : ''}
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ══════════════════════════════════
+// LÄNDERVORSCHRIFTEN
+// ══════════════════════════════════
+const VORS_DATA = [
+  { land:'🇩🇪 Deutschland',    promille:'0,5‰', info:'0,0‰ unter 21 J. / Fahranfänger', vignette:'Keine',              maut:'Keine PKW-Maut',              winter:'Situationsabhängig (M+S)',          ausruestung:['Warndreieck','Warnweste'] },
+  { land:'🇦🇹 Österreich',     promille:'0,5‰', info:'',                                 vignette:'Pflicht',             maut:'~10–93 € je Zeitraum',         winter:'Pflicht Nov–Apr (oder situationsbedgt.)', ausruestung:['Warndreieck','Warnweste','Verbandskasten','Feuerlöscher (WoMo)'] },
+  { land:'🇨🇭 Schweiz',        promille:'0,5‰', info:'',                                 vignette:'Pflicht (Jahresvig.)',maut:'CHF 40/Jahr',                   winter:'Situationsabhängig',               ausruestung:['Warndreieck','Warnweste'] },
+  { land:'🇮🇹 Italien',        promille:'0,5‰', info:'0,0‰ < 3 J. Führerschein',         vignette:'Keine',              maut:'Streckenmaut (Autostrada)',      winter:'Nov–Apr in Berggebieten',          ausruestung:['Warndreieck','Warnweste'] },
+  { land:'🇫🇷 Frankreich',     promille:'0,5‰', info:'0,2‰ < 3 J. Führerschein',         vignette:'Keine',              maut:'Streckenmaut (Autoroute)',       winter:'Nov–Mar Berggebiete (seit 2024)',   ausruestung:['Warndreieck','Warnweste (2×)'] },
+  { land:'🇪🇸 Spanien',        promille:'0,5‰', info:'0,3‰ < 2 J. Führerschein',         vignette:'Keine',              maut:'Streckenmaut (Autopista)',       winter:'Nur bei Schnee/Eis',               ausruestung:['Warndreieck (2×)','Warnweste'] },
+  { land:'🇵🇹 Portugal',       promille:'0,5‰', info:'0,2‰ < 3 J. Führerschein',         vignette:'Keine',              maut:'Elektronisch (Via Verde)',       winter:'Nur bei Schnee/Eis',               ausruestung:['Warndreieck','Warnweste'] },
+  { land:'🇳🇱 Niederlande',    promille:'0,5‰', info:'0,2‰ < 5 J. Führerschein',         vignette:'Keine',              maut:'Keine',                         winter:'Empfohlen, keine Pflicht',         ausruestung:['Warndreieck','Warnweste'] },
+  { land:'🇧🇪 Belgien',        promille:'0,5‰', info:'0,2‰ < 2 J. Führerschein',         vignette:'Keine',              maut:'Lkw-Maut (MyToll)',              winter:'Empfohlen, keine Pflicht',         ausruestung:['Warndreieck','Warnweste'] },
+  { land:'🇩🇰 Dänemark',       promille:'0,5‰', info:'',                                 vignette:'Keine',              maut:'Storebælt / Øresund',           winter:'Empfohlen, keine Pflicht',         ausruestung:['Warndreieck','Warnweste'] },
+  { land:'🇸🇪 Schweden',       promille:'0,2‰', info:'',                                 vignette:'Keine',              maut:'Stadtgebühr Stockholm/Göteborg', winter:'Pflicht 1. Dez – 31. Mär',         ausruestung:['Warndreieck','Warnweste'] },
+  { land:'🇳🇴 Norwegen',       promille:'0,2‰', info:'',                                 vignette:'Keine',              maut:'AutoPASS Streckengebühr',        winter:'Pflicht bei Schnee/Eis',           ausruestung:['Warndreieck','Warnweste'] },
+  { land:'🇫🇮 Finnland',       promille:'0,5‰', info:'',                                 vignette:'Keine',              maut:'Keine',                         winter:'Pflicht 1. Dez – 28. Feb',         ausruestung:['Warndreieck','Warnweste'] },
+  { land:'🇭🇷 Kroatien',       promille:'0,5‰', info:'0,0‰ < 24 Jahre',                  vignette:'Keine',              maut:'Streckenmaut',                  winter:'Nov–Apr empfohlen / bei Bedarf',   ausruestung:['Warndreieck','Warnweste','Verbandskasten','Feuerlöscher','Ersatzlampen'] },
+  { land:'🇸🇮 Slowenien',      promille:'0,5‰', info:'0,0‰ < 2 J. Führerschein',         vignette:'Pflicht (E-Vig.)',   maut:'15–110 €',                      winter:'Nov–Apr oder situationsbedgt.',    ausruestung:['Warndreieck','Warnweste','Verbandskasten'] },
+  { land:'🇬🇷 Griechenland',   promille:'0,5‰', info:'0,2‰ < 2 J. Führerschein',         vignette:'Keine',              maut:'Streckenmaut',                  winter:'In Bergen empfohlen',              ausruestung:['Warndreieck','Warnweste','Feuerlöscher','Verbandskasten'] },
+  { land:'🇵🇱 Polen',          promille:'0,2‰', info:'',                                 vignette:'Keine',              maut:'Elektronisch (e-TOLL)',          winter:'Empfohlen, keine Pflicht',         ausruestung:['Warndreieck','Warnweste','Verbandskasten','Feuerlöscher'] },
+  { land:'🇨🇿 Tschechien',     promille:'0,0‰', info:'Absolutes Alkoholverbot',           vignette:'Pflicht (E-Vig.)',   maut:'310 CZK (10T) / 1500 CZK (1M)', winter:'Nov–Mär situationsabhängig',       ausruestung:['Warndreieck','Warnweste','Verbandskasten','Feuerlöscher'] },
+  { land:'🇸🇰 Slowakei',       promille:'0,0‰', info:'Absolutes Alkoholverbot',           vignette:'Pflicht (E-Vig.)',   maut:'~6–15 €',                       winter:'Nov–Mär situationsabhängig',       ausruestung:['Warndreieck','Warnweste','Verbandskasten','Feuerlöscher'] },
+  { land:'🇭🇺 Ungarn',         promille:'0,0‰', info:'Absolutes Alkoholverbot',           vignette:'Pflicht (E-Vig.)',   maut:'~6–17 €',                       winter:'Empfohlen, keine Pflicht',         ausruestung:['Warndreieck','Warnweste','Verbandskasten','Feuerlöscher'] },
+  { land:'🇷🇴 Rumänien',       promille:'0,0‰', info:'Absolutes Alkoholverbot',           vignette:'Pflicht (Rovinieta)',maut:'~3–30 € je Zeitraum',           winter:'Nov–Mär empfohlen',                ausruestung:['Warndreieck','Warnweste','Verbandskasten','Feuerlöscher'] },
+  { land:'🇧🇬 Bulgarien',      promille:'0,5‰', info:'',                                 vignette:'Pflicht (E-Vig.)',   maut:'5–97 € je Zeitraum',            winter:'Situationsabhängig',               ausruestung:['Warndreieck','Warnweste','Verbandskasten','Feuerlöscher'] },
+  { land:'🇷🇸 Serbien',        promille:'0,3‰', info:'0,0‰ < 24 Jahre',                  vignette:'Keine',              maut:'Streckenmaut',                  winter:'Nov–Apr empfohlen',                ausruestung:['Warndreieck','Warnweste','Verbandskasten','Feuerlöscher'] },
+  { land:'🇲🇪 Montenegro',     promille:'0,3‰', info:'',                                 vignette:'Keine',              maut:'Streckenmaut',                  winter:'Situationsabhängig',               ausruestung:['Warndreieck','Warnweste'] },
+  { land:'🇦🇱 Albanien',       promille:'0,1‰', info:'',                                 vignette:'Keine',              maut:'Streckenmaut',                  winter:'Situationsabhängig',               ausruestung:['Warndreieck','Warnweste'] },
+  { land:'🇲🇰 Nordmazedonien', promille:'0,5‰', info:'0,0‰ < 24 Jahre',                  vignette:'Keine',              maut:'Streckenmaut',                  winter:'Situationsabhängig',               ausruestung:['Warndreieck','Warnweste'] },
+  { land:'🇬🇧 Großbritannien', promille:'0,8‰', info:'0,5‰ in Schottland',               vignette:'Keine',              maut:'London Congestion Charge',       winter:'Empfohlen, keine Pflicht',         ausruestung:['Warndreieck (empfohlen)','Warnweste (empfohlen)'] },
+  { land:'🇮🇪 Irland',         promille:'0,5‰', info:'0,2‰ < 2 J. Führerschein',         vignette:'Keine',              maut:'Streckenmaut',                  winter:'Empfohlen, keine Pflicht',         ausruestung:['Warndreieck (empfohlen)'] },
+  { land:'🇹🇷 Türkei',         promille:'0,5‰', info:'0,0‰ LKW/Bus-Fahrer',              vignette:'Keine',              maut:'Elektronisch (HGS/OGS)',         winter:'Situationsabhängig in Bergen',     ausruestung:['Warndreieck','Warnweste','Verbandskasten','Feuerlöscher'] },
+  { land:'🇲🇦 Marokko',        promille:'0,4‰', info:'',                                 vignette:'Keine',              maut:'Streckenmaut',                  winter:'In Bergen empfohlen',              ausruestung:['Warndreieck','Warnweste','Feuerlöscher'] },
+];
+
+let _vorsRendered = false;
+
+function renderVorschriften() {
+  if (_vorsRendered) return;
+  _vorsRendered = true;
+  filterVorschriften('');
+}
+
+function filterVorschriften(q) {
+  const term = q.toLowerCase().trim();
+  const list = VORS_DATA.filter(d => !term || d.land.toLowerCase().includes(term));
+  const container = document.getElementById('vors-list');
+  if (!container) return;
+  if (!list.length) { container.innerHTML = '<div class="no-entries">Kein Land gefunden</div>'; return; }
+  container.innerHTML = list.map(d => {
+    const pc = d.promille === '0,0‰' ? 'var(--danger)' : (d.promille === '0,2‰' || d.promille === '0,1‰' || d.promille === '0,3‰') ? 'var(--warn)' : 'var(--accent)';
+    const tags = d.ausruestung.map(a => `<span style="display:inline-block;background:var(--panel2);border:1px solid var(--border);border-radius:6px;padding:3px 8px;font-size:0.72rem;color:var(--text);margin:2px 2px 0 0">${a}</span>`).join('');
+    const vigBg = d.vignette.startsWith('Pflicht') ? 'rgba(245,158,11,0.08)' : 'var(--panel2)';
+    const vigBorder = d.vignette.startsWith('Pflicht') ? 'rgba(245,158,11,0.3)' : 'var(--border)';
+    return `<div style="background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:10px">
+      <div style="font-size:1rem;font-weight:700;color:var(--text);margin-bottom:12px">${d.land}</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
+        <div style="background:var(--panel2);border-radius:8px;padding:10px;border-left:3px solid ${pc}">
+          <div style="font-size:0.57rem;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px">🍺 Promillegrenze</div>
+          <div style="font-size:1.15rem;font-weight:800;color:${pc}">${d.promille}</div>
+          ${d.info ? `<div style="font-size:0.66rem;color:var(--muted);margin-top:2px;line-height:1.4">${d.info}</div>` : ''}
+        </div>
+        <div style="background:${vigBg};border:1px solid ${vigBorder};border-radius:8px;padding:10px">
+          <div style="font-size:0.57rem;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px">🛣 Vignette / Maut</div>
+          <div style="font-size:0.82rem;font-weight:700;color:var(--text)">${d.vignette}</div>
+          <div style="font-size:0.68rem;color:var(--muted);margin-top:2px">${d.maut}</div>
+        </div>
+      </div>
+      <div style="background:var(--panel2);border-radius:8px;padding:10px;margin-bottom:8px">
+        <div style="font-size:0.57rem;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px">❄️ Winterreifen</div>
+        <div style="font-size:0.82rem;color:var(--text)">${d.winter}</div>
+      </div>
+      <div>
+        <div style="font-size:0.57rem;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:6px">🎒 Pflichtausrüstung</div>
+        <div style="display:flex;flex-wrap:wrap">${tags}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
 
 let _notfallRendered = false;
 

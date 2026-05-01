@@ -22,6 +22,8 @@
 <title>Wohnmobil Pro – Camper Tools</title>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
 <style>
   @font-face { font-family:'Rajdhani'; font-style:normal; font-weight:400; font-display:swap; src:url('fonts/rajdhani-400.woff2') format('woff2'); }
   @font-face { font-family:'Rajdhani'; font-style:normal; font-weight:500; font-display:swap; src:url('fonts/rajdhani-500.woff2') format('woff2'); }
@@ -1660,7 +1662,7 @@
         </svg>
         <div>
           <strong>Wohnmobil Pro</strong>
-          <div style="font-size:0.8rem;color:var(--accent);margin-top:2px">v1.1.60</div>
+          <div style="font-size:0.8rem;color:var(--accent);margin-top:2px">v1.1.61</div>
           <div style="font-size:0.72rem;color:var(--muted);margin-top:2px">© 2026 Torsten Michaely</div>
         </div>
       </div>
@@ -2379,7 +2381,7 @@
       </div>
       <div style="font-size:0.7rem;color:var(--muted);text-align:center">
         © <span id="footer-year">2026</span> Torsten Michaely · Alle Rechte vorbehalten &nbsp;·&nbsp;
-        <span id="footer-version" style="color:var(--accent);font-size:0.7rem">v1.1.60</span>
+        <span id="footer-version" style="color:var(--accent);font-size:0.7rem">v1.1.61</span>
         &nbsp;|&nbsp; <a href="./impressum.html" style="color:var(--muted);text-decoration:none">Impressum</a>
         &nbsp;|&nbsp; <a href="./datenschutz.html" style="color:var(--muted);text-decoration:none">Datenschutz</a>
         &nbsp;|&nbsp; <a href="#" onclick="showDisclaimer();return false;" style="color:var(--muted);text-decoration:none">Haftungsausschluss</a>
@@ -5747,33 +5749,40 @@ function getSyncCode() {
   return c;
 }
 
+function fbTimeout(promise, ms = 8000) {
+  return Promise.race([
+    promise,
+    new Promise((_, rej) => setTimeout(() => rej(new Error('Timeout – kein Netz oder Firestore-Regeln prüfen')), ms))
+  ]);
+}
+
 async function syncUpload() {
   const db = getFB();
-  if (!db) { toast('Firebase nicht verfügbar'); return; }
+  if (!db) { toast('Firebase nicht verfügbar – Seite neu laden'); return; }
   const code = getSyncCode();
   const btn = document.getElementById('sync-upload-btn');
   if (btn) { btn.disabled = true; btn.textContent = '⏳ Hochladen…'; }
   try {
     const snap = buildSnapshot();
-    await db.collection('syncs').doc(code).set({ data: JSON.stringify(snap), ts: new Date().toISOString() });
+    await fbTimeout(db.collection('syncs').doc(code).set({ data: JSON.stringify(snap), ts: new Date().toISOString() }));
     toast('✅ Erfolgreich hochgeladen');
     renderSyncUI();
   } catch(e) {
-    toast('Fehler: ' + e.message);
+    toast('❌ ' + e.message);
     if (btn) { btn.disabled = false; btn.textContent = '☁️ Auf Cloud hochladen'; }
   }
 }
 
 async function syncDownload() {
   const db = getFB();
-  if (!db) { toast('Firebase nicht verfügbar'); return; }
+  if (!db) { toast('Firebase nicht verfügbar – Seite neu laden'); return; }
   const inputEl = document.getElementById('sync-input-code');
   const code = (inputEl?.value.trim().toUpperCase()) || getSyncCode();
   if (!code || code.length < 4) { toast('Sync-Code eingeben'); return; }
   const btn = document.getElementById('sync-download-btn');
   if (btn) { btn.disabled = true; btn.textContent = '⏳ Laden…'; }
   try {
-    const doc = await db.collection('syncs').doc(code).get();
+    const doc = await fbTimeout(db.collection('syncs').doc(code).get());
     if (!doc.exists) { toast('Kein Datensatz unter diesem Code'); if (btn) { btn.disabled = false; btn.textContent = '📲 Von Cloud laden'; } return; }
     const d = JSON.parse(doc.data().data);
     if (!confirm('Alle lokalen Daten mit dem Cloud-Stand ersetzen?')) { if (btn) { btn.disabled = false; btn.textContent = '📲 Von Cloud laden'; } return; }
@@ -5781,7 +5790,7 @@ async function syncDownload() {
     toast('✅ Sync erfolgreich');
     renderStart();
   } catch(e) {
-    toast('Fehler: ' + e.message);
+    toast('❌ ' + e.message);
     if (btn) { btn.disabled = false; btn.textContent = '📲 Von Cloud laden'; }
   }
 }
@@ -5817,7 +5826,5 @@ function renderSyncUI() {
 renderSyncUI();
 renderStart();
 </script>
-<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
 </body>
 </html>

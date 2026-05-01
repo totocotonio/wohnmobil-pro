@@ -1443,6 +1443,7 @@
       <button class="seg-tab" onclick="switchCL('ankunft', this)">Ankunft</button>
       <button class="seg-tab" onclick="switchCL('winter', this)">Winterlager</button>
       <button class="seg-tab" onclick="switchCL('eigen', this)">✏️ Eigene</button>
+      <button class="seg-tab" onclick="switchCL('dokumente', this)">📄 Dokumente</button>
     </div>
     <div id="cl-abfahrt" class="cl-panel">
       <div id="cl-items-abfahrt"></div>
@@ -1474,6 +1475,13 @@
       <div class="cl-footer" id="cl-footer-eigen" style="display:none">
         <div class="cl-progress">Erledigt: <span id="cl-prog-eigen">0/0</span></div>
         <button class="btn-reset" onclick="resetClEigen()">Zurücksetzen</button>
+      </div>
+    </div>
+    <div id="cl-dokumente" class="cl-panel" style="display:none">
+      <div id="cl-items-dokumente"></div>
+      <div class="cl-footer">
+        <div class="cl-progress">Erledigt: <span id="cl-prog-dokumente">0/0</span></div>
+        <button class="btn-reset" onclick="resetCL('dokumente')">Zurücksetzen</button>
       </div>
     </div>
   </div>
@@ -1915,6 +1923,7 @@
       <button class="seg-tab active" id="fz-tab-daten" onclick="switchFahrzeugTab('daten',this)">🚐 Fahrzeugdaten</button>
       <button class="seg-tab" id="fz-tab-wartung" onclick="switchFahrzeugTab('wartung',this)">🔧 Wartung</button>
       <button class="seg-tab" id="fz-tab-zuladung" onclick="switchFahrzeugTab('zuladung',this)">⚖️ Zuladung</button>
+      <button class="seg-tab" id="fz-tab-service" onclick="switchFahrzeugTab('service',this)">🔔 Service</button>
     </div>
 
     <!-- ── Panel: Fahrzeugdaten ── -->
@@ -2082,6 +2091,51 @@
         <div class="section-label" style="margin-bottom:10px">Aufschlüsselung</div>
         <div id="zul-breakdown-list"></div>
       </div>
+    </div>
+
+    <!-- ── Panel: Service-Alarm ── -->
+    <div id="fz-panel-service" class="fz-panel" style="display:none;padding-top:14px">
+
+      <!-- Aktueller Kilometerstand -->
+      <div style="background:var(--card);border-radius:12px;padding:14px 16px;margin-bottom:14px;display:flex;align-items:center;gap:10px">
+        <div style="flex:1">
+          <label class="form-lbl">Aktueller Kilometerstand</label>
+          <input class="form-inp" id="sv-aktkm" type="number" min="0" placeholder="z. B. 45000" oninput="renderService()">
+        </div>
+        <div style="font-size:1.6rem;padding-top:16px">🚐</div>
+      </div>
+
+      <!-- Automatisch aus Fahrzeugdaten -->
+      <div class="section-label" style="margin-bottom:10px">Fälligkeiten</div>
+      <div id="sv-list" style="margin-bottom:14px"></div>
+
+      <!-- Eigene Erinnerung hinzufügen -->
+      <div class="section-label" style="margin-bottom:10px">Eigene Erinnerung</div>
+      <div style="background:var(--card);border-radius:12px;padding:14px;margin-bottom:14px">
+        <div style="margin-bottom:10px">
+          <label class="form-lbl">Bezeichnung</label>
+          <input class="form-inp" id="sv-label" type="text" placeholder="z. B. Ölwechsel, Getriebeöl…">
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
+          <div>
+            <label class="form-lbl">Typ</label>
+            <select class="form-inp" id="sv-typ" onchange="svToggleTyp()">
+              <option value="km">Nach km</option>
+              <option value="date">Nach Datum</option>
+            </select>
+          </div>
+          <div id="sv-field-km">
+            <label class="form-lbl">Fällig bei km</label>
+            <input class="form-inp" id="sv-faellig-km" type="number" min="0" placeholder="60000">
+          </div>
+          <div id="sv-field-date" style="display:none">
+            <label class="form-lbl">Fällig am</label>
+            <input class="form-inp" id="sv-faellig-dat" type="date">
+          </div>
+        </div>
+        <button class="btn btn-primary" style="width:100%;padding:10px;font-weight:700" onclick="addSvCustom()">+ Erinnerung hinzufügen</button>
+      </div>
+
     </div>
 
   </div>
@@ -2395,6 +2449,13 @@ const CL_DATA = {
     { cat: 'Gas & Heizung', items: ['Gasflaschen schließen','Dieselheizung entlüften','Gasanlage auf Dichtheit prüfen'] },
     { cat: 'Sonstiges', items: ['Kühlschrank Tür anlehnen (Belüftung)','Wertgegenstände entnehmen','Versicherung informieren','KFZ abgemeldet?','Nächste HU / TÜV notiert'] },
   ],
+  dokumente: [
+    { cat: 'Fahrzeugdokumente', items: ['Fahrzeugschein (Zulassungsbescheinigung Teil I)','Führerschein','Grüne Versicherungskarte','TÜV / HU Bescheinigung','COC-Papiere (bei Auslandsreisen hilfreich)'] },
+    { cat: 'Persönliche Dokumente', items: ['Personalausweis / Reisepass','Europäische Krankenversicherungskarte (EHIC)','Impfausweis','Organspendeausweis','Notfallkontakte (ausgedruckt)'] },
+    { cat: 'Versicherung & Pannenhilfe', items: ['Auslandskrankenversicherung (Police/Karte)','ADAC / Pannenhilfe-Mitgliedskarte','Schutzbrief-Dokument','Camping-Haftpflicht-Nachweis'] },
+    { cat: 'Zahlungsmittel', items: ['EC-Karte','Kreditkarte','Bargeld (evtl. Fremdwährung)','Notgeldreserve'] },
+    { cat: 'Reisedokumente', items: ['Campingplatz-Buchungsbestätigungen','Vignetten (A, CH, SLO, CZ …)','Fährbuchungen ausgedruckt','Stellplatz-App / Führerausdruck','Länderspezifische Pflichtausrüstung geprüft'] },
+  ],
 };
 
 let clState = {};
@@ -2402,7 +2463,7 @@ function loadCL() { clState = JSON.parse(localStorage.getItem('wmp_cl') || '{}')
 function saveCL()  { localStorage.setItem('wmp_cl', JSON.stringify(clState)); }
 
 function renderCL() {
-  for (const name of ['abfahrt','ankunft','winter']) {
+  for (const name of ['abfahrt','ankunft','winter','dokumente']) {
     const data = CL_DATA[name];
     let html = '', total = 0, done = 0;
     for (const sec of data) {
@@ -2443,7 +2504,7 @@ function resetCL(name) {
 }
 
 function switchCL(name, btn) {
-  document.querySelectorAll('#tab-checkliste .seg-tab').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('#sec-checkliste .seg-tab').forEach(b => b.classList.remove('active'));
   document.querySelectorAll('.cl-panel').forEach(p => p.style.display = 'none');
   btn.classList.add('active');
   document.getElementById('cl-' + name).style.display = 'block';
@@ -3900,6 +3961,7 @@ function switchFahrzeugTab(name, btn) {
   btn.classList.add('active');
   document.getElementById('fz-panel-' + name).style.display = 'block';
   if (name === 'zuladung') initZuladung();
+  if (name === 'service') initService();
 }
 
 function initZuladung() {
@@ -3993,6 +4055,150 @@ function calcZuladung() {
   ).join('') + `<div style="display:flex;justify-content:space-between;padding:8px 0 4px;font-size:0.9rem;font-weight:700">
     <span>Gesamtgewicht</span><span>${Math.round(gesamtKg)} / ${zgg} kg</span>
   </div>`;
+}
+
+// ══════════════════════════════════
+// SERVICE-ALARM
+// ══════════════════════════════════
+function loadSvCustom()       { return JSON.parse(localStorage.getItem('wmp_service_custom') || '[]'); }
+function saveSvCustom(list)   { localStorage.setItem('wmp_service_custom', JSON.stringify(list)); }
+
+function svToggleTyp() {
+  const typ = document.getElementById('sv-typ')?.value;
+  document.getElementById('sv-field-km').style.display   = typ === 'km'   ? 'block' : 'none';
+  document.getElementById('sv-field-date').style.display = typ === 'date' ? 'block' : 'none';
+}
+
+function initService() {
+  const sv = JSON.parse(localStorage.getItem('wmp_service') || '{}');
+  const el = document.getElementById('sv-aktkm');
+  if (el && sv.aktkm) el.value = sv.aktkm;
+  renderService();
+}
+
+function renderService() {
+  const fz  = JSON.parse(localStorage.getItem('wmp_fahrzeug') || '{}');
+  const sv  = JSON.parse(localStorage.getItem('wmp_service')  || '{}');
+  const custom = loadSvCustom();
+  const aktkm = parseFloat(document.getElementById('sv-aktkm')?.value) || 0;
+
+  // Kilometerstand speichern
+  sv.aktkm = aktkm;
+  localStorage.setItem('wmp_service', JSON.stringify(sv));
+
+  const today = new Date(); today.setHours(0,0,0,0);
+  const items = [];
+
+  function daysDiff(dateStr) {
+    const d = new Date(dateStr); d.setHours(0,0,0,0);
+    return Math.round((d - today) / 86400000);
+  }
+
+  // TÜV (YYYY-MM) → fällig am letzten Tag des Monats
+  if (fz.tuev) {
+    const [y,m] = fz.tuev.split('-').map(Number);
+    const d = new Date(y, m, 0); // letzter Tag des Monats
+    const days = Math.round((d - today) / 86400000);
+    items.push({ label: 'TÜV / HU', typ: 'date', days });
+  }
+
+  // AU
+  if (fz.au) {
+    const [y,m] = fz.au.split('-').map(Number);
+    const d = new Date(y, m, 0);
+    const days = Math.round((d - today) / 86400000);
+    items.push({ label: 'AU (Abgasuntersuchung)', typ: 'date', days });
+  }
+
+  // Inspektion nach Datum
+  if (fz.inspektion) {
+    items.push({ label: 'Inspektion (Datum)', typ: 'date', days: daysDiff(fz.inspektion) });
+  }
+
+  // Inspektion nach km
+  if (fz['insp-km'] && aktkm) {
+    const kmLeft = parseFloat(fz['insp-km']) - aktkm;
+    items.push({ label: 'Inspektion (km)', typ: 'km', kmLeft });
+  }
+
+  // Eigene Erinnerungen
+  for (const r of custom) {
+    if (r.typ === 'date' && r.faellig) {
+      items.push({ label: r.label, typ: 'date', days: daysDiff(r.faellig), id: r.id });
+    } else if (r.typ === 'km' && r.faellig_km) {
+      const kmLeft = aktkm ? (r.faellig_km - aktkm) : null;
+      items.push({ label: r.label, typ: 'km', kmLeft, id: r.id, noKm: !aktkm });
+    }
+  }
+
+  const el = document.getElementById('sv-list');
+  if (!items.length) {
+    el.innerHTML = '<div style="text-align:center;color:var(--muted);padding:24px 0;font-size:0.9rem">Keine Daten. Fahrzeugdaten ausfüllen oder Erinnerungen hinzufügen.</div>';
+    return;
+  }
+
+  // Sortierung: überfällig zuerst, dann nach Dringlichkeit
+  items.sort((a, b) => {
+    const scoreA = a.typ === 'date' ? a.days : (a.kmLeft ?? 99999);
+    const scoreB = b.typ === 'date' ? b.days : (b.kmLeft ?? 99999);
+    return scoreA - scoreB;
+  });
+
+  el.innerHTML = items.map(item => {
+    let color, icon, sub;
+    if (item.noKm) {
+      color = 'var(--muted)'; icon = '📅'; sub = 'Kilometerstand eingeben';
+    } else if (item.typ === 'date') {
+      const d = item.days;
+      if      (d < 0)   { color='#ef4444'; icon='⚠️'; sub=`${Math.abs(d)} Tage überfällig`; }
+      else if (d <= 14) { color='#ef4444'; icon='🔔'; sub=`in ${d} Tagen fällig`; }
+      else if (d <= 60) { color='#f59e0b'; icon='📅'; sub=`in ${d} Tagen fällig`; }
+      else              { color='#27ae60'; icon='✅'; sub=`in ${d} Tagen fällig`; }
+    } else {
+      const km = Math.round(item.kmLeft);
+      if      (km < 0)    { color='#ef4444'; icon='⚠️'; sub=`${Math.abs(km).toLocaleString('de')} km überfällig`; }
+      else if (km <= 500) { color='#ef4444'; icon='🔔'; sub=`in ${km.toLocaleString('de')} km fällig`; }
+      else if (km <= 2000){ color='#f59e0b'; icon='📅'; sub=`in ${km.toLocaleString('de')} km fällig`; }
+      else                { color='#27ae60'; icon='✅'; sub=`in ${km.toLocaleString('de')} km fällig`; }
+    }
+    const del = item.id !== undefined
+      ? `<button onclick="deleteSvCustom(${item.id})" style="background:none;border:none;color:var(--danger);cursor:pointer;font-size:1.1rem;padding:0;flex-shrink:0">🗑</button>`
+      : '';
+    return `<div style="background:var(--card);border-radius:10px;padding:13px 14px;margin-bottom:8px;border-left:4px solid ${color};display:flex;align-items:center;gap:12px">
+      <div style="font-size:1.35rem;flex-shrink:0">${icon}</div>
+      <div style="flex:1;min-width:0">
+        <div style="font-weight:700;color:var(--text);font-size:0.93rem">${item.label}</div>
+        <div style="font-size:0.8rem;color:${color};margin-top:2px">${sub}</div>
+      </div>${del}
+    </div>`;
+  }).join('');
+}
+
+function addSvCustom() {
+  const label = document.getElementById('sv-label')?.value.trim();
+  const typ   = document.getElementById('sv-typ')?.value;
+  if (!label) { toast('Bezeichnung fehlt'); return; }
+  const list = loadSvCustom();
+  const id   = Date.now();
+  if (typ === 'km') {
+    const faellig_km = parseFloat(document.getElementById('sv-faellig-km')?.value);
+    if (!faellig_km) { toast('km-Wert fehlt'); return; }
+    list.push({ id, label, typ, faellig_km });
+  } else {
+    const faellig = document.getElementById('sv-faellig-dat')?.value;
+    if (!faellig) { toast('Datum fehlt'); return; }
+    list.push({ id, label, typ, faellig });
+  }
+  saveSvCustom(list);
+  document.getElementById('sv-label').value = '';
+  document.getElementById('sv-faellig-km').value = '';
+  document.getElementById('sv-faellig-dat').value = '';
+  renderService();
+}
+
+function deleteSvCustom(id) {
+  saveSvCustom(loadSvCustom().filter(r => r.id !== id));
+  renderService();
 }
 
 function loadFahrzeug() {

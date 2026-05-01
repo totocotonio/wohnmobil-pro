@@ -1,4 +1,4 @@
-const CACHE = 'womo-pro-1.1.69';
+const CACHE = 'womo-pro-1.1.71';
 const ASSETS = [
   './',
   './index.html',

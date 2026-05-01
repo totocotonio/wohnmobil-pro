@@ -2037,7 +2037,7 @@
     <div style="display:grid;grid-template-columns:1fr 1fr auto;gap:8px;align-items:end;margin-bottom:14px">
       <div>
         <label class="form-lbl">Kraftstoff</label>
-        <select class="form-inp" id="tp-kraftstoff">
+        <select class="form-inp" id="tp-kraftstoff" onchange="tpUpdatePmcLink()">
           <option value="diesel">🛢 Diesel</option>
           <option value="e5">🟢 Super E5</option>
           <option value="e10">🟡 Super E10</option>
@@ -2056,6 +2056,18 @@
 
     <!-- DE Key Notice -->
     <div id="tp-de-notice" style="display:none;margin-bottom:14px"></div>
+
+    <!-- Plein Moins Cher Button (FR + ES) -->
+    <div id="tp-pmc-btn" style="display:none;margin-bottom:14px">
+      <a id="tp-pmc-link" href="#" target="_blank" style="display:flex;align-items:center;gap:12px;background:linear-gradient(135deg,rgba(34,197,94,0.1),rgba(56,189,248,0.08));border:1px solid rgba(34,197,94,0.3);border-radius:12px;padding:14px 16px;text-decoration:none;color:var(--text)">
+        <span style="font-size:1.8rem;flex-shrink:0">⛽</span>
+        <div style="flex:1">
+          <div style="font-weight:700;font-size:0.92rem;margin-bottom:2px">Plein Moins Cher öffnen</div>
+          <div style="font-size:0.72rem;color:var(--muted)">Karte mit günstigen Tankstellen · Browser-GPS wird genutzt</div>
+        </div>
+        <span style="color:var(--accent);font-size:1.1rem">↗</span>
+      </a>
+    </div>
 
     <!-- Ergebnisse -->
     <div id="tp-results"></div>
@@ -4170,7 +4182,26 @@ function switchTpLand(land, btn) {
   TP.land = land;
   document.getElementById('tp-de-notice').style.display = land === 'de' ? 'block' : 'none';
   if (land === 'de') tpShowDeNotice(localStorage.getItem('wmp_tk_key'));
+  const pmcWrap = document.getElementById('tp-pmc-btn');
+  pmcWrap.style.display = (land === 'fr' || land === 'es') ? 'block' : 'none';
+  if (land === 'fr' || land === 'es') tpUpdatePmcLink();
   document.getElementById('tp-results').innerHTML = '';
+}
+
+function tpUpdatePmcLink() {
+  const link = document.getElementById('tp-pmc-link');
+  if (!link) return;
+  const kraftstoff = document.getElementById('tp-kraftstoff')?.value || 'diesel';
+  link.href = tpPleinMoinsCherUrl(TP.land, kraftstoff);
+}
+
+function tpPleinMoinsCherUrl(land, kraftstoff) {
+  const dimMap  = { diesel: 'c_gazole', e5: 'c_sp95', e10: 'c_e10' };
+  const slugMap = { diesel: 'gazole-b7', e5: 'sp95-e5', e10: 'e10-e5' };
+  const dim     = dimMap[kraftstoff] || 'c_gazole';
+  const slug    = slugMap[kraftstoff] || 'gazole-b7';
+  const filters = btoa(JSON.stringify([{ dim: 'pays', k: land.toUpperCase() }, { dim, k: '1' }]));
+  return `https://plein-moins-cher.fr/de/carte-carburants-prix-stations-${slug}.html?filters=${filters}`;
 }
 
 function tpShowDeNotice(key) {
@@ -4290,11 +4321,12 @@ async function tpSearchES(kraftstoff, radius, resultEl) {
   const url      = 'https://sedeaplicaciones.minetur.gob.es/ServiciosRESTCarburantes/PreciosCarburantes/EstacionesTerrestres/';
   let res;
   try { res = await fetch(url); } catch(e) {
+    const pmcUrl = tpPleinMoinsCherUrl('es', kraftstoff);
     resultEl.innerHTML = `<div style="background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:16px;text-align:center">
       <div style="font-size:1.5rem;margin-bottom:8px">🇪🇸</div>
-      <div style="font-weight:700;color:var(--text);margin-bottom:6px">Direktzugriff gesperrt (CORS)</div>
-      <div style="font-size:0.78rem;color:var(--muted);margin-bottom:12px">Die spanische API erlaubt keinen direkten Browser-Zugriff.</div>
-      <a href="https://geoportalgasolineras.es/" target="_blank" style="display:inline-block;padding:10px 20px;background:var(--accent);color:#fff;border-radius:8px;text-decoration:none;font-weight:700;font-size:0.88rem">🔗 Geoportal Gasolineras öffnen</a>
+      <div style="font-weight:700;color:var(--text);margin-bottom:6px">Direktzugriff nicht möglich</div>
+      <div style="font-size:0.78rem;color:var(--muted);margin-bottom:12px">Die spanische API erlaubt keinen direkten Browser-Zugriff. Nutze Plein Moins Cher (oben) oder das Geoportal.</div>
+      <a href="https://geoportalgasolineras.es/" target="_blank" style="display:inline-block;padding:8px 16px;background:var(--panel2);border:1px solid var(--border);color:var(--text);border-radius:8px;text-decoration:none;font-weight:700;font-size:0.82rem">🔗 Geoportal Gasolineras</a>
     </div>`;
     return;
   }

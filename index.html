@@ -1914,6 +1914,7 @@
     <div class="seg-tabs" style="margin-top:14px">
       <button class="seg-tab active" id="fz-tab-daten" onclick="switchFahrzeugTab('daten',this)">🚐 Fahrzeugdaten</button>
       <button class="seg-tab" id="fz-tab-wartung" onclick="switchFahrzeugTab('wartung',this)">🔧 Wartung</button>
+      <button class="seg-tab" id="fz-tab-zuladung" onclick="switchFahrzeugTab('zuladung',this)">⚖️ Zuladung</button>
     </div>
 
     <!-- ── Panel: Fahrzeugdaten ── -->
@@ -2009,6 +2010,80 @@
       <div class="section-label">Einträge</div>
       <div id="wt-list"></div>
     </div>
+
+    <!-- ── Panel: Zuladung ── -->
+    <div id="fz-panel-zuladung" class="fz-panel" style="display:none;padding-top:14px">
+      <div style="background:var(--card);border-radius:12px;padding:16px;margin-bottom:14px">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px">
+          <div>
+            <label class="form-lbl">ZGG (kg)</label>
+            <input class="form-inp" id="zul-zgg" type="number" min="0" placeholder="aus Fahrzeugdaten" oninput="calcZuladung()">
+          </div>
+          <div>
+            <label class="form-lbl">Leergewicht (kg)</label>
+            <input class="form-inp" id="zul-leer" type="number" min="0" placeholder="aus Fahrzeugdaten" oninput="calcZuladung()">
+          </div>
+        </div>
+        <div class="section-label" style="margin-bottom:10px">Beladung</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
+          <div>
+            <label class="form-lbl">Personen (Anz.)</label>
+            <input class="form-inp" id="zul-pers-anz" type="number" min="0" value="2" oninput="calcZuladung()">
+          </div>
+          <div>
+            <label class="form-lbl">Ø kg/Person</label>
+            <input class="form-inp" id="zul-pers-kg" type="number" min="0" value="85" oninput="calcZuladung()">
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
+          <div>
+            <label class="form-lbl">Gepäck (kg)</label>
+            <input class="form-inp" id="zul-gepaeck" type="number" min="0" value="0" oninput="calcZuladung()">
+          </div>
+          <div>
+            <label class="form-lbl">Lebensmittel (kg)</label>
+            <input class="form-inp" id="zul-lebensm" type="number" min="0" value="0" oninput="calcZuladung()">
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
+          <div>
+            <label class="form-lbl">Wasser (Liter)</label>
+            <input class="form-inp" id="zul-wasser" type="number" min="0" value="0" oninput="calcZuladung()">
+          </div>
+          <div>
+            <label class="form-lbl">Kraftstoff (Liter)</label>
+            <input class="form-inp" id="zul-kraftstoff" type="number" min="0" value="0" oninput="calcZuladung()">
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
+          <div>
+            <label class="form-lbl">Gas (kg)</label>
+            <input class="form-inp" id="zul-gas" type="number" min="0" value="0" oninput="calcZuladung()">
+          </div>
+          <div>
+            <label class="form-lbl">Sonstiges (kg)</label>
+            <input class="form-inp" id="zul-sonstiges" type="number" min="0" value="0" oninput="calcZuladung()">
+          </div>
+        </div>
+      </div>
+
+      <!-- Ergebnis -->
+      <div id="zul-result" style="border-radius:12px;padding:18px;text-align:center;background:var(--card);margin-bottom:14px">
+        <div style="font-size:0.8rem;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">Noch verfügbare Zuladung</div>
+        <div id="zul-wert" style="font-size:2.8rem;font-weight:800;line-height:1">–</div>
+        <div id="zul-status" style="font-size:0.85rem;margin-top:6px;color:var(--muted)">Fahrzeugdaten eingeben</div>
+        <div id="zul-bar-wrap" style="margin-top:12px;background:rgba(255,255,255,0.06);border-radius:8px;height:10px;overflow:hidden;display:none">
+          <div id="zul-bar" style="height:100%;border-radius:8px;transition:width 0.3s,background 0.3s"></div>
+        </div>
+      </div>
+
+      <!-- Aufschlüsselung -->
+      <div id="zul-breakdown" style="background:var(--card);border-radius:12px;padding:14px;display:none">
+        <div class="section-label" style="margin-bottom:10px">Aufschlüsselung</div>
+        <div id="zul-breakdown-list"></div>
+      </div>
+    </div>
+
   </div>
 
   <!-- ════════════ TANKPREISE ════════════ -->
@@ -3824,6 +3899,100 @@ function switchFahrzeugTab(name, btn) {
   document.querySelectorAll('.fz-panel').forEach(p => p.style.display = 'none');
   btn.classList.add('active');
   document.getElementById('fz-panel-' + name).style.display = 'block';
+  if (name === 'zuladung') initZuladung();
+}
+
+function initZuladung() {
+  const fz = JSON.parse(localStorage.getItem('wmp_fahrzeug') || '{}');
+  if (fz.zgg)  { const el = document.getElementById('zul-zgg');  if (el && !el.dataset.manual) el.value = fz.zgg; }
+  if (fz.leer) { const el = document.getElementById('zul-leer'); if (el && !el.dataset.manual) el.value = fz.leer; }
+  calcZuladung();
+}
+
+function calcZuladung() {
+  const zgg  = parseFloat(document.getElementById('zul-zgg')?.value)  || 0;
+  const leer = parseFloat(document.getElementById('zul-leer')?.value) || 0;
+  const pers = (parseFloat(document.getElementById('zul-pers-anz')?.value) || 0)
+             * (parseFloat(document.getElementById('zul-pers-kg')?.value)  || 85);
+  const gepaeck    = parseFloat(document.getElementById('zul-gepaeck')?.value)    || 0;
+  const lebensm    = parseFloat(document.getElementById('zul-lebensm')?.value)    || 0;
+  const wasserL    = parseFloat(document.getElementById('zul-wasser')?.value)     || 0;
+  const kraftstL   = parseFloat(document.getElementById('zul-kraftstoff')?.value) || 0;
+  const gas        = parseFloat(document.getElementById('zul-gas')?.value)        || 0;
+  const sonstiges  = parseFloat(document.getElementById('zul-sonstiges')?.value)  || 0;
+
+  const wasser    = wasserL   * 1.0;
+  const kraftstoff = kraftstL * 0.84;
+
+  const beladen = pers + gepaeck + lebensm + wasser + kraftstoff + gas + sonstiges;
+  const wertEl  = document.getElementById('zul-wert');
+  const statusEl = document.getElementById('zul-status');
+  const barWrap = document.getElementById('zul-bar-wrap');
+  const bar     = document.getElementById('zul-bar');
+  const breakdown = document.getElementById('zul-breakdown');
+  const bList   = document.getElementById('zul-breakdown-list');
+
+  if (!zgg || !leer) {
+    wertEl.textContent = '–';
+    wertEl.style.color = 'var(--muted)';
+    statusEl.textContent = 'ZGG und Leergewicht eingeben';
+    barWrap.style.display = 'none';
+    breakdown.style.display = 'none';
+    return;
+  }
+
+  const maxNutzlast = zgg - leer;
+  const frei = maxNutzlast - beladen;
+  const gesamtKg = leer + beladen;
+
+  wertEl.textContent = Math.round(frei) + ' kg';
+  barWrap.style.display = 'block';
+  breakdown.style.display = 'block';
+
+  const pct = Math.min(100, Math.max(0, (beladen / maxNutzlast) * 100));
+  bar.style.width = pct + '%';
+
+  if (frei < 0) {
+    wertEl.style.color = '#c0392b';
+    bar.style.background = '#c0392b';
+    statusEl.textContent = '⚠️ Überladen! ' + Math.abs(Math.round(frei)) + ' kg zu viel';
+    statusEl.style.color = '#c0392b';
+  } else if (frei < 50) {
+    wertEl.style.color = '#e74c3c';
+    bar.style.background = '#e74c3c';
+    statusEl.textContent = '⚠️ Kritisch – fast überladen';
+    statusEl.style.color = '#e74c3c';
+  } else if (frei < 200) {
+    wertEl.style.color = '#f39c12';
+    bar.style.background = '#f39c12';
+    statusEl.textContent = '⚡ Knapp – Beladung prüfen';
+    statusEl.style.color = '#f39c12';
+  } else {
+    wertEl.style.color = '#27ae60';
+    bar.style.background = '#27ae60';
+    statusEl.textContent = '✅ Reserven vorhanden';
+    statusEl.style.color = '#27ae60';
+  }
+
+  const rows = [
+    { label: 'Leergewicht', kg: leer },
+    { label: `Personen (${document.getElementById('zul-pers-anz')?.value || 0} × ${document.getElementById('zul-pers-kg')?.value || 85} kg)`, kg: pers },
+    gepaeck   ? { label: 'Gepäck',        kg: gepaeck }   : null,
+    lebensm   ? { label: 'Lebensmittel',  kg: lebensm }   : null,
+    wasserL   ? { label: `Wasser (${wasserL} L)`,        kg: wasser }    : null,
+    kraftstL  ? { label: `Kraftstoff (${kraftstL} L)`,   kg: Math.round(kraftstoff * 10) / 10 } : null,
+    gas       ? { label: 'Gas',           kg: gas }       : null,
+    sonstiges ? { label: 'Sonstiges',     kg: sonstiges } : null,
+  ].filter(Boolean);
+
+  bList.innerHTML = rows.map(r =>
+    `<div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--border);font-size:0.88rem">
+      <span style="color:var(--muted)">${r.label}</span>
+      <span style="font-weight:600;color:var(--text)">${r.kg} kg</span>
+    </div>`
+  ).join('') + `<div style="display:flex;justify-content:space-between;padding:8px 0 4px;font-size:0.9rem;font-weight:700">
+    <span>Gesamtgewicht</span><span>${Math.round(gesamtKg)} / ${zgg} kg</span>
+  </div>`;
 }
 
 function loadFahrzeug() {

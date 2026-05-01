@@ -4048,7 +4048,6 @@ function closeDisclaimer() {
   startSensor();
   restoreWetterCache();
   renderServiceStartBanner();
-  renderStart();
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('./sw.js').catch(() => {});
   }
@@ -5627,6 +5626,8 @@ function filterNotfall(q) {
     </div>`;
   }).join('');
 }
+
+renderStart();
 </script>
 </body>
 </html>

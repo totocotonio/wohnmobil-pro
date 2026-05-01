@@ -1694,7 +1694,7 @@
         </svg>
         <div>
           <strong>Wohnmobil Pro</strong>
-          <div style="font-size:0.8rem;color:var(--accent);margin-top:2px">v1.1.83</div>
+          <div style="font-size:0.8rem;color:var(--accent);margin-top:2px">v1.1.84</div>
           <div style="font-size:0.72rem;color:var(--muted);margin-top:2px">© 2026 Torsten Michaely</div>
         </div>
       </div>
@@ -1956,6 +1956,10 @@
       <div id="tuev-banner" style="margin-bottom:14px;margin-top:14px"></div>
 
       <div class="section-label">Fahrzeuginfo</div>
+      <div style="margin-bottom:10px">
+        <label class="form-lbl">🏷️ Spitzname <span style="color:var(--muted);font-weight:400">(wird auf der Startseite angezeigt)</span></label>
+        <input class="form-inp" id="fz-spitzname" placeholder="z.B. Fridolin, Berta, Willi…" style="width:100%" oninput="saveFahrzeugSilent();renderStart()">
+      </div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">
         <div><label class="form-lbl">Fahrzeugtyp</label><input class="form-inp" id="fz-typ" placeholder="Kastenwagen, Alkoven…"></div>
         <div><label class="form-lbl">Kennzeichen</label><input class="form-inp" id="fz-kz" placeholder="AB-CD 1234" style="text-transform:uppercase"></div>
@@ -2441,7 +2445,7 @@
       </div>
       <div style="font-size:0.7rem;color:var(--muted);text-align:center">
         © <span id="footer-year">2026</span> Torsten Michaely · Alle Rechte vorbehalten &nbsp;·&nbsp;
-        <span id="footer-version" style="color:var(--accent);font-size:0.7rem">v1.1.83</span>
+        <span id="footer-version" style="color:var(--accent);font-size:0.7rem">v1.1.84</span>
         &nbsp;|&nbsp; <a href="./impressum.html" style="color:var(--muted);text-decoration:none">Impressum</a>
         &nbsp;|&nbsp; <a href="./datenschutz.html" style="color:var(--muted);text-decoration:none">Datenschutz</a>
         &nbsp;|&nbsp; <a href="#" onclick="showDisclaimer();return false;" style="color:var(--muted);text-decoration:none">Haftungsausschluss</a>
@@ -4229,7 +4233,7 @@ const NOTFALL_DATA = [
 // ══════════════════════════════════
 // FAHRZEUGDATEN
 // ══════════════════════════════════
-const FZ_FIELDS = ['typ','kz','hersteller','modell','fin','ez','bj','tuev','gas-pruef','inspektion','insp-km','vers-name','vers-nr','vers-tel','reifen','druck','oel','tank','zgg','leer','notiz'];
+const FZ_FIELDS = ['typ','kz','hersteller','modell','spitzname','fin','ez','bj','tuev','gas-pruef','inspektion','insp-km','vers-name','vers-nr','vers-tel','reifen','druck','oel','tank','zgg','leer','notiz'];
 
 function switchFahrzeugTab(name, btn) {
   document.querySelectorAll('#sec-fahrzeug .seg-tab').forEach(b => b.classList.remove('active'));
@@ -4489,7 +4493,7 @@ function renderStart() {
   if (fzEl) {
     try {
       const fz = JSON.parse(localStorage.getItem('wmp_fahrzeug') || '{}');
-      const name = (fz.hersteller && fz.modell) ? `${fz.hersteller} ${fz.modell}` : fz.typ || null;
+      const name = fz.spitzname || ((fz.hersteller && fz.modell) ? `${fz.hersteller} ${fz.modell}` : fz.typ || null);
       fzEl.textContent = name ? `🚐 ${name}` : '13 Werkzeuge · Camping · Offline';
     } catch(e) { fzEl.textContent = '13 Werkzeuge · Camping · Offline'; }
   }

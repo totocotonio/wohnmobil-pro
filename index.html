@@ -1275,6 +1275,7 @@
     <button class="nav-item" id="nav-notfall" onclick="showSection('notfall');closeMenu()">🆘 Notfall</button>
     <button class="nav-item" id="nav-tanken" onclick="showSection('tanken');closeMenu()">⛽ Tankpreise</button>
     <button class="nav-item" id="nav-fahrzeug" onclick="showSection('fahrzeug');closeMenu()">🚐 Mein Fahrzeug</button>
+    <button class="nav-item" id="nav-satfinder" onclick="showSection('satfinder');closeMenu()">📡 Sat-Finder</button>
     <button class="nav-item" id="nav-vorschriften" onclick="showSection('vorschriften');closeMenu()">📋 Vorschriften</button>
     <div style="border-top:1px solid var(--border);margin:8px 0"></div>
     <button class="nav-item" id="nav-mehr" onclick="showSection('mehr');closeMenu()">⚙ Einstellungen</button>
@@ -1355,6 +1356,11 @@
         <div class="start-card-icon">📋</div>
         <div class="start-card-name">Vorschriften</div>
         <div class="start-card-desc">Promille, Vignetten &amp; Pflichtausrüstung je Land</div>
+      </div>
+      <div class="start-card" onclick="showSection('satfinder')">
+        <div class="start-card-icon">📡</div>
+        <div class="start-card-name">Sat-Finder</div>
+        <div class="start-card-desc">Azimut &amp; Elevation für Satellitenschüssel</div>
       </div>
     </div>
   </div>
@@ -2202,6 +2208,83 @@
     <div id="tp-results"></div>
   </div>
 
+  <!-- ════════════ SAT-FINDER ════════════ -->
+  <div id="sec-satfinder" class="wmp-section">
+    <div style="text-align:center;padding:24px 0 18px;position:relative">
+      <div style="font-size:2.2rem;margin-bottom:6px">📡</div>
+      <div style="font-size:1.55rem;font-weight:700;letter-spacing:0.06em;color:var(--text)">SAT-<span style="color:var(--accent)">FINDER</span></div>
+      <div style="font-size:0.72rem;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-top:4px">Azimut · Elevation · LNB-Drehwinkel · Offline</div>
+      <div style="position:absolute;bottom:0;left:50%;transform:translateX(-50%);width:48px;height:2px;background:linear-gradient(90deg,transparent,var(--accent),transparent);border-radius:2px"></div>
+    </div>
+
+    <!-- Satellit wählen -->
+    <div class="entry-form" style="margin-bottom:14px">
+      <div style="margin-bottom:10px">
+        <label class="form-lbl">Satellit</label>
+        <select class="form-inp" id="sat-sel" onchange="satCalc()">
+          <option value="19.2">📺 Astra 1 – 19,2° Ost (ARD, ZDF, RTL…)</option>
+          <option value="13.0">🌍 Hotbird – 13° Ost (internationale Sender)</option>
+          <option value="23.5">📺 Astra 3 – 23,5° Ost (weitere Sender)</option>
+          <option value="9.0">📡 Eutelsat 9B – 9° Ost (Sky, diverse)</option>
+          <option value="28.2">🇬🇧 Astra 2 – 28,2° Ost (Sky UK)</option>
+          <option value="42.0">🇹🇷 Türksat – 42° Ost (türkische Sender)</option>
+          <option value="-0.8">🇩🇰 Thor – 0,8° West (Skandinavien)</option>
+          <option value="-5.0">🇮🇪 Eutelsat 5WA – 5° West (diverse)</option>
+          <option value="-30.0">🇵🇹 Hispasat – 30° West (PT/ES Sender)</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- GPS -->
+    <div style="background:var(--card);border-radius:12px;padding:14px 16px;margin-bottom:14px;display:flex;align-items:center;gap:12px">
+      <div style="flex:1">
+        <div id="sat-gps-status" style="font-size:0.82rem;color:var(--muted)">GPS-Position wird benötigt</div>
+        <div id="sat-gps-coords" style="font-size:0.72rem;color:var(--muted);margin-top:2px"></div>
+      </div>
+      <button class="btn btn-primary" style="padding:8px 14px;font-size:0.85rem;flex-shrink:0" onclick="satGetGPS()">📍 GPS</button>
+    </div>
+
+    <!-- Ergebnis -->
+    <div id="sat-result" style="display:none">
+      <!-- Kompass -->
+      <div style="text-align:center;margin-bottom:14px">
+        <canvas id="sat-canvas" width="220" height="220" style="max-width:100%"></canvas>
+      </div>
+
+      <!-- Werte -->
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:14px">
+        <div style="background:var(--card);border-radius:10px;padding:12px 8px;text-align:center">
+          <div style="font-size:0.58rem;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">⬆️ Elevation</div>
+          <div id="sat-el" style="font-size:1.7rem;font-weight:800;color:var(--accent)">–</div>
+          <div style="font-size:0.65rem;color:var(--muted)">Grad</div>
+        </div>
+        <div style="background:var(--card);border-radius:10px;padding:12px 8px;text-align:center">
+          <div style="font-size:0.58rem;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">🧭 Azimut</div>
+          <div id="sat-az" style="font-size:1.7rem;font-weight:800;color:var(--accent)">–</div>
+          <div style="font-size:0.65rem;color:var(--muted)">Grad</div>
+        </div>
+        <div style="background:var(--card);border-radius:10px;padding:12px 8px;text-align:center">
+          <div style="font-size:0.58rem;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">🔄 LNB-Skew</div>
+          <div id="sat-skew" style="font-size:1.7rem;font-weight:800;color:var(--text)">–</div>
+          <div style="font-size:0.65rem;color:var(--muted)">Grad</div>
+        </div>
+      </div>
+
+      <!-- Himmelsrichtung -->
+      <div id="sat-direction" style="background:var(--card);border-radius:10px;padding:12px 14px;margin-bottom:14px;text-align:center;font-size:0.9rem;color:var(--muted)"></div>
+    </div>
+
+    <!-- Info -->
+    <div style="background:rgba(34,197,94,0.06);border:1px solid rgba(34,197,94,0.2);border-radius:10px;padding:12px 14px;font-size:0.78rem;color:var(--muted);line-height:1.6">
+      <strong style="color:var(--text)">So gehst du vor:</strong><br>
+      1. Satellit auswählen<br>
+      2. GPS-Position bestimmen<br>
+      3. Schüssel auf Azimut-Richtung ausrichten<br>
+      4. Elevation (Neigung) einstellen<br>
+      5. LNB um Skew-Winkel drehen (+ = im Uhrzeigersinn)
+    </div>
+  </div>
+
   <!-- ════════════ LÄNDERVORSCHRIFTEN ════════════ -->
   <div id="sec-vorschriften" class="wmp-section">
     <div style="text-align:center;padding:24px 0 18px;position:relative">
@@ -2290,6 +2373,7 @@ function showSection(name) {
   if (name === 'fahrzeug') { loadFahrzeug(); renderWartung(); }
   if (name === 'tanken') tpInit();
   if (name === 'vorschriften') renderVorschriften();
+  if (name === 'satfinder' && SAT.lat) satCalc();
 }
 
 function openMenu() {
@@ -4673,6 +4757,154 @@ function filterVorschriften(q) {
       </div>
     </div>`;
   }).join('');
+}
+
+// ══════════════════════════════════
+// SAT-FINDER
+// ══════════════════════════════════
+const SAT = { lat: null, lon: null };
+
+function satGetGPS() {
+  const status = document.getElementById('sat-gps-status');
+  const coords = document.getElementById('sat-gps-coords');
+  status.textContent = '⏳ GPS wird ermittelt…';
+  if (!navigator.geolocation) { status.textContent = '❌ GPS nicht verfügbar'; return; }
+  navigator.geolocation.getCurrentPosition(pos => {
+    SAT.lat = pos.coords.latitude;
+    SAT.lon = pos.coords.longitude;
+    status.textContent = '✅ GPS-Position ermittelt';
+    coords.textContent = `${SAT.lat.toFixed(4)}° N  ${SAT.lon.toFixed(4)}° E`;
+    satCalc();
+  }, () => {
+    status.textContent = '❌ GPS-Zugriff verweigert';
+  }, { enableHighAccuracy: true, timeout: 10000 });
+}
+
+function satCalc() {
+  if (!SAT.lat || !SAT.lon) return;
+  const satLon = parseFloat(document.getElementById('sat-sel')?.value || '19.2');
+
+  const toRad = d => d * Math.PI / 180;
+  const toDeg = r => r * 180 / Math.PI;
+  const φ  = toRad(SAT.lat);
+  const dL = toRad(satLon - SAT.lon);
+
+  // Central angle
+  const cosC = Math.cos(φ) * Math.cos(dL);
+
+  // Elevation
+  const el = toDeg(Math.atan((cosC - 0.15127) / Math.sqrt(1 - cosC * cosC)));
+
+  // Azimuth (bearing from North, 0–360°)
+  const azRaw = toDeg(Math.atan2(Math.tan(dL), Math.sin(φ)));
+  const az = ((180 - azRaw) + 360) % 360;
+
+  // LNB Skew (positive = clockwise when looking at dish)
+  const skew = toDeg(Math.atan2(-Math.cos(φ) * Math.sin(dL),
+                                 Math.sin(φ) * Math.sqrt(1 - cosC * cosC)));
+
+  // Himmelsrichtung
+  const dirs = ['N','NNO','NO','ONO','O','OSO','SO','SSO','S','SSW','SW','WSW','W','WNW','NW','NNW'];
+  const dir  = dirs[Math.round(az / 22.5) % 16];
+
+  document.getElementById('sat-el').textContent   = el.toFixed(1) + '°';
+  document.getElementById('sat-az').textContent   = az.toFixed(1) + '°';
+  document.getElementById('sat-skew').textContent = (skew >= 0 ? '+' : '') + skew.toFixed(1) + '°';
+  document.getElementById('sat-direction').textContent =
+    `Schüssel Richtung: ${dir} (${az.toFixed(1)}°) · Elevation: ${el.toFixed(1)}°`;
+
+  document.getElementById('sat-result').style.display = 'block';
+  satDrawCompass(az);
+}
+
+function satDrawCompass(az) {
+  const canvas = document.getElementById('sat-canvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width, H = canvas.height;
+  const cx = W/2, cy = H/2, r = W/2 - 8;
+
+  const isDark = !document.documentElement.classList.contains('light');
+  const colBg      = isDark ? '#1e293b' : '#f1f5f9';
+  const colBorder  = isDark ? '#334155' : '#cbd5e1';
+  const colText    = isDark ? '#94a3b8' : '#64748b';
+  const colSouth   = '#22c55e';
+  const colArrow   = '#22c55e';
+  const colCenter  = isDark ? '#475569' : '#94a3b8';
+
+  ctx.clearRect(0, 0, W, H);
+
+  // Background circle
+  ctx.beginPath();
+  ctx.arc(cx, cy, r, 0, Math.PI*2);
+  ctx.fillStyle = colBg;
+  ctx.fill();
+  ctx.strokeStyle = colBorder;
+  ctx.lineWidth = 2;
+  ctx.stroke();
+
+  // Degree ticks
+  for (let i = 0; i < 72; i++) {
+    const a = (i * 5 - 90) * Math.PI / 180;
+    const len = i % 18 === 0 ? 14 : (i % 9 === 0 ? 9 : 5);
+    ctx.strokeStyle = colBorder;
+    ctx.lineWidth = i % 18 === 0 ? 2 : 1;
+    ctx.beginPath();
+    ctx.moveTo(cx + r * Math.cos(a), cy + r * Math.sin(a));
+    ctx.lineTo(cx + (r-len) * Math.cos(a), cy + (r-len) * Math.sin(a));
+    ctx.stroke();
+  }
+
+  // Cardinal labels
+  ctx.font = `bold ${Math.round(W*0.07)}px sans-serif`;
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  [['N',0],['O',90],['S',180],['W',270]].forEach(([lbl, deg]) => {
+    const a = (deg - 90) * Math.PI / 180;
+    const x = cx + (r - 22) * Math.cos(a);
+    const y = cy + (r - 22) * Math.sin(a);
+    ctx.fillStyle = lbl === 'S' ? colSouth : colText;
+    ctx.fillText(lbl, x, y);
+  });
+
+  // Direction arrow
+  const aRad = (az - 90) * Math.PI / 180;
+  const arrowLen = r - 38;
+
+  // Arrow shaft
+  ctx.strokeStyle = colArrow;
+  ctx.lineWidth = 4;
+  ctx.lineCap = 'round';
+  ctx.beginPath();
+  ctx.moveTo(cx - (arrowLen * 0.25) * Math.cos(aRad), cy - (arrowLen * 0.25) * Math.sin(aRad));
+  ctx.lineTo(cx + arrowLen * Math.cos(aRad), cy + arrowLen * Math.sin(aRad));
+  ctx.stroke();
+
+  // Arrow head
+  const hLen = 16, hAng = 0.45;
+  ctx.fillStyle = colArrow;
+  ctx.beginPath();
+  const tx = cx + arrowLen * Math.cos(aRad);
+  const ty = cy + arrowLen * Math.sin(aRad);
+  ctx.moveTo(tx, ty);
+  ctx.lineTo(tx - hLen*Math.cos(aRad-hAng), ty - hLen*Math.sin(aRad-hAng));
+  ctx.lineTo(tx - hLen*Math.cos(aRad+hAng), ty - hLen*Math.sin(aRad+hAng));
+  ctx.closePath();
+  ctx.fill();
+
+  // Tail (opposite direction, gray)
+  ctx.strokeStyle = colCenter;
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(cx, cy);
+  ctx.lineTo(cx - (arrowLen * 0.25) * Math.cos(aRad), cy - (arrowLen * 0.25) * Math.sin(aRad));
+  ctx.stroke();
+
+  // Center dot
+  ctx.fillStyle = colArrow;
+  ctx.beginPath();
+  ctx.arc(cx, cy, 5, 0, Math.PI*2);
+  ctx.fill();
 }
 
 // ══════════════════════════════════

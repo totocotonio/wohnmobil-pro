@@ -1694,10 +1694,21 @@
         </svg>
         <div>
           <strong>Wohnmobil Pro</strong>
-          <div style="font-size:0.8rem;color:var(--accent);margin-top:2px">v1.1.77</div>
+          <div style="font-size:0.8rem;color:var(--accent);margin-top:2px">v1.1.78</div>
           <div style="font-size:0.72rem;color:var(--muted);margin-top:2px">© 2026 Torsten Michaely</div>
         </div>
       </div>
+    </div>
+    <div class="mehr-block">
+      <div class="section-label">Benachrichtigungen</div>
+      <div class="info-card" style="margin-bottom:8px;font-size:0.82rem;color:var(--muted);line-height:1.5">
+        Bei fälligem Service (TÜV, Inspektion usw.) erscheint beim App-Start eine Benachrichtigung – einmal pro Tag.
+      </div>
+      <div id="notif-status" class="info-card" style="margin-bottom:8px;font-size:0.83rem;display:flex;align-items:center;justify-content:space-between">
+        <span id="notif-status-text">Wird geprüft…</span>
+        <span id="notif-status-icon"></span>
+      </div>
+      <button id="notif-btn" class="btn" style="width:100%;display:none" onclick="requestNotifPermission()">🔔 Benachrichtigungen erlauben</button>
     </div>
     <div class="mehr-block">
       <div class="section-label">Darstellung</div>
@@ -2430,7 +2441,7 @@
       </div>
       <div style="font-size:0.7rem;color:var(--muted);text-align:center">
         © <span id="footer-year">2026</span> Torsten Michaely · Alle Rechte vorbehalten &nbsp;·&nbsp;
-        <span id="footer-version" style="color:var(--accent);font-size:0.7rem">v1.1.77</span>
+        <span id="footer-version" style="color:var(--accent);font-size:0.7rem">v1.1.78</span>
         &nbsp;|&nbsp; <a href="./impressum.html" style="color:var(--muted);text-decoration:none">Impressum</a>
         &nbsp;|&nbsp; <a href="./datenschutz.html" style="color:var(--muted);text-decoration:none">Datenschutz</a>
         &nbsp;|&nbsp; <a href="#" onclick="showDisclaimer();return false;" style="color:var(--muted);text-decoration:none">Haftungsausschluss</a>
@@ -4172,6 +4183,7 @@ function closeDisclaimer() {
   startSensor();
   restoreWetterCache();
   renderServiceStartBanner();
+  renderNotifStatus();
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('./sw.js').catch(() => {});
   }
@@ -4552,27 +4564,58 @@ function renderServiceStartBanner() {
 function checkServiceNotification(urgentItems) {
   if (!urgentItems || !urgentItems.length) return;
   if (!('Notification' in window)) return;
+  if (Notification.permission !== 'granted') return;
 
   const today = new Date().toISOString().split('T')[0];
-  const lastShown = localStorage.getItem('wmp_sv_notif_date');
-  if (lastShown === today) return; // max 1× pro Tag
+  if (localStorage.getItem('wmp_sv_notif_date') === today) return;
 
-  const show = () => {
-    const worst = urgentItems[0];
-    const { sub } = svItemStyle(worst);
-    localStorage.setItem('wmp_sv_notif_date', today);
-    new Notification('🔔 Wohnmobil Pro – Service-Alarm', {
-      body: `${worst.label}: ${sub}${urgentItems.length > 1 ? ` (+${urgentItems.length - 1} weitere)` : ''}`,
-      icon: '/favicon.ico',
-      tag: 'wmp-service-alarm'
-    });
-  };
+  const worst = urgentItems[0];
+  const { sub } = svItemStyle(worst);
+  localStorage.setItem('wmp_sv_notif_date', today);
+  new Notification('🔔 Wohnmobil Pro – Service-Alarm', {
+    body: `${worst.label}: ${sub}${urgentItems.length > 1 ? ` (+${urgentItems.length - 1} weitere)` : ''}`,
+    icon: './favicon.ico',
+    tag: 'wmp-service-alarm'
+  });
+}
 
-  if (Notification.permission === 'granted') {
-    show();
-  } else if (Notification.permission === 'default') {
-    Notification.requestPermission().then(p => { if (p === 'granted') show(); });
+function renderNotifStatus() {
+  const txt  = document.getElementById('notif-status-text');
+  const icon = document.getElementById('notif-status-icon');
+  const btn  = document.getElementById('notif-btn');
+  if (!txt) return;
+  if (!('Notification' in window)) {
+    txt.textContent = 'Nicht unterstützt von diesem Browser';
+    if (icon) icon.textContent = '❌';
+    return;
   }
+  const p = Notification.permission;
+  if (p === 'granted') {
+    txt.textContent = 'Benachrichtigungen aktiv';
+    if (icon) icon.textContent = '✅';
+    if (btn) btn.style.display = 'none';
+  } else if (p === 'denied') {
+    txt.textContent = 'Blockiert – in Browser-Einstellungen erlauben';
+    if (icon) icon.textContent = '🚫';
+    if (btn) btn.style.display = 'none';
+  } else {
+    txt.textContent = 'Noch nicht erlaubt';
+    if (icon) icon.textContent = '🔕';
+    if (btn) btn.style.display = 'block';
+  }
+}
+
+function requestNotifPermission() {
+  if (!('Notification' in window)) return;
+  Notification.requestPermission().then(p => {
+    renderNotifStatus();
+    if (p === 'granted') {
+      toast('✅ Benachrichtigungen aktiviert');
+      renderServiceStartBanner();
+    } else {
+      toast('Benachrichtigungen nicht erlaubt');
+    }
+  });
 }
 
 function addSvCustom() {

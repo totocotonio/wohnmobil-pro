@@ -1291,11 +1291,16 @@
     <!-- Service-Alarm Banner -->
     <div id="sv-start-banner" style="display:none;padding:0 0 6px"></div>
 
-    <!-- Favoriten -->
-    <div id="start-fav-section" style="display:none;margin-bottom:14px">
-      <div style="font-size:0.65rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--accent);margin-bottom:8px">⭐ Meine Favoriten</div>
-      <div id="start-fav-grid" class="start-grid"></div>
+    <!-- Willkommen-Box -->
+    <div style="background:rgba(245,158,11,0.07);border:1px solid rgba(245,158,11,0.2);border-radius:12px;padding:12px 16px;margin-bottom:14px;font-size:0.84rem;line-height:1.6;color:var(--text)">
+      Willkommen bei <strong>Wohnmobil Pro</strong> – deinem digitalen Begleiter für Camping &amp; Reise.<br>
+      <span style="color:var(--muted);font-size:0.8rem">Nivellieren · Wetter · Checkliste · Kosten · Solar · Sat-Finder &amp; mehr</span>
+      <div style="margin-top:6px;font-size:0.8rem;color:var(--muted)">⭐ Stern auf einer Kachel antippen zum Fixieren &nbsp;·&nbsp; ☰ Alle Werkzeuge unten</div>
     </div>
+
+    <!-- Schnellzugriff (4 Tools / Favoriten) -->
+    <div style="font-size:0.65rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;margin-bottom:8px" id="start-quick-label" style="color:var(--muted)">Schnellzugriff</div>
+    <div id="start-fav-grid" class="start-grid" style="margin-bottom:14px"></div>
 
     <!-- Alle Werkzeuge (einklappbar) -->
     <button id="start-all-btn" onclick="toggleAllTools()"
@@ -4375,19 +4380,20 @@ function renderStart() {
     } catch(e) { fzEl.textContent = '13 Werkzeuge · Camping · Offline'; }
   }
 
-  // Favoriten-Grid
-  const favSection = document.getElementById('start-fav-section');
-  const favGrid    = document.getElementById('start-fav-grid');
-  if (favSection && favGrid) {
-    if (wmpFavs.length > 0) {
-      favSection.style.display = 'block';
-      favGrid.innerHTML = wmpFavs.map(id => {
-        const t = START_TOOLS.find(x => x.id === id);
-        return t ? makeStartCard(t) : '';
-      }).join('');
-    } else {
-      favSection.style.display = 'none';
+  // Schnellzugriff: Favoriten wenn gesetzt, sonst 4 Defaults
+  const QUICK_DEFAULT = ['nivellieren', 'wetter', 'checkliste', 'fahrzeug'];
+  const favGrid  = document.getElementById('start-fav-grid');
+  const favLabel = document.getElementById('start-quick-label');
+  if (favGrid) {
+    const showIds = wmpFavs.length > 0 ? wmpFavs : QUICK_DEFAULT;
+    if (favLabel) {
+      favLabel.textContent = wmpFavs.length > 0 ? '⭐ Meine Favoriten' : '🔧 Schnellzugriff';
+      favLabel.style.color = wmpFavs.length > 0 ? 'var(--accent)' : 'var(--muted)';
     }
+    favGrid.innerHTML = showIds.map(id => {
+      const t = START_TOOLS.find(x => x.id === id);
+      return t ? makeStartCard(t) : '';
+    }).join('');
   }
 
   // Alle Werkzeuge (Grid immer aktuell halten, Sichtbarkeit über toggleAllTools)

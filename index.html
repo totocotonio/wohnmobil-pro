@@ -3945,12 +3945,10 @@ function renderWartung() {
       <div style="display:flex;align-items:flex-start;gap:10px">
         <span style="font-size:1.5rem;flex-shrink:0;line-height:1.2">${k.icon}</span>
         <div style="flex:1;min-width:0">
-          <div style="display:flex;align-items:center;justify-content:space-between;gap:8px">
-            <span style="font-weight:700;color:var(--text);font-size:0.95rem">${k.label}</span>
-            <div style="display:flex;gap:6px;flex-shrink:0">
-              <button onclick="editWartung(${e.id})" style="background:var(--panel2);border:1px solid var(--border);color:var(--accent);cursor:pointer;font-size:0.8rem;padding:4px 8px;border-radius:6px;font-weight:700">✎ Edit</button>
-              <button onclick="deleteWartung(${e.id})" style="background:var(--panel2);border:1px solid var(--border);color:var(--danger);cursor:pointer;font-size:0.8rem;padding:4px 8px;border-radius:6px;font-weight:700">✕</button>
-            </div>
+          <div style="display:flex;align-items:center;gap:8px">
+            <span style="font-weight:700;color:var(--text);font-size:0.95rem;flex:1">${k.label}</span>
+            <button onclick="editWartung(${e.id})" style="background:none;border:none;color:var(--accent);cursor:pointer;font-size:1.2rem;padding:0;line-height:1;opacity:0.8">✎</button>
+            <button onclick="deleteWartung(${e.id})" style="background:none;border:none;color:var(--danger);cursor:pointer;font-size:1.1rem;padding:0;line-height:1;opacity:0.8">🗑</button>
           </div>
           <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:4px">
             <span style="font-size:0.75rem;color:var(--muted)">📅 ${e.dat.split('-').reverse().join('.')}</span>

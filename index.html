@@ -3948,8 +3948,8 @@ function renderWartung() {
           <div style="display:flex;align-items:center;justify-content:space-between;gap:8px">
             <span style="font-weight:700;color:var(--text);font-size:0.95rem">${k.label}</span>
             <div style="display:flex;gap:6px;flex-shrink:0">
-              <button onclick="editWartung(${e.id})" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:1rem;padding:0">✎</button>
-              <button onclick="deleteWartung(${e.id})" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:1rem;padding:0">🗑</button>
+              <button onclick="editWartung(${e.id})" style="background:var(--panel2);border:1px solid var(--border);color:var(--accent);cursor:pointer;font-size:0.8rem;padding:4px 8px;border-radius:6px;font-weight:700">✎ Edit</button>
+              <button onclick="deleteWartung(${e.id})" style="background:var(--panel2);border:1px solid var(--border);color:var(--danger);cursor:pointer;font-size:0.8rem;padding:4px 8px;border-radius:6px;font-weight:700">✕</button>
             </div>
           </div>
           <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:4px">

@@ -1694,7 +1694,7 @@
         </svg>
         <div>
           <strong>Wohnmobil Pro</strong>
-          <div style="font-size:0.8rem;color:var(--accent);margin-top:2px">v1.1.75</div>
+          <div style="font-size:0.8rem;color:var(--accent);margin-top:2px">v1.1.76</div>
           <div style="font-size:0.72rem;color:var(--muted);margin-top:2px">© 2026 Torsten Michaely</div>
         </div>
       </div>
@@ -2430,7 +2430,7 @@
       </div>
       <div style="font-size:0.7rem;color:var(--muted);text-align:center">
         © <span id="footer-year">2026</span> Torsten Michaely · Alle Rechte vorbehalten &nbsp;·&nbsp;
-        <span id="footer-version" style="color:var(--accent);font-size:0.7rem">v1.1.75</span>
+        <span id="footer-version" style="color:var(--accent);font-size:0.7rem">v1.1.76</span>
         &nbsp;|&nbsp; <a href="./impressum.html" style="color:var(--muted);text-decoration:none">Impressum</a>
         &nbsp;|&nbsp; <a href="./datenschutz.html" style="color:var(--muted);text-decoration:none">Datenschutz</a>
         &nbsp;|&nbsp; <a href="#" onclick="showDisclaimer();return false;" style="color:var(--muted);text-decoration:none">Haftungsausschluss</a>
@@ -5914,9 +5914,155 @@ function renderSyncUI() {
     </div>`;
 }
 
+// ══════════════════════════════════
+// ONBOARDING - HTML wird beim Laden eingefügt
+// ══════════════════════════════════
+(function() {
+  if (localStorage.getItem('wmp_onboarded')) return;
+  const div = document.createElement('div');
+  div.id = 'onboarding';
+  div.style.cssText = 'position:fixed;inset:0;z-index:10000;background:var(--bg);display:flex;flex-direction:column;padding:env(safe-area-inset-top,20px) 20px 32px;overflow-y:auto';
+  div.innerHTML = `
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0 20px">
+      <div id="ob-dots" style="display:flex;gap:6px;align-items:center"></div>
+      <button onclick="finishOnboarding()" style="background:none;border:none;color:var(--muted);font-family:inherit;font-size:0.8rem;cursor:pointer;padding:4px 8px">Überspringen</button>
+    </div>
+    <div id="ob-content" style="flex:1"></div>
+    <div style="display:flex;gap:10px;margin-top:20px">
+      <button id="ob-back" onclick="obBack()" style="padding:14px 20px;background:var(--panel2);border:1px solid var(--border);border-radius:14px;color:var(--muted);font-family:inherit;font-size:0.9rem;font-weight:700;cursor:pointer;visibility:hidden">← Zurück</button>
+      <button id="ob-next" onclick="obNext()" style="flex:1;padding:14px;background:var(--accent);border:none;border-radius:14px;color:#fff;font-family:inherit;font-size:1rem;font-weight:700;cursor:pointer">Weiter →</button>
+    </div>`;
+  document.body.appendChild(div);
+})();
+
 renderSyncUI();
 renderColorPicker();
 renderStart();
+
+// ══════════════════════════════════
+// ONBOARDING
+// ══════════════════════════════════
+const ONBOARD_KEY = 'wmp_onboarded';
+let _obStep = 0;
+let _obFavs = [];
+
+function showOnboarding() {
+  if (localStorage.getItem(ONBOARD_KEY)) return;
+  _obStep = 0; _obFavs = [];
+  const el = document.getElementById('onboarding');
+  if (el) { el.style.display = 'flex'; renderObStep(); }
+}
+
+function obNext() {
+  if (_obStep === 1) {
+    const h = document.getElementById('ob-hersteller')?.value.trim();
+    const m = document.getElementById('ob-modell')?.value.trim();
+    if (h || m) {
+      const fz = JSON.parse(localStorage.getItem('wmp_fahrzeug')||'{}');
+      if (h) fz.hersteller = h;
+      if (m) fz.modell = m;
+      localStorage.setItem('wmp_fahrzeug', JSON.stringify(fz));
+    }
+  }
+  if (_obStep === 2) {
+    if (_obFavs.length > 0) {
+      wmpFavs = _obFavs;
+      localStorage.setItem(WMP_FAVS_KEY, JSON.stringify(wmpFavs));
+    }
+  }
+  if (_obStep >= 3) { finishOnboarding(); return; }
+  _obStep++;
+  renderObStep();
+}
+
+function obBack() {
+  if (_obStep > 0) { _obStep--; renderObStep(); }
+}
+
+function obToggleFav(id) {
+  const i = _obFavs.indexOf(id);
+  if (i >= 0) { _obFavs.splice(i, 1); }
+  else if (_obFavs.length < 4) { _obFavs.push(id); }
+  renderObStep();
+}
+
+function finishOnboarding() {
+  localStorage.setItem(ONBOARD_KEY, '1');
+  const el = document.getElementById('onboarding');
+  if (el) { el.style.opacity = '0'; el.style.transition = 'opacity 0.4s'; setTimeout(() => el.style.display = 'none', 400); }
+  renderStart();
+}
+
+function renderObStep() {
+  const wrap = document.getElementById('ob-content');
+  const dots = document.getElementById('ob-dots');
+  if (!wrap || !dots) return;
+
+  dots.innerHTML = [0,1,2,3].map(i =>
+    `<div style="width:${i===_obStep?20:8}px;height:8px;border-radius:4px;background:${i===_obStep?'var(--accent)':'var(--border)'};transition:all 0.3s"></div>`
+  ).join('');
+
+  const steps = [
+    // Step 0: Willkommen
+    `<div style="text-align:center;padding:16px 0">
+      <div style="width:80px;height:80px;background:linear-gradient(135deg,var(--accent),var(--accent2,#38bdf8));border-radius:24px;display:flex;align-items:center;justify-content:center;font-size:38px;margin:0 auto 20px;box-shadow:0 0 40px var(--accent-dim)">🚐</div>
+      <div style="font-size:1.8rem;font-weight:800;letter-spacing:2px;color:var(--text);margin-bottom:6px">WOHNMOBIL <span style="color:var(--accent)">PRO</span></div>
+      <div style="font-size:0.85rem;color:var(--muted);line-height:1.7;margin-bottom:24px">Dein digitaler Begleiter für Camping & Reise.<br>Kostenlos · Offline · Ohne Registrierung</div>
+      <div style="display:flex;flex-direction:column;gap:8px;text-align:left;background:var(--panel2);border-radius:14px;padding:14px 16px">
+        ${['⊙ Wohnmobil nivellieren','🌤 Wetter am Stellplatz','☑ Checklisten','€ Kosten & Urlaube','⚡ Solar & Energie','📡 Sat-Finder & mehr'].map(t=>`<div style="font-size:0.85rem;color:var(--text)">✓ ${t}</div>`).join('')}
+      </div>
+    </div>`,
+
+    // Step 1: Fahrzeug
+    `<div style="padding:8px 0">
+      <div style="font-size:1.4rem;font-weight:800;color:var(--text);margin-bottom:6px">Dein Fahrzeug 🚐</div>
+      <div style="font-size:0.82rem;color:var(--muted);margin-bottom:20px">Optional – du kannst das auch später unter „Mein Fahrzeug" ausfüllen.</div>
+      <label style="font-size:0.72rem;color:var(--muted);letter-spacing:1px;text-transform:uppercase;display:block;margin-bottom:6px">Hersteller</label>
+      <input id="ob-hersteller" class="form-inp" type="text" placeholder="z.B. Fiat, Mercedes, VW…" style="width:100%;margin-bottom:14px">
+      <label style="font-size:0.72rem;color:var(--muted);letter-spacing:1px;text-transform:uppercase;display:block;margin-bottom:6px">Modell</label>
+      <input id="ob-modell" class="form-inp" type="text" placeholder="z.B. Ducato, Sprinter, Crafter…" style="width:100%">
+    </div>`,
+
+    // Step 2: Favoriten
+    `<div style="padding:8px 0">
+      <div style="font-size:1.4rem;font-weight:800;color:var(--text);margin-bottom:6px">Deine Favoriten ⭐</div>
+      <div style="font-size:0.82rem;color:var(--muted);margin-bottom:16px">Wähle bis zu 4 Werkzeuge für die Startseite. <span style="color:var(--accent)">${_obFavs.length}/4 gewählt</span></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+        ${START_TOOLS.map(t => {
+          const sel = _obFavs.includes(t.id);
+          return `<button onclick="obToggleFav('${t.id}')" style="display:flex;align-items:center;gap:8px;padding:10px 12px;background:${sel?'var(--accent-dim)':'var(--panel2)'};border:1px solid ${sel?'var(--accent)':'var(--border)'};border-radius:12px;cursor:pointer;font-family:inherit;text-align:left;transition:all 0.15s">
+            <span style="font-size:1.2rem">${t.icon}</span>
+            <span style="font-size:0.8rem;font-weight:700;color:${sel?'var(--accent)':'var(--text)'}">${t.name}</span>
+          </button>`;
+        }).join('')}
+      </div>
+    </div>`,
+
+    // Step 3: Fertig
+    `<div style="text-align:center;padding:24px 0">
+      <div style="font-size:4rem;margin-bottom:16px">🎉</div>
+      <div style="font-size:1.6rem;font-weight:800;color:var(--text);margin-bottom:8px">Alles bereit!</div>
+      <div style="font-size:0.85rem;color:var(--muted);line-height:1.7;margin-bottom:20px">Du kannst jederzeit in den Einstellungen<br>Favoriten und Fahrzeugdaten anpassen.</div>
+      <div style="background:var(--accent-dim);border:1px solid var(--accent);border-radius:12px;padding:12px 16px;font-size:0.82rem;color:var(--text);line-height:1.6">
+        💡 Tipp: App zum Homescreen hinzufügen für den besten Vollbild-Erlebnis
+      </div>
+    </div>`
+  ];
+
+  wrap.style.opacity = '0';
+  wrap.style.transform = 'translateX(20px)';
+  setTimeout(() => {
+    wrap.innerHTML = steps[_obStep];
+    wrap.style.transition = 'opacity 0.25s, transform 0.25s';
+    wrap.style.opacity = '1';
+    wrap.style.transform = 'translateX(0)';
+  }, 150);
+
+  document.getElementById('ob-back').style.visibility = _obStep > 0 ? 'visible' : 'hidden';
+  document.getElementById('ob-next').textContent = _obStep === 3 ? '🚀 Los geht\'s!' : _obStep === 2 && _obFavs.length === 0 ? 'Überspringen' : 'Weiter →';
+}
+
+showOnboarding();
 
 // ══════════════════════════════════
 // FEEDBACK

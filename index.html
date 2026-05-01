@@ -1956,6 +1956,20 @@
     <div class="section-label">Notizen</div>
     <textarea class="form-inp" id="fz-notiz" placeholder="Wichtige Infos, Besonderheiten, Codes…" style="width:100%;min-height:80px;resize:vertical;margin-bottom:14px;box-sizing:border-box"></textarea>
 
+    <div class="section-label">Foto Fahrzeugschein / Zulassung</div>
+    <input type="file" id="fz-foto-inp" accept="image/*" style="display:none" onchange="onFzFotoSelect(this)">
+    <div id="fz-foto-preview" style="margin-bottom:14px">
+      <div id="fz-foto-placeholder" style="border:2px dashed var(--border);border-radius:10px;padding:28px;text-align:center;cursor:pointer;color:var(--muted)" onclick="document.getElementById('fz-foto-inp').click()">
+        <div style="font-size:2rem;margin-bottom:6px">📄</div>
+        <div style="font-size:0.82rem">Tippen zum Foto auswählen</div>
+      </div>
+      <div id="fz-foto-img-wrap" style="display:none;position:relative">
+        <img id="fz-foto-img" src="" alt="Zulassung" onclick="showFzFotoFull()" style="width:100%;border-radius:10px;border:1px solid var(--border);cursor:zoom-in;display:block">
+        <button onclick="removeFzFoto()" style="position:absolute;top:8px;right:8px;background:rgba(0,0,0,0.6);border:none;color:#fff;border-radius:50%;width:28px;height:28px;font-size:0.9rem;cursor:pointer;display:flex;align-items:center;justify-content:center">✕</button>
+        <button onclick="document.getElementById('fz-foto-inp').click()" style="position:absolute;top:8px;right:44px;background:rgba(0,0,0,0.6);border:none;color:#fff;border-radius:50%;width:28px;height:28px;font-size:0.9rem;cursor:pointer;display:flex;align-items:center;justify-content:center">📷</button>
+      </div>
+    </div>
+
     <button class="btn btn-primary" style="width:100%;padding:13px;font-size:1rem;font-weight:700" onclick="saveFahrzeug()">💾 Speichern</button>
   </div>
 
@@ -3752,13 +3766,16 @@ function loadFahrzeug() {
     const el = document.getElementById('fz-' + f);
     if (el && d[f] !== undefined) el.value = d[f];
   });
+  if (d.zulassung_foto) renderFzFoto(d.zulassung_foto);
   renderTuevBanner();
   renderVersTelLink();
 }
 
 function saveFahrzeugSilent() {
-  const d = {};
+  const d = JSON.parse(localStorage.getItem('wmp_fahrzeug') || '{}');
   FZ_FIELDS.forEach(f => { const el = document.getElementById('fz-' + f); if (el) d[f] = el.value; });
+  if (_fzFotoBase64 !== null) d.zulassung_foto = _fzFotoBase64;
+  if (_fzFotoBase64 === null) delete d.zulassung_foto;
   localStorage.setItem('wmp_fahrzeug', JSON.stringify(d));
   renderVersTelLink();
 }
@@ -3811,6 +3828,43 @@ function renderVersTelLink() {
   } else {
     link.style.display = 'none';
   }
+}
+
+let _fzFotoBase64 = null;
+
+function renderFzFoto(src) {
+  const wrap = document.getElementById('fz-foto-img-wrap');
+  const placeholder = document.getElementById('fz-foto-placeholder');
+  if (src) {
+    document.getElementById('fz-foto-img').src = src;
+    wrap.style.display = 'block';
+    placeholder.style.display = 'none';
+    _fzFotoBase64 = src;
+  } else {
+    wrap.style.display = 'none';
+    placeholder.style.display = 'block';
+    _fzFotoBase64 = null;
+  }
+}
+
+async function onFzFotoSelect(input) {
+  if (!input.files || !input.files[0]) return;
+  const base64 = await resizeImage(input.files[0], 1200);
+  renderFzFoto(base64);
+}
+
+function removeFzFoto() {
+  renderFzFoto(null);
+  document.getElementById('fz-foto-inp').value = '';
+}
+
+function showFzFotoFull() {
+  if (!_fzFotoBase64) return;
+  const ov = document.createElement('div');
+  ov.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.92);z-index:2000;display:flex;align-items:center;justify-content:center;padding:16px;cursor:zoom-out';
+  ov.onclick = () => ov.remove();
+  ov.innerHTML = `<img src="${_fzFotoBase64}" style="max-width:100%;max-height:90vh;border-radius:10px;object-fit:contain">`;
+  document.body.appendChild(ov);
 }
 
 // ══════════════════════════════════

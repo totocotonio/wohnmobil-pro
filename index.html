@@ -2026,23 +2026,29 @@
       <button class="btn btn-primary" style="flex-shrink:0;padding:10px 16px;font-weight:700" id="tp-loc-btn" onclick="tpGetLocation()">Standort</button>
     </div>
 
-    <!-- Land-Tabs -->
-    <div class="seg-tabs" style="margin-bottom:14px">
-      <button class="seg-tab active" id="tp-tab-de" onclick="switchTpLand('de',this)">🇩🇪 Deutschland</button>
-      <button class="seg-tab" id="tp-tab-fr" onclick="switchTpLand('fr',this)">🇫🇷 Frankreich</button>
-      <button class="seg-tab" id="tp-tab-es" onclick="switchTpLand('es',this)">🇪🇸 Spanien</button>
-    </div>
-
     <!-- Filter -->
-    <div style="display:grid;grid-template-columns:1fr 1fr auto;gap:8px;align-items:end;margin-bottom:14px">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
+      <div>
+        <label class="form-lbl">Land</label>
+        <select class="form-inp" id="tp-land" onchange="onTpLandChange()">
+          <option value="de">🇩🇪 Deutschland</option>
+          <option value="at">🇦🇹 Österreich</option>
+          <option value="fr">🇫🇷 Frankreich</option>
+          <option value="be">🇧🇪 Belgien</option>
+          <option value="nl">🇳🇱 Niederlande</option>
+          <option value="es">🇪🇸 Spanien</option>
+        </select>
+      </div>
       <div>
         <label class="form-lbl">Kraftstoff</label>
-        <select class="form-inp" id="tp-kraftstoff" onchange="tpUpdatePmcLink()">
+        <select class="form-inp" id="tp-kraftstoff" onchange="tpUpdateExtLink()">
           <option value="diesel">🛢 Diesel</option>
           <option value="e5">🟢 Super E5</option>
           <option value="e10">🟡 Super E10</option>
         </select>
       </div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr auto;gap:8px;align-items:end;margin-bottom:14px">
       <div>
         <label class="form-lbl">Umkreis</label>
         <select class="form-inp" id="tp-radius">
@@ -2051,23 +2057,14 @@
           <option value="20">20 km</option>
         </select>
       </div>
-      <button class="btn btn-primary" style="padding:0 16px;height:42px;font-size:1.1rem" onclick="tpSearch()">🔍</button>
+      <button class="btn btn-primary" style="padding:0 20px;height:42px;font-size:1.1rem" onclick="tpSearch()">🔍</button>
     </div>
 
     <!-- DE Key Notice -->
     <div id="tp-de-notice" style="display:none;margin-bottom:14px"></div>
 
-    <!-- Plein Moins Cher Button (FR + ES) -->
-    <div id="tp-pmc-btn" style="display:none;margin-bottom:14px">
-      <a id="tp-pmc-link" href="#" target="_blank" style="display:flex;align-items:center;gap:12px;background:linear-gradient(135deg,rgba(34,197,94,0.1),rgba(56,189,248,0.08));border:1px solid rgba(34,197,94,0.3);border-radius:12px;padding:14px 16px;text-decoration:none;color:var(--text)">
-        <span style="font-size:1.8rem;flex-shrink:0">⛽</span>
-        <div style="flex:1">
-          <div style="font-weight:700;font-size:0.92rem;margin-bottom:2px">Plein Moins Cher öffnen</div>
-          <div style="font-size:0.72rem;color:var(--muted)">Karte mit günstigen Tankstellen · Browser-GPS wird genutzt</div>
-        </div>
-        <span style="color:var(--accent);font-size:1.1rem">↗</span>
-      </a>
-    </div>
+    <!-- Externer Link (FR/BE/NL/ES) -->
+    <div id="tp-ext-btn" style="display:none;margin-bottom:14px"></div>
 
     <!-- Ergebnisse -->
     <div id="tp-results"></div>
@@ -4172,34 +4169,50 @@ function filterVorschriften(q) {
 const TP = { lat: null, lng: null, land: 'de' };
 
 function tpInit() {
-  const key = localStorage.getItem('wmp_tk_key');
-  if (TP.land === 'de') tpShowDeNotice(key);
+  TP.land = document.getElementById('tp-land')?.value || 'de';
+  onTpLandChange();
 }
 
-function switchTpLand(land, btn) {
-  document.querySelectorAll('#sec-tanken .seg-tab').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-  TP.land = land;
-  document.getElementById('tp-de-notice').style.display = land === 'de' ? 'block' : 'none';
-  if (land === 'de') tpShowDeNotice(localStorage.getItem('wmp_tk_key'));
-  const pmcWrap = document.getElementById('tp-pmc-btn');
-  pmcWrap.style.display = (land === 'fr' || land === 'es') ? 'block' : 'none';
-  if (land === 'fr' || land === 'es') tpUpdatePmcLink();
+function onTpLandChange() {
+  TP.land = document.getElementById('tp-land').value;
+  const deOnly  = TP.land === 'de';
+  const atOnly  = TP.land === 'at';
+  const extLink = ['fr','be','nl','es'].includes(TP.land);
+  document.getElementById('tp-de-notice').style.display = deOnly ? 'block' : 'none';
+  if (deOnly) tpShowDeNotice(localStorage.getItem('wmp_tk_key'));
+  document.getElementById('tp-ext-btn').style.display = extLink ? 'block' : 'none';
+  if (extLink) tpUpdateExtLink();
   document.getElementById('tp-results').innerHTML = '';
 }
 
-function tpUpdatePmcLink() {
-  const link = document.getElementById('tp-pmc-link');
-  if (!link) return;
-  const kraftstoff = document.getElementById('tp-kraftstoff')?.value || 'diesel';
-  link.href = tpPleinMoinsCherUrl(TP.land, kraftstoff);
+function tpUpdateExtLink() {
+  const btn  = document.getElementById('tp-ext-btn');
+  if (!btn) return;
+  const land = document.getElementById('tp-land')?.value || TP.land;
+  const ks   = document.getElementById('tp-kraftstoff')?.value || 'diesel';
+  const configs = {
+    fr: { url: tpPleinMoinsCherUrl('fr', ks), name: 'Plein Moins Cher', desc: 'Frankreich · Interaktive Karte · Browser-GPS' },
+    es: { url: tpPleinMoinsCherUrl('es', ks), name: 'Plein Moins Cher', desc: 'Spanien · Interaktive Karte · Browser-GPS' },
+    be: { url: `https://www.carbu.com/belgie/index.cfm${TP.lat ? '?lng='+TP.lng+'&lat='+TP.lat+'&radius=10' : ''}`, name: 'carbu.com', desc: 'Belgien & Luxemburg · Günstigste Tankstellen' },
+    nl: { url: 'https://www.anwb.nl/auto/tanken/brandstofprijzen', name: 'ANWB Brandstofprijzen', desc: 'Niederlande · Aktuelle Kraftstoffpreise' },
+  };
+  const c = configs[land];
+  if (!c) return;
+  btn.innerHTML = `<a href="${c.url}" target="_blank" style="display:flex;align-items:center;gap:12px;background:linear-gradient(135deg,rgba(34,197,94,0.1),rgba(56,189,248,0.06));border:1px solid rgba(34,197,94,0.3);border-radius:12px;padding:14px 16px;text-decoration:none;color:var(--text)">
+    <span style="font-size:1.8rem;flex-shrink:0">⛽</span>
+    <div style="flex:1">
+      <div style="font-weight:700;font-size:0.92rem;margin-bottom:2px">${c.name} öffnen</div>
+      <div style="font-size:0.72rem;color:var(--muted)">${c.desc}</div>
+    </div>
+    <span style="color:var(--accent);font-size:1.1rem">↗</span>
+  </a>`;
 }
 
 function tpPleinMoinsCherUrl(land, kraftstoff) {
   const dimMap  = { diesel: 'c_gazole', e5: 'c_sp95', e10: 'c_e10' };
   const slugMap = { diesel: 'gazole-b7', e5: 'sp95-e5', e10: 'e10-e5' };
-  const dim     = dimMap[kraftstoff] || 'c_gazole';
-  const slug    = slugMap[kraftstoff] || 'gazole-b7';
+  const dim  = dimMap[kraftstoff] || 'c_gazole';
+  const slug = slugMap[kraftstoff] || 'gazole-b7';
   const filters = btoa(JSON.stringify([{ dim: 'pays', k: land.toUpperCase() }, { dim, k: '1' }]));
   return `https://plein-moins-cher.fr/de/carte-carburants-prix-stations-${slug}.html?filters=${filters}`;
 }
@@ -4264,11 +4277,48 @@ async function tpSearch() {
   const resultEl   = document.getElementById('tp-results');
   resultEl.innerHTML = '<div style="text-align:center;padding:28px;color:var(--muted);font-size:0.9rem">⏳ Lade Tankstellen…</div>';
   try {
-    if (TP.land === 'de') await tpSearchDE(kraftstoff, radius, resultEl);
+    if      (TP.land === 'de') await tpSearchDE(kraftstoff, radius, resultEl);
+    else if (TP.land === 'at') await tpSearchAT(kraftstoff, radius, resultEl);
     else if (TP.land === 'fr') await tpSearchFR(kraftstoff, radius, resultEl);
     else if (TP.land === 'es') await tpSearchES(kraftstoff, radius, resultEl);
+    else resultEl.innerHTML = '<div class="no-entries">Bitte den Link oben nutzen</div>';
   } catch(e) {
     resultEl.innerHTML = `<div class="no-entries">Fehler: ${e.message}</div>`;
+  }
+}
+
+// ── Österreich (E-Control) ──
+async function tpSearchAT(kraftstoff, radius, resultEl) {
+  const typeMap = { diesel: 'DIE', e5: 'SUP', e10: 'SUP' };
+  const type    = typeMap[kraftstoff] || 'DIE';
+  const url     = `https://api.e-control.at/sprit/1.0/search/gas-stations/by-address?latitude=${TP.lat}&longitude=${TP.lng}&fuelType=${type}&includeClosed=true&maxDistance=${radius}`;
+  const res  = await fetch(url);
+  if (!res.ok) throw new Error(`E-Control API: ${res.status}`);
+  const data = await res.json();
+  const list = (Array.isArray(data) ? data : [])
+    .filter(s => s.prices?.some(p => p.fuelType === type && p.amount))
+    .map(s => {
+      const price = s.prices.find(p => p.fuelType === type);
+      return {
+        name:    s.name || '–',
+        adresse: [s.location?.address, s.location?.postalCode, s.location?.city].filter(Boolean).join(', '),
+        preis:   price?.amount ?? null,
+        dist:    typeof s.distance === 'number' ? s.distance.toFixed(1) : '?',
+        lat:     s.location?.latitude,
+        lng:     s.location?.longitude,
+        offen:   s.open,
+      };
+    })
+    .filter(s => s.preis)
+    .sort((a, b) => a.preis - b.preis)
+    .slice(0, 15);
+  if (!list.length) { resultEl.innerHTML = '<div class="no-entries">Keine Tankstellen gefunden</div>'; return; }
+  if (kraftstoff === 'e10') {
+    resultEl.innerHTML = '<div style="font-size:0.75rem;color:var(--muted);margin-bottom:10px">ℹ️ E10 kaum verbreitet in AT – zeige Super 95 (E5)</div>';
+    resultEl.innerHTML += '<div id="tp-res-inner"></div>';
+    tpRenderResults(list, 'e5', document.getElementById('tp-res-inner'));
+  } else {
+    tpRenderResults(list, kraftstoff, resultEl);
   }
 }
 
@@ -4321,13 +4371,7 @@ async function tpSearchES(kraftstoff, radius, resultEl) {
   const url      = 'https://sedeaplicaciones.minetur.gob.es/ServiciosRESTCarburantes/PreciosCarburantes/EstacionesTerrestres/';
   let res;
   try { res = await fetch(url); } catch(e) {
-    const pmcUrl = tpPleinMoinsCherUrl('es', kraftstoff);
-    resultEl.innerHTML = `<div style="background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:16px;text-align:center">
-      <div style="font-size:1.5rem;margin-bottom:8px">🇪🇸</div>
-      <div style="font-weight:700;color:var(--text);margin-bottom:6px">Direktzugriff nicht möglich</div>
-      <div style="font-size:0.78rem;color:var(--muted);margin-bottom:12px">Die spanische API erlaubt keinen direkten Browser-Zugriff. Nutze Plein Moins Cher (oben) oder das Geoportal.</div>
-      <a href="https://geoportalgasolineras.es/" target="_blank" style="display:inline-block;padding:8px 16px;background:var(--panel2);border:1px solid var(--border);color:var(--text);border-radius:8px;text-decoration:none;font-weight:700;font-size:0.82rem">🔗 Geoportal Gasolineras</a>
-    </div>`;
+    resultEl.innerHTML = '<div class="no-entries">Direktzugriff gesperrt – bitte den Link oben (Plein Moins Cher) nutzen</div>';
     return;
   }
   const data = await res.json();

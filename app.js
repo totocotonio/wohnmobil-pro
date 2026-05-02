@@ -18,6 +18,7 @@ const START_TOOLS = [
   { id:'satfinder',   icon:'📡', name:'Sat-Finder',        desc:'Azimut & Elevation für Satellitenschüssel',            action:"showSection('satfinder')" },
   { id:'sonne',       icon:'🌞', name:'Sonnenausrichtung', desc:'Fahrzeug optimal für Schatten & Solar ausrichten',     action:"showSection('sonne')" },
   { id:'gas',         icon:'🔥', name:'Gasvorrat',         desc:'Füllstand, Verbrauch & Reichweite in Tagen',           action:"showSection('gas');gasRender()" },
+  { id:'stellplatz',  icon:'⛺', name:'Stellplatz-Logbuch',desc:'Besuchte Plätze, Bewertungen & Notizen',                action:"showSection('stellplatz');spRender()" },
 ];
 
 // ══════════════════════════════════
@@ -2049,8 +2050,8 @@ function renderStart() {
     try {
       const fz = JSON.parse(localStorage.getItem('wmp_fahrzeug') || '{}');
       const name = fz.spitzname || ((fz.hersteller && fz.modell) ? `${fz.hersteller} ${fz.modell}` : fz.typ || null);
-      fzEl.textContent = name ? `🚐 ${name}` : '14 Werkzeuge · Camping · Offline';
-    } catch(e) { fzEl.textContent = '14 Werkzeuge · Camping · Offline'; }
+      fzEl.textContent = name ? `🚐 ${name}` : '15 Werkzeuge · Camping · Offline';
+    } catch(e) { fzEl.textContent = '15 Werkzeuge · Camping · Offline'; }
   }
 
   // Schnellzugriff: Favoriten wenn gesetzt, sonst 4 Defaults
@@ -3969,4 +3970,193 @@ function sendFeedback(typ) {
   const body = encodeURIComponent(text + '\n\n---\nWohnmobil Pro App');
   window.location.href = `mailto:info@michaely.de?subject=${encodeURIComponent(subjects[typ])}&body=${body}`;
   document.getElementById('feedback-modal')?.remove();
+}
+
+
+// ══════════════════════════════════
+// STELLPLATZ-LOGBUCH
+// ══════════════════════════════════
+const SP_KEY = 'wmp_stellplatz';
+let spData = [];
+let spCurrentStar = 0;
+
+function spLoad() {
+  try { spData = JSON.parse(localStorage.getItem(SP_KEY) || '[]'); } catch(e) { spData = []; }
+}
+function spSave() {
+  localStorage.setItem(SP_KEY, JSON.stringify(spData));
+}
+spLoad();
+
+function spOpenForm(id) {
+  const form = document.getElementById('sp-form');
+  if (!form) return;
+  form.style.display = 'block';
+  form.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  if (id) {
+    const e = spData.find(x => x.id === id);
+    if (!e) return;
+    document.getElementById('sp-edit-id').value  = id;
+    document.getElementById('sp-name').value     = e.name    || '';
+    document.getElementById('sp-ort').value      = e.ort     || '';
+    document.getElementById('sp-land').value     = e.land    || '';
+    document.getElementById('sp-datum').value    = e.datum   || '';
+    document.getElementById('sp-naechte').value  = e.naechte || '';
+    document.getElementById('sp-preis').value    = e.preis !== undefined && e.preis !== null ? e.preis : '';
+    document.getElementById('sp-notiz').value    = e.notiz   || '';
+    document.getElementById('sp-lat').value      = e.lat     || '';
+    document.getElementById('sp-lon').value      = e.lon     || '';
+    const gpsEl = document.getElementById('sp-gps-status');
+    if (gpsEl) gpsEl.textContent = e.lat ? `📍 ${parseFloat(e.lat).toFixed(5)}, ${parseFloat(e.lon).toFixed(5)}` : 'Kein GPS gespeichert';
+    document.getElementById('sp-form-title').textContent = '✏️ Stellplatz bearbeiten';
+    spSetStar(e.bewertung || 0);
+  } else {
+    document.getElementById('sp-edit-id').value  = '';
+    document.getElementById('sp-name').value     = '';
+    document.getElementById('sp-ort').value      = '';
+    document.getElementById('sp-land').value     = '';
+    document.getElementById('sp-datum').value    = new Date().toISOString().split('T')[0];
+    document.getElementById('sp-naechte').value  = '1';
+    document.getElementById('sp-preis').value    = '';
+    document.getElementById('sp-notiz').value    = '';
+    document.getElementById('sp-lat').value      = '';
+    document.getElementById('sp-lon').value      = '';
+    const gpsEl = document.getElementById('sp-gps-status');
+    if (gpsEl) gpsEl.textContent = 'Kein GPS gespeichert';
+    document.getElementById('sp-form-title').textContent = '⛺ Neuer Stellplatz';
+    spSetStar(0);
+  }
+}
+
+function spCloseForm() {
+  const form = document.getElementById('sp-form');
+  if (form) form.style.display = 'none';
+}
+
+function spSetStar(v) {
+  spCurrentStar = v;
+  document.querySelectorAll('.sp-star').forEach(s => {
+    s.style.opacity = parseInt(s.dataset.v) <= v ? '1' : '0.25';
+  });
+}
+
+function spGetGps() {
+  const statusEl = document.getElementById('sp-gps-status');
+  if (!navigator.geolocation) { if (statusEl) statusEl.textContent = 'GPS nicht verfügbar'; return; }
+  if (statusEl) statusEl.textContent = '⏳ Ermittle Position…';
+  navigator.geolocation.getCurrentPosition(pos => {
+    document.getElementById('sp-lat').value = pos.coords.latitude;
+    document.getElementById('sp-lon').value = pos.coords.longitude;
+    if (statusEl) {
+      statusEl.textContent = `📍 ${pos.coords.latitude.toFixed(5)}, ${pos.coords.longitude.toFixed(5)}`;
+      statusEl.style.color = 'var(--accent)';
+    }
+  }, () => {
+    if (statusEl) { statusEl.textContent = 'Standort konnte nicht ermittelt werden'; statusEl.style.color = '#ef4444'; }
+  }, { timeout: 10000 });
+}
+
+function spSaveEntry() {
+  const name = document.getElementById('sp-name').value.trim();
+  if (!name) { toast('Bitte einen Namen eingeben'); return; }
+  const editId = document.getElementById('sp-edit-id').value;
+  const preisVal = document.getElementById('sp-preis').value;
+  const entry = {
+    id:        editId ? parseInt(editId) : Date.now(),
+    name,
+    ort:       document.getElementById('sp-ort').value.trim(),
+    land:      document.getElementById('sp-land').value.trim(),
+    datum:     document.getElementById('sp-datum').value,
+    naechte:   parseFloat(document.getElementById('sp-naechte').value) || 1,
+    preis:     preisVal !== '' ? parseFloat(preisVal) : null,
+    bewertung: spCurrentStar,
+    notiz:     document.getElementById('sp-notiz').value.trim(),
+    lat:       document.getElementById('sp-lat').value || null,
+    lon:       document.getElementById('sp-lon').value || null,
+  };
+  if (editId) {
+    const idx = spData.findIndex(x => x.id == editId);
+    if (idx >= 0) spData[idx] = entry; else spData.unshift(entry);
+  } else {
+    spData.unshift(entry);
+  }
+  spSave();
+  spCloseForm();
+  spRender();
+  toast('✅ Stellplatz gespeichert');
+}
+
+function spDelete(id) {
+  if (!confirm('Eintrag löschen?')) return;
+  spData = spData.filter(x => x.id !== id);
+  spSave();
+  spRender();
+}
+
+function spStars(n) {
+  if (!n) return '';
+  return '⭐'.repeat(n) + '☆'.repeat(5 - n);
+}
+
+function spRender() {
+  spLoad();
+  const statsEl = document.getElementById('sp-stats');
+  if (statsEl) {
+    const total = spData.length;
+    const naechte = spData.reduce((s, e) => s + (e.naechte || 1), 0);
+    const preise = spData.filter(e => e.preis !== null && e.preis !== undefined);
+    const avgPreis = preise.length ? preise.reduce((s, e) => s + e.preis, 0) / preise.length : null;
+    statsEl.innerHTML = [
+      { icon: '⛺', label: 'Stellplätze', val: total },
+      { icon: '🌙', label: 'Nächte gesamt', val: naechte },
+      { icon: '💶', label: 'Ø Preis/Nacht', val: avgPreis !== null ? avgPreis.toFixed(2) + ' €' : '–' },
+    ].map(s => `<div style="background:var(--panel2);border:1px solid var(--border);border-radius:12px;padding:12px;text-align:center">
+      <div style="font-size:1.3rem">${s.icon}</div>
+      <div style="font-size:1.2rem;font-weight:800;color:var(--accent)">${s.val}</div>
+      <div style="font-size:0.65rem;color:var(--muted);text-transform:uppercase;letter-spacing:1px">${s.label}</div>
+    </div>`).join('');
+  }
+
+  const q = (document.getElementById('sp-search')?.value || '').toLowerCase();
+  const list = document.getElementById('sp-list');
+  if (!list) return;
+  const filtered = q ? spData.filter(e =>
+    (e.name + ' ' + e.ort + ' ' + e.land + ' ' + e.notiz).toLowerCase().includes(q)
+  ) : spData;
+
+  if (!filtered.length) {
+    list.innerHTML = `<div style="text-align:center;padding:40px 20px;color:var(--muted)">
+      <div style="font-size:2.5rem;margin-bottom:10px">⛺</div>
+      <div style="font-size:0.9rem">${q ? 'Keine Treffer' : 'Noch kein Stellplatz eingetragen'}</div>
+      ${!q ? '<div style="font-size:0.78rem;margin-top:6px">Auf „+ Neuer Stellplatz" tippen</div>' : ''}
+    </div>`;
+    return;
+  }
+
+  list.innerHTML = filtered.map(e => {
+    const datumStr = e.datum ? new Date(e.datum + 'T12:00:00').toLocaleDateString('de-DE', { day:'2-digit', month:'2-digit', year:'numeric' }) : '';
+    const preisStr = e.preis !== null && e.preis !== undefined ? parseFloat(e.preis).toFixed(2) + ' €/Nacht' : '';
+    const mapsUrl = e.lat && e.lon ? `https://www.google.com/maps?q=${e.lat},${e.lon}` : null;
+    const stars = spStars(e.bewertung);
+    return `<div style="background:var(--panel2);border:1px solid var(--border);border-radius:14px;padding:14px 16px;margin-bottom:10px">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:6px">
+        <div style="flex:1;min-width:0">
+          <div style="font-size:1rem;font-weight:700;color:var(--text)">${e.name}</div>
+          ${(e.ort || e.land) ? `<div style="font-size:0.78rem;color:var(--muted);margin-top:2px">${[e.ort, e.land].filter(Boolean).join(' · ')}</div>` : ''}
+        </div>
+        <div style="display:flex;gap:6px;flex-shrink:0">
+          <button onclick="spOpenForm(${e.id})" style="background:var(--panel);border:1px solid var(--border);border-radius:8px;padding:5px 10px;color:var(--muted);font-size:0.8rem;cursor:pointer">✏️</button>
+          <button onclick="spDelete(${e.id})" style="background:var(--panel);border:1px solid var(--border);border-radius:8px;padding:5px 10px;color:#ef4444;font-size:0.8rem;cursor:pointer">🗑</button>
+        </div>
+      </div>
+      <div style="display:flex;flex-wrap:wrap;gap:8px;font-size:0.75rem;color:var(--muted)">
+        ${stars ? `<span style="color:#f59e0b">${stars}</span>` : ''}
+        ${datumStr ? `<span>📅 ${datumStr}</span>` : ''}
+        ${e.naechte ? `<span>🌙 ${e.naechte} Nacht${e.naechte !== 1 ? 'e' : ''}</span>` : ''}
+        ${preisStr ? `<span>💶 ${preisStr}</span>` : ''}
+        ${mapsUrl ? `<a href="${mapsUrl}" target="_blank" rel="noopener" style="color:var(--accent);text-decoration:none">📍 Maps</a>` : ''}
+      </div>
+      ${e.notiz ? `<div style="font-size:0.8rem;color:var(--text);line-height:1.5;border-top:1px solid var(--border);padding-top:8px;margin-top:8px">${e.notiz}</div>` : ''}
+    </div>`;
+  }).join('');
 }

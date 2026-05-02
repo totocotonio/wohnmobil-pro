@@ -126,6 +126,7 @@
     <button class="nav-item" id="nav-sonne" onclick="showSection('sonne');closeMenu()">🌞 Sonnenausrichtung</button>
     <button class="nav-item" id="nav-vorschriften" onclick="showSection('vorschriften');closeMenu()">📋 Vorschriften</button>
     <button class="nav-item" id="nav-gas" onclick="showSection('gas');gasRender();closeMenu()">🔥 Gasvorrat</button>
+    <button class="nav-item" id="nav-stellplatz" onclick="showSection('stellplatz');spRender();closeMenu()">⛺ Stellplatz-Logbuch</button>
     <div style="border-top:1px solid var(--border);margin:8px 0"></div>
     <button class="nav-item" id="nav-mehr" onclick="showSection('mehr');closeMenu()">⚙ Einstellungen</button>
     <div style="padding:12px 4px;display:flex;align-items:center;justify-content:space-between">
@@ -153,7 +154,7 @@
         <div style="width:64px;height:64px;background:linear-gradient(135deg,var(--accent),var(--accent2,#38bdf8));border-radius:20px;display:flex;align-items:center;justify-content:center;font-size:30px;box-shadow:0 0 32px var(--accent-dim),0 8px 24px rgba(0,0,0,0.3);margin:0 auto">🚐</div>
       </div>
       <div style="font-size:1.6rem;font-weight:800;letter-spacing:2px;color:var(--text);line-height:1;margin-bottom:4px;position:relative">WOHNMOBIL <span style="color:var(--accent)">PRO</span></div>
-      <div id="start-fahrzeug" style="font-size:0.9rem;color:var(--text);letter-spacing:0.5px;position:relative">14 Werkzeuge · Camping · Offline</div>
+      <div id="start-fahrzeug" style="font-size:0.9rem;color:var(--text);letter-spacing:0.5px;position:relative">15 Werkzeuge · Camping · Offline</div>
       <div id="start-weather" style="margin-top:12px;position:relative;cursor:pointer" onclick="showSection('wetter')" title="Zum Wetter-Tab"></div>
     </div>
 
@@ -1356,6 +1357,85 @@
     <div style="background:linear-gradient(135deg,rgba(245,158,11,0.1),rgba(245,158,11,0.03));border:1px solid rgba(245,158,11,0.25);border-radius:10px;padding:10px 14px;margin-bottom:14px;font-size:0.72rem;color:var(--muted)">⚠️ Angaben ohne Gewähr – vor Reiseantritt beim ADAC oder offiziellen Stellen prüfen.</div>
     <input class="form-inp" type="text" id="vors-search" placeholder="Land suchen…" oninput="filterVorschriften(this.value)" style="width:100%;margin-bottom:14px">
     <div id="vors-list"></div>
+  </div>
+
+  <!-- ════════════ STELLPLATZ-LOGBUCH ════════════ -->
+  <div id="sec-stellplatz" class="wmp-section">
+    <div style="text-align:center;padding:24px 0 18px;position:relative">
+      <div style="font-size:2.2rem;margin-bottom:6px">⛺</div>
+      <div style="font-size:1.55rem;font-weight:700;letter-spacing:0.06em;color:var(--text)">STELLPLATZ<span style="color:var(--accent)">LOGBUCH</span></div>
+      <div style="font-size:0.72rem;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-top:4px">Besuchte Plätze · Bewertungen · Notizen</div>
+      <div style="position:absolute;bottom:0;left:50%;transform:translateX(-50%);width:48px;height:2px;background:linear-gradient(90deg,transparent,var(--accent),transparent);border-radius:2px"></div>
+    </div>
+
+    <!-- Statistik -->
+    <div id="sp-stats" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:14px"></div>
+
+    <!-- Neuer Eintrag Button -->
+    <button class="btn btn-primary" style="width:100%;margin-bottom:14px;font-size:0.9rem;padding:12px" onclick="spOpenForm()">+ Neuer Stellplatz</button>
+
+    <!-- Formular (versteckt) -->
+    <div id="sp-form" style="display:none;background:var(--panel2);border:1px solid var(--accent);border-radius:14px;padding:16px;margin-bottom:14px">
+      <div style="font-size:0.68rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--accent);margin-bottom:12px" id="sp-form-title">⛺ Neuer Stellplatz</div>
+      <input type="hidden" id="sp-edit-id">
+      <div class="form-grid">
+        <div class="form-col" style="grid-column:1/-1">
+          <label class="form-lbl">Name / Bezeichnung *</label>
+          <input class="form-inp" id="sp-name" placeholder="z.B. Camping am See, Stellplatz Rathaus…" style="width:100%">
+        </div>
+        <div class="form-col">
+          <label class="form-lbl">Ort / Region</label>
+          <input class="form-inp" id="sp-ort" placeholder="z.B. Flensburg, Kroatien" style="width:100%">
+        </div>
+        <div class="form-col">
+          <label class="form-lbl">Land</label>
+          <input class="form-inp" id="sp-land" placeholder="z.B. 🇩🇪 Deutschland" style="width:100%">
+        </div>
+        <div class="form-col">
+          <label class="form-lbl">Datum (Ankunft)</label>
+          <input class="form-inp" type="date" id="sp-datum" style="width:100%">
+        </div>
+        <div class="form-col">
+          <label class="form-lbl">Nächte</label>
+          <input class="form-inp" type="number" id="sp-naechte" placeholder="1" min="1" style="width:100%">
+        </div>
+        <div class="form-col">
+          <label class="form-lbl">Preis / Nacht (€)</label>
+          <input class="form-inp" type="number" id="sp-preis" placeholder="0.00" min="0" step="0.5" style="width:100%">
+        </div>
+        <div class="form-col">
+          <label class="form-lbl">Bewertung</label>
+          <div id="sp-stars-input" style="display:flex;gap:4px;padding:9px 0">
+            <span class="sp-star" data-v="1" onclick="spSetStar(1)" style="font-size:1.4rem;cursor:pointer;opacity:0.3">⭐</span>
+            <span class="sp-star" data-v="2" onclick="spSetStar(2)" style="font-size:1.4rem;cursor:pointer;opacity:0.3">⭐</span>
+            <span class="sp-star" data-v="3" onclick="spSetStar(3)" style="font-size:1.4rem;cursor:pointer;opacity:0.3">⭐</span>
+            <span class="sp-star" data-v="4" onclick="spSetStar(4)" style="font-size:1.4rem;cursor:pointer;opacity:0.3">⭐</span>
+            <span class="sp-star" data-v="5" onclick="spSetStar(5)" style="font-size:1.4rem;cursor:pointer;opacity:0.3">⭐</span>
+          </div>
+        </div>
+        <div class="form-col" style="grid-column:1/-1">
+          <label class="form-lbl">Notiz</label>
+          <textarea class="form-inp" id="sp-notiz" placeholder="Sanitäranlagen, Umgebung, Besonderheiten…" rows="3" style="width:100%;resize:vertical"></textarea>
+        </div>
+      </div>
+      <!-- GPS -->
+      <div style="display:flex;gap:8px;align-items:center;margin-top:10px;margin-bottom:14px">
+        <button class="btn" style="font-size:0.78rem;padding:6px 12px;flex-shrink:0" onclick="spGetGps()">📍 GPS ermitteln</button>
+        <div id="sp-gps-status" style="font-size:0.72rem;color:var(--muted)">Kein GPS gespeichert</div>
+        <input type="hidden" id="sp-lat">
+        <input type="hidden" id="sp-lon">
+      </div>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-primary" style="flex:1;padding:11px" onclick="spSaveEntry()">💾 Speichern</button>
+        <button class="btn" style="padding:11px 18px" onclick="spCloseForm()">Abbrechen</button>
+      </div>
+    </div>
+
+    <!-- Suchfeld -->
+    <input class="form-inp" type="text" id="sp-search" placeholder="Suchen…" oninput="spRender()" style="width:100%;margin-bottom:12px">
+
+    <!-- Liste -->
+    <div id="sp-list"></div>
   </div>
 
 </main><!-- .main-content -->

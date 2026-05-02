@@ -4155,9 +4155,9 @@ function spSaveEntry() {
   spCloseForm();
   spRender();
 
-  // Verknüpfung mit Kosten: bei Preis > 0 und aktiver Reise anbieten
+  // Verknüpfung mit Kosten: immer fragen wenn aktive Reise vorhanden und noch nicht verknüpft
   const activeTrip = getActiveTrip ? getActiveTrip() : null;
-  if (!editId && entry.preis !== null && entry.preis > 0 && activeTrip && !activeTrip.archiviert) {
+  if (!editId && activeTrip && !activeTrip.archiviert) {
     spOfferTripLink(entry, activeTrip);
   } else {
     toast('✅ Stellplatz gespeichert');
@@ -4166,7 +4166,11 @@ function spSaveEntry() {
 
 function spOfferTripLink(entry, trip) {
   document.getElementById('spl-trip-popup')?.remove();
-  const gesamtPreis = (entry.preis * entry.naechte).toFixed(2);
+  const hatPreis = entry.preis !== null && entry.preis > 0;
+  const gesamtPreis = hatPreis ? (entry.preis * entry.naechte).toFixed(2) : null;
+  const preisZeile = hatPreis
+    ? `<span style="color:var(--muted);font-size:0.78rem">${entry.naechte} Nacht${entry.naechte!==1?'e':''} × ${entry.preis.toFixed(2)} € = <strong style="color:var(--accent)">${gesamtPreis} €</strong></span>`
+    : `<span style="color:var(--muted);font-size:0.78rem">${entry.naechte} Nacht${entry.naechte!==1?'e':''} · kein Preis eingetragen</span>`;
   const div = document.createElement('div');
   div.id = 'spl-trip-popup';
   div.style.cssText = 'position:fixed;bottom:80px;left:50%;transform:translateX(-50%);z-index:9999;background:var(--panel);border:1px solid var(--accent);border-radius:14px;padding:14px 18px;box-shadow:0 8px 32px rgba(0,0,0,0.4);max-width:340px;width:90%';
@@ -4174,7 +4178,7 @@ function spOfferTripLink(entry, trip) {
     <div style="font-size:0.72rem;color:var(--accent);font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-bottom:6px">✅ Stellplatz gespeichert</div>
     <div style="font-size:0.85rem;color:var(--text);margin-bottom:10px">
       In aktive Reise <strong>${trip.land||''} ${trip.name}</strong> übernehmen?<br>
-      <span style="color:var(--muted);font-size:0.78rem">${entry.naechte} Nacht${entry.naechte!==1?'e':''} × ${entry.preis.toFixed(2)} € = <strong style="color:var(--accent)">${gesamtPreis} €</strong></span>
+      ${preisZeile}
     </div>
     <div style="display:flex;gap:8px">
       <button onclick="spDoTripLink(${JSON.stringify(entry).replace(/"/g,'&quot;')});document.getElementById('spl-trip-popup')?.remove()" class="btn btn-primary" style="flex:1;padding:8px;font-size:0.82rem">📋 Ja, übernehmen</button>

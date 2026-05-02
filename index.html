@@ -1289,6 +1289,7 @@
     <button class="nav-item" id="nav-satfinder" onclick="showSection('satfinder');closeMenu()">📡 Sat-Finder</button>
     <button class="nav-item" id="nav-sonne" onclick="showSection('sonne');closeMenu()">🌞 Sonnenausrichtung</button>
     <button class="nav-item" id="nav-vorschriften" onclick="showSection('vorschriften');closeMenu()">📋 Vorschriften</button>
+    <button class="nav-item" id="nav-gas" onclick="showSection('gas');gasRender();closeMenu()">🔥 Gasvorrat</button>
     <div style="border-top:1px solid var(--border);margin:8px 0"></div>
     <button class="nav-item" id="nav-mehr" onclick="showSection('mehr');closeMenu()">⚙ Einstellungen</button>
     <div style="padding:12px 4px;display:flex;align-items:center;justify-content:space-between">
@@ -2410,6 +2411,51 @@
     </div>
   </div>
 
+  <!-- ════════════ GASVORRAT ════════════ -->
+  <div id="sec-gas" class="wmp-section">
+    <div style="text-align:center;padding:24px 0 18px;position:relative">
+      <div style="font-size:2.2rem;margin-bottom:6px">🔥</div>
+      <div style="font-size:1.55rem;font-weight:700;letter-spacing:0.06em;color:var(--text)">GAS<span style="color:var(--accent)">VORRAT</span></div>
+      <div style="font-size:0.72rem;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-top:4px">Füllstand · Verbrauch · Reichweite</div>
+      <div style="position:absolute;bottom:0;left:50%;transform:translateX(-50%);width:48px;height:2px;background:linear-gradient(90deg,transparent,var(--accent),transparent);border-radius:2px"></div>
+    </div>
+
+    <!-- Flaschen -->
+    <div id="gas-bottles-wrap"></div>
+    <button class="btn" style="width:100%;margin-bottom:16px" onclick="gasAddBottle()" id="gas-add-btn">+ Zweite Flasche hinzufügen</button>
+
+    <!-- Verbrauch -->
+    <div style="background:var(--panel2);border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:14px">
+      <div style="font-size:0.68rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--accent);margin-bottom:10px">🔥 Tagesverbrauch</div>
+      <div class="form-grid">
+        <div class="form-col">
+          <label class="form-lbl">Kochen (g/Tag)</label>
+          <input class="form-inp" type="number" id="gas-kochen" placeholder="50" min="0" oninput="gasCalc();gasSave()">
+        </div>
+        <div class="form-col">
+          <label class="form-lbl">Heizung (g/Tag)</label>
+          <input class="form-inp" type="number" id="gas-heizung" placeholder="200" min="0" oninput="gasCalc();gasSave()">
+        </div>
+        <div class="form-col">
+          <label class="form-lbl">Warmwasser (g/Tag)</label>
+          <input class="form-inp" type="number" id="gas-wasser" placeholder="80" min="0" oninput="gasCalc();gasSave()">
+        </div>
+        <div class="form-col">
+          <label class="form-lbl">Sonstiges (g/Tag)</label>
+          <input class="form-inp" type="number" id="gas-sonstig" placeholder="0" min="0" oninput="gasCalc();gasSave()">
+        </div>
+      </div>
+      <div style="margin-top:10px;display:flex;gap:6px;flex-wrap:wrap">
+        <button class="btn" style="font-size:0.75rem;padding:4px 10px" onclick="gasPreset('sommer')">☀️ Sommer</button>
+        <button class="btn" style="font-size:0.75rem;padding:4px 10px" onclick="gasPreset('winter')">❄️ Winter</button>
+        <button class="btn" style="font-size:0.75rem;padding:4px 10px" onclick="gasPreset('kochen')">🍳 Nur Kochen</button>
+      </div>
+    </div>
+
+    <!-- Ergebnis -->
+    <div id="gas-result"></div>
+  </div>
+
   <!-- ════════════ LÄNDERVORSCHRIFTEN ════════════ -->
   <div id="sec-vorschriften" class="wmp-section">
     <div style="text-align:center;padding:24px 0 18px;position:relative">
@@ -2478,6 +2524,7 @@ const START_TOOLS = [
   { id:'vorschriften',icon:'📋', name:'Vorschriften',      desc:'Promille, Vignetten & Pflichtausrüstung je Land',      action:"showSection('vorschriften')" },
   { id:'satfinder',   icon:'📡', name:'Sat-Finder',        desc:'Azimut & Elevation für Satellitenschüssel',            action:"showSection('satfinder')" },
   { id:'sonne',       icon:'🌞', name:'Sonnenausrichtung', desc:'Fahrzeug optimal für Schatten & Solar ausrichten',     action:"showSection('sonne')" },
+  { id:'gas',         icon:'🔥', name:'Gasvorrat',         desc:'Füllstand, Verbrauch & Reichweite in Tagen',           action:"showSection('gas');gasRender()" },
 ];
 
 // ══════════════════════════════════
@@ -5985,6 +6032,177 @@ renderSyncUI();
 renderColorPicker();
 renderNotifStatus();
 renderStart();
+gasRender();
+
+// ══════════════════════════════════
+// GASVORRAT
+// ══════════════════════════════════
+const GAS_KEY = 'wmp_gas';
+let gasData = (() => {
+  try { return JSON.parse(localStorage.getItem(GAS_KEY)) || null; } catch(e) { return null; }
+})() || {
+  bottles: [{ size: 11, fill: 50 }],
+  kochen: 50, heizung: 200, wasser: 80, sonstig: 0
+};
+
+function gasSave() {
+  gasData.kochen  = parseFloat(document.getElementById('gas-kochen')?.value)  || 0;
+  gasData.heizung = parseFloat(document.getElementById('gas-heizung')?.value) || 0;
+  gasData.wasser  = parseFloat(document.getElementById('gas-wasser')?.value)  || 0;
+  gasData.sonstig = parseFloat(document.getElementById('gas-sonstig')?.value) || 0;
+  localStorage.setItem(GAS_KEY, JSON.stringify(gasData));
+}
+
+function gasRender() {
+  // Verbrauchs-Felder
+  ['kochen','heizung','wasser','sonstig'].forEach(k => {
+    const el = document.getElementById('gas-' + k);
+    if (el) el.value = gasData[k] || '';
+  });
+  gasRenderBottles();
+  gasCalc();
+}
+
+function gasRenderBottles() {
+  const wrap = document.getElementById('gas-bottles-wrap');
+  if (!wrap) return;
+  const GAS_SIZES = [5, 11, 33];
+  wrap.innerHTML = gasData.bottles.map((b, i) => {
+    const pct = Math.max(0, Math.min(100, b.fill));
+    const color = pct < 20 ? '#ef4444' : pct < 40 ? '#f59e0b' : 'var(--accent)';
+    return `<div style="background:var(--panel2);border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:10px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+        <div style="font-size:0.68rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--accent)">🔥 Flasche ${i+1}</div>
+        ${gasData.bottles.length > 1 ? `<button onclick="gasRemoveBottle(${i})" style="background:none;border:none;color:var(--muted);font-size:1rem;cursor:pointer;padding:0 4px">✕</button>` : ''}
+      </div>
+      <div class="form-grid" style="margin-bottom:12px">
+        <div class="form-col">
+          <label class="form-lbl">Flaschengröße</label>
+          <select class="form-inp" onchange="gasSetSize(${i},this.value)">
+            ${GAS_SIZES.map(s => `<option value="${s}" ${b.size==s?'selected':''}>${s} kg</option>`).join('')}
+            <option value="custom" ${!GAS_SIZES.includes(b.size)?'selected':''}>Eigene</option>
+          </select>
+        </div>
+        <div class="form-col" id="gas-custom-wrap-${i}" style="${!GAS_SIZES.includes(b.size)?'':'display:none'}">
+          <label class="form-lbl">Größe (kg)</label>
+          <input class="form-inp" type="number" value="${!GAS_SIZES.includes(b.size)?b.size:''}" placeholder="kg" min="1" oninput="gasSetCustomSize(${i},this.value)">
+        </div>
+      </div>
+      <!-- Visueller Tank -->
+      <div style="margin-bottom:8px">
+        <div style="display:flex;justify-content:space-between;margin-bottom:4px">
+          <span style="font-size:0.72rem;color:var(--muted)">Füllstand</span>
+          <span style="font-size:0.85rem;font-weight:700;color:${color}" id="gas-pct-${i}">${pct}%</span>
+        </div>
+        <div style="height:18px;background:var(--panel);border:1px solid var(--border);border-radius:9px;overflow:hidden;margin-bottom:6px">
+          <div id="gas-bar-${i}" style="height:100%;width:${pct}%;background:${color};border-radius:9px;transition:width 0.3s,background 0.3s"></div>
+        </div>
+        <input type="range" min="0" max="100" value="${pct}" style="width:100%;accent-color:${color}" oninput="gasSetFill(${i},this.value)">
+      </div>
+      <div style="font-size:0.78rem;color:var(--muted);text-align:center">
+        Inhalt: <strong style="color:var(--text)">${((b.size * pct / 100) * 1000).toFixed(0)} g</strong> von ${(b.size * 1000).toFixed(0)} g
+      </div>
+    </div>`;
+  }).join('');
+
+  const addBtn = document.getElementById('gas-add-btn');
+  if (addBtn) addBtn.style.display = gasData.bottles.length >= 2 ? 'none' : '';
+}
+
+function gasSetFill(i, val) {
+  gasData.bottles[i].fill = parseFloat(val);
+  // Update bar + label live
+  const pct = Math.max(0, Math.min(100, gasData.bottles[i].fill));
+  const color = pct < 20 ? '#ef4444' : pct < 40 ? '#f59e0b' : 'var(--accent)';
+  const bar = document.getElementById('gas-bar-' + i);
+  const lbl = document.getElementById('gas-pct-' + i);
+  if (bar) { bar.style.width = pct + '%'; bar.style.background = color; }
+  if (lbl) { lbl.textContent = pct + '%'; lbl.style.color = color; }
+  localStorage.setItem(GAS_KEY, JSON.stringify(gasData));
+  gasCalc();
+}
+
+function gasSetSize(i, val) {
+  const wrap = document.getElementById('gas-custom-wrap-' + i);
+  if (val === 'custom') {
+    if (wrap) wrap.style.display = '';
+  } else {
+    gasData.bottles[i].size = parseFloat(val);
+    if (wrap) wrap.style.display = 'none';
+    localStorage.setItem(GAS_KEY, JSON.stringify(gasData));
+    gasCalc();
+  }
+}
+
+function gasSetCustomSize(i, val) {
+  const v = parseFloat(val);
+  if (v > 0) { gasData.bottles[i].size = v; localStorage.setItem(GAS_KEY, JSON.stringify(gasData)); gasCalc(); }
+}
+
+function gasAddBottle() {
+  if (gasData.bottles.length >= 2) return;
+  gasData.bottles.push({ size: 11, fill: 100 });
+  localStorage.setItem(GAS_KEY, JSON.stringify(gasData));
+  gasRenderBottles();
+  gasCalc();
+}
+
+function gasRemoveBottle(i) {
+  gasData.bottles.splice(i, 1);
+  localStorage.setItem(GAS_KEY, JSON.stringify(gasData));
+  gasRenderBottles();
+  gasCalc();
+}
+
+function gasPreset(typ) {
+  const presets = {
+    sommer:  { kochen: 60,  heizung: 0,   wasser: 60,  sonstig: 0 },
+    winter:  { kochen: 80,  heizung: 400, wasser: 100, sonstig: 20 },
+    kochen:  { kochen: 100, heizung: 0,   wasser: 0,   sonstig: 0 },
+  };
+  const p = presets[typ];
+  if (!p) return;
+  Object.keys(p).forEach(k => {
+    gasData[k] = p[k];
+    const el = document.getElementById('gas-' + k);
+    if (el) el.value = p[k] || '';
+  });
+  localStorage.setItem(GAS_KEY, JSON.stringify(gasData));
+  gasCalc();
+}
+
+function gasCalc() {
+  const result = document.getElementById('gas-result');
+  if (!result) return;
+  const totalG = gasData.bottles.reduce((s, b) => s + (b.size * Math.max(0, Math.min(100, b.fill)) / 100 * 1000), 0);
+  const tagesverbrauch = (gasData.kochen || 0) + (gasData.heizung || 0) + (gasData.wasser || 0) + (gasData.sonstig || 0);
+  const reichweite = tagesverbrauch > 0 ? totalG / tagesverbrauch : null;
+  const totalKg = gasData.bottles.reduce((s, b) => s + b.size, 0);
+  const totalPct = totalKg > 0 ? (totalG / (totalKg * 1000) * 100) : 0;
+  const resColor = totalPct < 20 ? '#ef4444' : totalPct < 40 ? '#f59e0b' : 'var(--accent)';
+  const warn = totalPct < 20 ? `<div style="background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);border-radius:10px;padding:10px 14px;margin-bottom:10px;font-size:0.82rem;color:#ef4444">⚠️ <strong>Gasvorrat kritisch!</strong> Jetzt nachfüllen.</div>` :
+               totalPct < 40 ? `<div style="background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.3);border-radius:10px;padding:10px 14px;margin-bottom:10px;font-size:0.82rem;color:#f59e0b">⚠️ Gasvorrat wird knapp. Nächste Möglichkeit einplanen.</div>` : '';
+  result.innerHTML = `${warn}
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+      <div style="background:var(--panel2);border:1px solid var(--border);border-radius:12px;padding:14px;text-align:center">
+        <div style="font-size:0.65rem;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">Gesamtvorrat</div>
+        <div style="font-size:1.6rem;font-weight:800;color:${resColor}">${(totalG/1000).toFixed(2)} kg</div>
+        <div style="font-size:0.72rem;color:var(--muted)">${totalPct.toFixed(0)}% voll</div>
+      </div>
+      <div style="background:var(--panel2);border:1px solid var(--border);border-radius:12px;padding:14px;text-align:center">
+        <div style="font-size:0.65rem;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">Tagesverbrauch</div>
+        <div style="font-size:1.6rem;font-weight:800;color:var(--accent)">${tagesverbrauch} g</div>
+        <div style="font-size:0.72rem;color:var(--muted)">${(tagesverbrauch/1000).toFixed(2)} kg/Tag</div>
+      </div>
+      <div style="background:var(--panel2);border:1px solid var(--border);border-radius:12px;padding:14px;text-align:center;grid-column:1/-1">
+        <div style="font-size:0.65rem;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">Reichweite</div>
+        <div style="font-size:2rem;font-weight:800;color:${tagesverbrauch>0?resColor:'var(--muted)'}">
+          ${reichweite !== null ? Math.floor(reichweite) + ' Tage' : '–'}
+        </div>
+        ${reichweite !== null ? `<div style="font-size:0.72rem;color:var(--muted)">≈ bis ${(() => { const d=new Date(); d.setDate(d.getDate()+Math.floor(reichweite)); return d.toLocaleDateString('de-DE',{day:'2-digit',month:'2-digit'}); })()}</div>` : '<div style="font-size:0.72rem;color:var(--muted)">Tagesverbrauch eingeben</div>'}
+      </div>
+    </div>`;
+}
 
 // ══════════════════════════════════
 // ONBOARDING

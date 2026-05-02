@@ -1849,7 +1849,7 @@ const NOTFALL_DATA = [
 // ══════════════════════════════════
 // FAHRZEUGDATEN
 // ══════════════════════════════════
-const FZ_FIELDS = ['typ','kz','hersteller','modell','spitzname','fin','ez','bj','tuev','gas-pruef','inspektion','insp-km','vers-name','vers-nr','vers-tel','reifen','druck','oel','tank','zgg','leer','notiz'];
+const FZ_FIELDS = ['typ','kz','hersteller','modell','spitzname','fin','ez','bj','tuev','gas-pruef','inspektion','insp-km','vers-name','vers-nr','vers-tel','reifen','druck','oel','tank','zgg','leer','hoehe','breite','laenge','radstand','notiz'];
 
 function switchFahrzeugTab(name, btn) {
   document.querySelectorAll('#sec-fahrzeug .seg-tab').forEach(b => b.classList.remove('active'));
@@ -2138,6 +2138,9 @@ function renderStart() {
   // Alle Werkzeuge (Grid immer aktuell halten, Sichtbarkeit über toggleAllTools)
   const allGrid = document.getElementById('start-all-grid');
   if (allGrid) allGrid.innerHTML = START_TOOLS.map(t => makeStartCard(t)).join('');
+
+  // Fahrzeugmaße-Karte
+  renderMaesseCard();
 }
 
 async function startWeatherLoad() {
@@ -2412,6 +2415,51 @@ function addToCalendar(label, dateIso) {
   setTimeout(() => { document.body.removeChild(a); URL.revokeObjectURL(url); }, 1000);
 }
 
+function renderMaesseCard() {
+  const el = document.getElementById('maesse-card');
+  if (!el) return;
+  const fz = JSON.parse(localStorage.getItem('wmp_fahrzeug') || '{}');
+  // Werte aus Formular-Inputs übernehmen falls gerade geöffnet
+  ['hoehe','breite','laenge','radstand','zgg'].forEach(k => {
+    const inp = document.getElementById('fz-' + k);
+    if (inp && inp.value) fz[k] = inp.value;
+  });
+  const h = parseFloat(fz.hoehe);
+  const b = parseFloat(fz.breite);
+  const l = parseFloat(fz.laenge);
+  const z = parseFloat(fz.zgg);
+  if (!h && !b && !l && !z) { el.style.display = 'none'; return; }
+  el.style.display = 'block';
+  const fmt = (v, unit) => v ? `<span style="color:var(--text);font-weight:700">${v.toFixed(2)}</span><span style="color:var(--muted);font-size:0.7rem"> ${unit}</span>` : `<span style="color:var(--muted);font-size:0.7rem">–</span>`;
+  const fmtKg = (v) => v ? `<span style="color:var(--text);font-weight:700">${Math.round(v)}</span><span style="color:var(--muted);font-size:0.7rem"> kg</span>` : `<span style="color:var(--muted);font-size:0.7rem">–</span>`;
+  el.innerHTML = `
+    <div style="background:linear-gradient(135deg,var(--panel),var(--panel2));border:1px solid var(--accent-border);border-radius:16px;padding:14px 18px;margin-bottom:14px;cursor:pointer" onclick="showSection('fahrzeug')" title="Zu Fahrzeugdaten">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+        <span style="font-size:1.1rem">📐</span>
+        <span style="font-size:0.65rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--muted)">Fahrzeugmaße</span>
+        <span style="margin-left:auto;font-size:0.65rem;color:var(--muted)">➜ Details</span>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px;text-align:center">
+        <div style="background:var(--bg);border-radius:10px;padding:8px 4px">
+          <div style="font-size:0.6rem;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px">Höhe</div>
+          <div style="font-size:1rem;line-height:1">${fmt(h,'m')}</div>
+        </div>
+        <div style="background:var(--bg);border-radius:10px;padding:8px 4px">
+          <div style="font-size:0.6rem;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px">Breite</div>
+          <div style="font-size:1rem;line-height:1">${fmt(b,'m')}</div>
+        </div>
+        <div style="background:var(--bg);border-radius:10px;padding:8px 4px">
+          <div style="font-size:0.6rem;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px">Länge</div>
+          <div style="font-size:1rem;line-height:1">${fmt(l,'m')}</div>
+        </div>
+        <div style="background:var(--bg);border-radius:10px;padding:8px 4px">
+          <div style="font-size:0.6rem;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px">ZGG</div>
+          <div style="font-size:1rem;line-height:1">${fmtKg(z)}</div>
+        </div>
+      </div>
+    </div>`;
+}
+
 function loadFahrzeug() {
   const d = JSON.parse(localStorage.getItem('wmp_fahrzeug') || '{}');
   FZ_FIELDS.forEach(f => {
@@ -2421,6 +2469,7 @@ function loadFahrzeug() {
   if (d.zulassung_foto) renderFzFoto(d.zulassung_foto);
   renderTuevBanner();
   renderVersTelLink();
+  renderMaesseCard();
 }
 
 function saveFahrzeugSilent() {

@@ -161,7 +161,8 @@
     <!-- Service-Alarm Banner -->
     <div id="sv-start-banner" style="display:none;padding:0 0 6px"></div>
 
-
+    <!-- Fahrzeugmaße Karte -->
+    <div id="maesse-card" style="display:none"></div>
 
     <!-- Schnellzugriff (4 Tools / Favoriten) -->
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
@@ -838,6 +839,14 @@
         <div><label class="form-lbl">Tankinhalt (L)</label><input class="form-inp" type="number" id="fz-tank" placeholder="90"></div>
         <div><label class="form-lbl">Zul. Gesamtgewicht</label><input class="form-inp" id="fz-zgg" placeholder="3500 kg"></div>
         <div><label class="form-lbl">Leergewicht</label><input class="form-inp" id="fz-leer" placeholder="2800 kg"></div>
+      </div>
+
+      <div class="section-label">Abmessungen</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">
+        <div><label class="form-lbl">Höhe (m)</label><input class="form-inp" type="number" step="0.01" id="fz-hoehe" placeholder="2.95" oninput="saveFahrzeugSilent();renderMaesseCard()"></div>
+        <div><label class="form-lbl">Breite (m)</label><input class="form-inp" type="number" step="0.01" id="fz-breite" placeholder="2.30" oninput="saveFahrzeugSilent();renderMaesseCard()"></div>
+        <div><label class="form-lbl">Länge (m)</label><input class="form-inp" type="number" step="0.01" id="fz-laenge" placeholder="6.50" oninput="saveFahrzeugSilent();renderMaesseCard()"></div>
+        <div><label class="form-lbl">Radstand (m)</label><input class="form-inp" type="number" step="0.01" id="fz-radstand" placeholder="3.68" oninput="saveFahrzeugSilent()"></div>
       </div>
 
       <div class="section-label">Notizen</div>

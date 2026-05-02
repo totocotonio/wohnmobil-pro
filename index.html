@@ -1319,7 +1319,7 @@
         <div style="width:64px;height:64px;background:linear-gradient(135deg,var(--accent),var(--accent2,#38bdf8));border-radius:20px;display:flex;align-items:center;justify-content:center;font-size:30px;box-shadow:0 0 32px var(--accent-dim),0 8px 24px rgba(0,0,0,0.3);margin:0 auto">🚐</div>
       </div>
       <div style="font-size:1.6rem;font-weight:800;letter-spacing:2px;color:var(--text);line-height:1;margin-bottom:4px;position:relative">WOHNMOBIL <span style="color:var(--accent)">PRO</span></div>
-      <div id="start-fahrzeug" style="font-size:0.9rem;color:var(--text);letter-spacing:0.5px;position:relative">13 Werkzeuge · Camping · Offline</div>
+      <div id="start-fahrzeug" style="font-size:0.9rem;color:var(--text);letter-spacing:0.5px;position:relative">14 Werkzeuge · Camping · Offline</div>
       <div id="start-weather" style="margin-top:12px;position:relative;cursor:pointer" onclick="showSection('wetter')" title="Zum Wetter-Tab"></div>
     </div>
 
@@ -4607,8 +4607,8 @@ function renderStart() {
     try {
       const fz = JSON.parse(localStorage.getItem('wmp_fahrzeug') || '{}');
       const name = fz.spitzname || ((fz.hersteller && fz.modell) ? `${fz.hersteller} ${fz.modell}` : fz.typ || null);
-      fzEl.textContent = name ? `🚐 ${name}` : '13 Werkzeuge · Camping · Offline';
-    } catch(e) { fzEl.textContent = '13 Werkzeuge · Camping · Offline'; }
+      fzEl.textContent = name ? `🚐 ${name}` : '14 Werkzeuge · Camping · Offline';
+    } catch(e) { fzEl.textContent = '14 Werkzeuge · Camping · Offline'; }
   }
 
   // Schnellzugriff: Favoriten wenn gesetzt, sonst 4 Defaults

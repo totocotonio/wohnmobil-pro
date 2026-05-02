@@ -4090,8 +4090,8 @@ function spOpenForm(id) {
     document.getElementById('spl-notiz').value    = e.notiz   || '';
     document.getElementById('spl-lat').value      = e.lat     || '';
     document.getElementById('spl-lon').value      = e.lon     || '';
-    const gpsEl = document.getElementById('spl-gps-status');
-    if (gpsEl) gpsEl.textContent = e.lat ? `📍 ${parseFloat(e.lat).toFixed(5)}, ${parseFloat(e.lon).toFixed(5)}` : 'Kein GPS gespeichert';
+    if (e.lat && e.lon) { spGpsStatusSet(e.lat, e.lon); }
+    else { const gpsEl = document.getElementById('spl-gps-status'); if (gpsEl) { gpsEl.textContent = 'Kein GPS gespeichert'; gpsEl.style.color = 'var(--muted)'; } }
     document.getElementById('spl-form-title').textContent = '✏️ Stellplatz bearbeiten';
     spSetStar(e.bewertung || 0);
     // Foto vorladen
@@ -4136,17 +4136,21 @@ function spSetStar(v) {
   });
 }
 
+function spGpsStatusSet(lat, lon) {
+  const statusEl = document.getElementById('spl-gps-status');
+  if (!statusEl) return;
+  const url = `https://www.google.com/maps?q=${lat},${lon}`;
+  statusEl.innerHTML = `<a href="${url}" target="_blank" rel="noopener" style="color:var(--accent);text-decoration:none;font-weight:600">📍 ${parseFloat(lat).toFixed(5)}, ${parseFloat(lon).toFixed(5)} ↗</a>`;
+}
+
 function spGetGps() {
   const statusEl = document.getElementById('spl-gps-status');
   if (!navigator.geolocation) { if (statusEl) statusEl.textContent = 'GPS nicht verfügbar'; return; }
-  if (statusEl) statusEl.textContent = '⏳ Ermittle Position…';
+  if (statusEl) { statusEl.textContent = '⏳ Ermittle Position…'; statusEl.style.color = 'var(--muted)'; }
   navigator.geolocation.getCurrentPosition(pos => {
     document.getElementById('spl-lat').value = pos.coords.latitude;
     document.getElementById('spl-lon').value = pos.coords.longitude;
-    if (statusEl) {
-      statusEl.textContent = `📍 ${pos.coords.latitude.toFixed(5)}, ${pos.coords.longitude.toFixed(5)}`;
-      statusEl.style.color = 'var(--accent)';
-    }
+    spGpsStatusSet(pos.coords.latitude, pos.coords.longitude);
   }, () => {
     if (statusEl) { statusEl.textContent = 'Standort konnte nicht ermittelt werden'; statusEl.style.color = '#ef4444'; }
   }, { timeout: 10000 });

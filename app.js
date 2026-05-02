@@ -3989,64 +3989,64 @@ function spSave() {
 spLoad();
 
 function spOpenForm(id) {
-  const form = document.getElementById('sp-form');
+  const form = document.getElementById('spl-form');
   if (!form) return;
   form.style.display = 'block';
   form.scrollIntoView({ behavior: 'smooth', block: 'start' });
   if (id) {
     const e = spData.find(x => x.id === id);
     if (!e) return;
-    document.getElementById('sp-edit-id').value  = id;
-    document.getElementById('sp-name').value     = e.name    || '';
-    document.getElementById('sp-ort').value      = e.ort     || '';
-    document.getElementById('sp-land').value     = e.land    || '';
-    document.getElementById('sp-datum').value    = e.datum   || '';
-    document.getElementById('sp-naechte').value  = e.naechte || '';
-    document.getElementById('sp-preis').value    = e.preis !== undefined && e.preis !== null ? e.preis : '';
-    document.getElementById('sp-notiz').value    = e.notiz   || '';
-    document.getElementById('sp-lat').value      = e.lat     || '';
-    document.getElementById('sp-lon').value      = e.lon     || '';
-    const gpsEl = document.getElementById('sp-gps-status');
+    document.getElementById('spl-edit-id').value  = id;
+    document.getElementById('spl-name').value     = e.name    || '';
+    document.getElementById('spl-ort').value      = e.ort     || '';
+    document.getElementById('spl-land').value     = e.land    || '';
+    document.getElementById('spl-datum').value    = e.datum   || '';
+    document.getElementById('spl-naechte').value  = e.naechte || '';
+    document.getElementById('spl-preis').value    = e.preis !== undefined && e.preis !== null ? e.preis : '';
+    document.getElementById('spl-notiz').value    = e.notiz   || '';
+    document.getElementById('spl-lat').value      = e.lat     || '';
+    document.getElementById('spl-lon').value      = e.lon     || '';
+    const gpsEl = document.getElementById('spl-gps-status');
     if (gpsEl) gpsEl.textContent = e.lat ? `📍 ${parseFloat(e.lat).toFixed(5)}, ${parseFloat(e.lon).toFixed(5)}` : 'Kein GPS gespeichert';
-    document.getElementById('sp-form-title').textContent = '✏️ Stellplatz bearbeiten';
+    document.getElementById('spl-form-title').textContent = '✏️ Stellplatz bearbeiten';
     spSetStar(e.bewertung || 0);
   } else {
-    document.getElementById('sp-edit-id').value  = '';
-    document.getElementById('sp-name').value     = '';
-    document.getElementById('sp-ort').value      = '';
-    document.getElementById('sp-land').value     = '';
-    document.getElementById('sp-datum').value    = new Date().toISOString().split('T')[0];
-    document.getElementById('sp-naechte').value  = '1';
-    document.getElementById('sp-preis').value    = '';
-    document.getElementById('sp-notiz').value    = '';
-    document.getElementById('sp-lat').value      = '';
-    document.getElementById('sp-lon').value      = '';
-    const gpsEl = document.getElementById('sp-gps-status');
+    document.getElementById('spl-edit-id').value  = '';
+    document.getElementById('spl-name').value     = '';
+    document.getElementById('spl-ort').value      = '';
+    document.getElementById('spl-land').value     = '';
+    document.getElementById('spl-datum').value    = new Date().toISOString().split('T')[0];
+    document.getElementById('spl-naechte').value  = '1';
+    document.getElementById('spl-preis').value    = '';
+    document.getElementById('spl-notiz').value    = '';
+    document.getElementById('spl-lat').value      = '';
+    document.getElementById('spl-lon').value      = '';
+    const gpsEl = document.getElementById('spl-gps-status');
     if (gpsEl) gpsEl.textContent = 'Kein GPS gespeichert';
-    document.getElementById('sp-form-title').textContent = '⛺ Neuer Stellplatz';
+    document.getElementById('spl-form-title').textContent = '⛺ Neuer Stellplatz';
     spSetStar(0);
   }
 }
 
 function spCloseForm() {
-  const form = document.getElementById('sp-form');
+  const form = document.getElementById('spl-form');
   if (form) form.style.display = 'none';
 }
 
 function spSetStar(v) {
   spCurrentStar = v;
-  document.querySelectorAll('.sp-star').forEach(s => {
+  document.querySelectorAll('.spl-star').forEach(s => {
     s.style.opacity = parseInt(s.dataset.v) <= v ? '1' : '0.25';
   });
 }
 
 function spGetGps() {
-  const statusEl = document.getElementById('sp-gps-status');
+  const statusEl = document.getElementById('spl-gps-status');
   if (!navigator.geolocation) { if (statusEl) statusEl.textContent = 'GPS nicht verfügbar'; return; }
   if (statusEl) statusEl.textContent = '⏳ Ermittle Position…';
   navigator.geolocation.getCurrentPosition(pos => {
-    document.getElementById('sp-lat').value = pos.coords.latitude;
-    document.getElementById('sp-lon').value = pos.coords.longitude;
+    document.getElementById('spl-lat').value = pos.coords.latitude;
+    document.getElementById('spl-lon').value = pos.coords.longitude;
     if (statusEl) {
       statusEl.textContent = `📍 ${pos.coords.latitude.toFixed(5)}, ${pos.coords.longitude.toFixed(5)}`;
       statusEl.style.color = 'var(--accent)';
@@ -4057,22 +4057,22 @@ function spGetGps() {
 }
 
 function spSaveEntry() {
-  const name = document.getElementById('sp-name').value.trim();
+  const name = document.getElementById('spl-name').value.trim();
   if (!name) { toast('Bitte einen Namen eingeben'); return; }
-  const editId = document.getElementById('sp-edit-id').value;
-  const preisVal = document.getElementById('sp-preis').value;
+  const editId = document.getElementById('spl-edit-id').value;
+  const preisVal = document.getElementById('spl-preis').value;
   const entry = {
     id:        editId ? parseInt(editId) : Date.now(),
     name,
-    ort:       document.getElementById('sp-ort').value.trim(),
-    land:      document.getElementById('sp-land').value.trim(),
-    datum:     document.getElementById('sp-datum').value,
-    naechte:   parseFloat(document.getElementById('sp-naechte').value) || 1,
+    ort:       document.getElementById('spl-ort').value.trim(),
+    land:      document.getElementById('spl-land').value.trim(),
+    datum:     document.getElementById('spl-datum').value,
+    naechte:   parseFloat(document.getElementById('spl-naechte').value) || 1,
     preis:     preisVal !== '' ? parseFloat(preisVal) : null,
     bewertung: spCurrentStar,
-    notiz:     document.getElementById('sp-notiz').value.trim(),
-    lat:       document.getElementById('sp-lat').value || null,
-    lon:       document.getElementById('sp-lon').value || null,
+    notiz:     document.getElementById('spl-notiz').value.trim(),
+    lat:       document.getElementById('spl-lat').value || null,
+    lon:       document.getElementById('spl-lon').value || null,
   };
   if (editId) {
     const idx = spData.findIndex(x => x.id == editId);
@@ -4083,7 +4083,48 @@ function spSaveEntry() {
   spSave();
   spCloseForm();
   spRender();
-  toast('✅ Stellplatz gespeichert');
+
+  // Verknüpfung mit Kosten: bei Preis > 0 und aktiver Reise anbieten
+  const activeTrip = getActiveTrip ? getActiveTrip() : null;
+  if (!editId && entry.preis !== null && entry.preis > 0 && activeTrip && !activeTrip.archiviert) {
+    spOfferTripLink(entry, activeTrip);
+  } else {
+    toast('✅ Stellplatz gespeichert');
+  }
+}
+
+function spOfferTripLink(entry, trip) {
+  const gesamtPreis = (entry.preis * entry.naechte).toFixed(2);
+  const div = document.createElement('div');
+  div.style.cssText = 'position:fixed;bottom:80px;left:50%;transform:translateX(-50%);z-index:9999;background:var(--panel);border:1px solid var(--accent);border-radius:14px;padding:14px 18px;box-shadow:0 8px 32px rgba(0,0,0,0.4);max-width:340px;width:90%';
+  div.innerHTML = `
+    <div style="font-size:0.72rem;color:var(--accent);font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-bottom:6px">✅ Stellplatz gespeichert</div>
+    <div style="font-size:0.85rem;color:var(--text);margin-bottom:10px">
+      In aktive Reise <strong>${trip.land||''} ${trip.name}</strong> übernehmen?<br>
+      <span style="color:var(--muted);font-size:0.78rem">${entry.naechte} Nacht${entry.naechte!==1?'e':''} × ${entry.preis.toFixed(2)} € = <strong style="color:var(--accent)">${gesamtPreis} €</strong></span>
+    </div>
+    <div style="display:flex;gap:8px">
+      <button onclick="spDoTripLink(${JSON.stringify(entry).replace(/"/g,'&quot;')});this.closest('div[style]').remove()" class="btn btn-primary" style="flex:1;padding:8px;font-size:0.82rem">📋 Ja, übernehmen</button>
+      <button onclick="this.closest('div[style]').remove()" class="btn" style="padding:8px 14px;font-size:0.82rem">Nein</button>
+    </div>`;
+  document.body.appendChild(div);
+  setTimeout(() => div.remove(), 12000);
+}
+
+function spDoTripLink(entry) {
+  const trip = getActiveTrip ? getActiveTrip() : null;
+  if (!trip) { toast('Keine aktive Reise'); return; }
+  const gesamtPreis = parseFloat((entry.preis * entry.naechte).toFixed(2));
+  trip.stellplatz.unshift({
+    id:   Date.now(),
+    dat:  entry.datum || '',
+    name: entry.name + (entry.ort ? ', ' + entry.ort : ''),
+    n:    entry.naechte || 1,
+    p:    gesamtPreis,
+    bem:  entry.notiz || '',
+  });
+  saveTrips();
+  toast('📋 In Reise übernommen');
 }
 
 function spDelete(id) {
@@ -4100,7 +4141,7 @@ function spStars(n) {
 
 function spRender() {
   spLoad();
-  const statsEl = document.getElementById('sp-stats');
+  const statsEl = document.getElementById('spl-stats');
   if (statsEl) {
     const total = spData.length;
     const naechte = spData.reduce((s, e) => s + (e.naechte || 1), 0);
@@ -4117,8 +4158,8 @@ function spRender() {
     </div>`).join('');
   }
 
-  const q = (document.getElementById('sp-search')?.value || '').toLowerCase();
-  const list = document.getElementById('sp-list');
+  const q = (document.getElementById('spl-search')?.value || '').toLowerCase();
+  const list = document.getElementById('spl-list');
   if (!list) return;
   const filtered = q ? spData.filter(e =>
     (e.name + ' ' + e.ort + ' ' + e.land + ' ' + e.notiz).toLowerCase().includes(q)

@@ -4192,16 +4192,21 @@ function spRender() {
   if (statsEl) {
     const total = spData.length;
     const naechte = spData.reduce((s, e) => s + (e.naechte || 1), 0);
-    const preise = spData.filter(e => e.preis !== null && e.preis !== undefined);
-    const avgPreis = preise.length ? preise.reduce((s, e) => s + e.preis, 0) / preise.length : null;
+    const preise = spData.filter(e => e.preis !== null && e.preis !== undefined && e.preis > 0);
+    const gesamtKosten = preise.reduce((s, e) => s + e.preis * (e.naechte || 1), 0);
+    const naechteWithPreis = preise.reduce((s, e) => s + (e.naechte || 1), 0);
+    const avgPreis = naechteWithPreis > 0 ? gesamtKosten / naechteWithPreis : null;
+    const avgTooltip = avgPreis !== null
+      ? `Gewichteter Durchschnitt: ${gesamtKosten.toFixed(2)} € Gesamtkosten ÷ ${naechteWithPreis} Nächte (nur Einträge mit Preisangabe)`
+      : 'Noch keine Preise eingetragen';
     statsEl.innerHTML = [
-      { icon: '⛺', label: 'Stellplätze', val: total },
-      { icon: '🌙', label: 'Nächte gesamt', val: naechte },
-      { icon: '💶', label: 'Ø Preis/Nacht', val: avgPreis !== null ? avgPreis.toFixed(2) + ' €' : '–' },
-    ].map(s => `<div style="background:var(--panel2);border:1px solid var(--border);border-radius:12px;padding:12px;text-align:center">
+      { icon: '⛺', label: 'Stellplätze', val: total, tip: '' },
+      { icon: '🌙', label: 'Nächte gesamt', val: naechte, tip: '' },
+      { icon: '💶', label: 'Ø Preis/Nacht', val: avgPreis !== null ? avgPreis.toFixed(2) + ' €' : '–', tip: avgTooltip },
+    ].map(s => `<div style="background:var(--panel2);border:1px solid var(--border);border-radius:12px;padding:12px;text-align:center${s.tip ? ';cursor:help' : ''}" ${s.tip ? `title="${s.tip}"` : ''}>
       <div style="font-size:1.3rem">${s.icon}</div>
       <div style="font-size:1.2rem;font-weight:800;color:var(--accent)">${s.val}</div>
-      <div style="font-size:0.65rem;color:var(--muted);text-transform:uppercase;letter-spacing:1px">${s.label}</div>
+      <div style="font-size:0.65rem;color:var(--muted);text-transform:uppercase;letter-spacing:1px">${s.label}${s.tip ? ' ℹ️' : ''}</div>
     </div>`).join('');
   }
 

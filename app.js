@@ -4160,7 +4160,6 @@ function spOfferTripLink(entry, trip) {
       <button onclick="this.closest('div[style]').remove()" class="btn" style="padding:8px 14px;font-size:0.82rem">Nein</button>
     </div>`;
   document.body.appendChild(div);
-  setTimeout(() => div.remove(), 12000);
 }
 
 function spDoTripLink(entry) {

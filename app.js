@@ -1510,6 +1510,7 @@ function renderTagebuch(trip, isArchived) {
   const fmt = d => d ? new Date(d+'T00:00:00').toLocaleDateString('de-DE',{day:'2-digit',month:'2-digit',year:'numeric'}) : '';
   list.innerHTML = trip.tagebuch.map(e => {
     const fotoHtml = e.foto ? `<img class="tb-thumb" src="${e.foto}" alt="Foto" onclick="showTbFotoFull('${e.id}')">` : '';
+    const editBtn  = isArchived ? '' : `<button class="ei-del" style="flex-shrink:0;color:var(--muted)" onclick="editTagebuch(${trip.id},${e.id})">✏️</button>`;
     const delBtn   = isArchived ? '' : `<button class="ei-del" style="flex-shrink:0" onclick="delTagebuch(${trip.id},${e.id})">✕</button>`;
     return `<div class="tb-entry" id="tb-entry-${e.id}">
       ${fotoHtml}
@@ -1518,7 +1519,7 @@ function renderTagebuch(trip, isArchived) {
         <div class="tb-text collapsed" id="tb-txt-${e.id}">${e.text.replace(/</g,'&lt;').replace(/\n/g,'<br>')}</div>
         ${e.text.length > 120 ? `<span class="tb-mehr" onclick="toggleTbText(${e.id})">mehr anzeigen</span>` : ''}
       </div>
-      ${delBtn}
+      <div style="display:flex;gap:4px;flex-shrink:0">${editBtn}${delBtn}</div>
     </div>`;
   }).join('');
 }
@@ -1547,6 +1548,52 @@ function delTagebuch(tripId, entryId) {
   if (!trip || !trip.tagebuch) return;
   trip.tagebuch = trip.tagebuch.filter(e => e.id !== entryId);
   saveTrips(); renderKosten();
+}
+
+function editTagebuch(tripId, entryId) {
+  const trip = trips.find(t => String(t.id) === String(tripId));
+  if (!trip || !trip.tagebuch) return;
+  const entry = trip.tagebuch.find(e => e.id === entryId);
+  if (!entry) return;
+
+  const ov = document.createElement('div');
+  ov.id = 'tb-edit-overlay';
+  ov.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:9999;display:flex;align-items:center;justify-content:center;padding:16px';
+  ov.innerHTML = `
+    <div style="background:var(--card);border-radius:16px;padding:20px;width:100%;max-width:480px;max-height:90vh;overflow-y:auto;display:flex;flex-direction:column;gap:14px">
+      <div style="font-size:1rem;font-weight:600;color:var(--text)">✏️ Tagebucheintrag bearbeiten</div>
+      <div>
+        <label style="font-size:0.75rem;color:var(--muted);display:block;margin-bottom:4px">Datum</label>
+        <input id="tb-edit-dat" type="date" class="form-inp" value="${entry.dat||''}">
+      </div>
+      <div>
+        <label style="font-size:0.75rem;color:var(--muted);display:block;margin-bottom:4px">Eintrag</label>
+        <textarea id="tb-edit-text" class="form-inp" rows="6" style="resize:vertical;font-family:inherit;line-height:1.5">${entry.text||''}</textarea>
+      </div>
+      <div style="display:flex;gap:8px;justify-content:flex-end">
+        <button class="btn" onclick="document.getElementById('tb-edit-overlay').remove()">Abbrechen</button>
+        <button class="btn btn-primary" onclick="saveEditTagebuch('${tripId}','${entryId}')">Speichern</button>
+      </div>
+    </div>`;
+  document.body.appendChild(ov);
+  ov.addEventListener('click', ev => { if (ev.target === ov) ov.remove(); });
+  setTimeout(() => { const t = document.getElementById('tb-edit-text'); if (t) t.focus(); }, 50);
+}
+
+function saveEditTagebuch(tripId, entryId) {
+  const trip = trips.find(t => String(t.id) === String(tripId));
+  if (!trip || !trip.tagebuch) return;
+  const entry = trip.tagebuch.find(e => e.id === entryId);
+  if (!entry) return;
+  const dat  = document.getElementById('tb-edit-dat').value.trim();
+  const text = document.getElementById('tb-edit-text').value.trim();
+  if (!text) { toast('Kein Text eingegeben'); return; }
+  entry.dat  = dat  || entry.dat;
+  entry.text = text;
+  saveTrips();
+  document.getElementById('tb-edit-overlay')?.remove();
+  renderKosten();
+  toast('Eintrag gespeichert');
 }
 
 // ══════════════════════════════════

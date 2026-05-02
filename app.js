@@ -4141,7 +4141,13 @@ function spSaveEntry() {
   };
   if (editId) {
     const idx = spData.findIndex(x => x.id == editId);
-    if (idx >= 0) spData[idx] = entry; else spData.unshift(entry);
+    if (idx >= 0) {
+      // Verknüpfungs-Felder vom alten Eintrag übernehmen
+      if (spData[idx].tripId) entry.tripId = spData[idx].tripId;
+      spData[idx] = entry;
+    } else {
+      spData.unshift(entry);
+    }
   } else {
     spData.unshift(entry);
   }

@@ -1313,12 +1313,14 @@
     <div style="margin:-16px -16px 16px;padding:28px 20px 24px;text-align:center;position:relative;background:linear-gradient(160deg,var(--panel2) 0%,var(--bg) 100%);border-bottom:1px solid var(--border);overflow:hidden">
       <!-- Hintergrund-Glow -->
       <div style="position:absolute;top:-30px;left:50%;transform:translateX(-50%);width:200px;height:200px;background:radial-gradient(circle,var(--accent-dim) 0%,transparent 70%);pointer-events:none"></div>
-      <div id="start-greeting" style="font-size:0.65rem;color:var(--muted);letter-spacing:3px;text-transform:uppercase;margin-bottom:14px;position:relative">Guten Tag</div>
+      <div id="start-greeting" style="font-size:0.78rem;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:4px;position:relative">Guten Tag</div>
+      <div id="start-date" style="font-size:0.72rem;color:var(--muted);margin-bottom:10px;position:relative"></div>
       <div style="position:relative;display:inline-block;margin-bottom:12px">
         <div style="width:64px;height:64px;background:linear-gradient(135deg,var(--accent),var(--accent2,#38bdf8));border-radius:20px;display:flex;align-items:center;justify-content:center;font-size:30px;box-shadow:0 0 32px var(--accent-dim),0 8px 24px rgba(0,0,0,0.3);margin:0 auto">🚐</div>
       </div>
       <div style="font-size:1.6rem;font-weight:800;letter-spacing:2px;color:var(--text);line-height:1;margin-bottom:4px;position:relative">WOHNMOBIL <span style="color:var(--accent)">PRO</span></div>
       <div id="start-fahrzeug" style="font-size:0.9rem;color:var(--text);letter-spacing:0.5px;position:relative">13 Werkzeuge · Camping · Offline</div>
+      <div id="start-weather" style="margin-top:12px;position:relative;cursor:pointer" onclick="showSection('wetter')" title="Zum Wetter-Tab"></div>
     </div>
 
     <!-- Service-Alarm Banner -->
@@ -4588,11 +4590,16 @@ function makeStartCard(tool) {
 }
 
 function renderStart() {
-  // Begrüßung
-  const h = new Date().getHours();
+  // Begrüßung + Datum
+  const now = new Date();
+  const h = now.getHours();
   const greet = h < 11 ? '☀️ Guten Morgen' : h < 18 ? '🌤 Guten Tag' : '🌙 Guten Abend';
   const gEl = document.getElementById('start-greeting');
   if (gEl) gEl.textContent = greet;
+  const dEl = document.getElementById('start-date');
+  if (dEl) dEl.textContent = now.toLocaleDateString('de-DE', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
+  // Wetter auf Startseite laden
+  startWeatherLoad();
 
   // Fahrzeugname
   const fzEl = document.getElementById('start-fahrzeug');
@@ -4623,6 +4630,61 @@ function renderStart() {
   // Alle Werkzeuge (Grid immer aktuell halten, Sichtbarkeit über toggleAllTools)
   const allGrid = document.getElementById('start-all-grid');
   if (allGrid) allGrid.innerHTML = START_TOOLS.map(t => makeStartCard(t)).join('');
+}
+
+async function startWeatherLoad() {
+  const el = document.getElementById('start-weather');
+  if (!el) return;
+
+  // Aus Wetter-Cache laden (max 30 Min alt)
+  try {
+    const cache = JSON.parse(localStorage.getItem('wmp_wetter_cache') || 'null');
+    if (cache && cache.data && (Date.now() - cache.ts) < 30 * 60 * 1000) {
+      renderStartWeather(cache.data, cache.name);
+      return;
+    }
+  } catch(e) {}
+
+  // Standort holen (still, ohne Fehlermeldung bei Ablehnung)
+  if (!navigator.geolocation) return;
+  el.innerHTML = `<div style="font-size:0.72rem;color:var(--muted)">📍 Wetter wird geladen…</div>`;
+  navigator.geolocation.getCurrentPosition(async pos => {
+    try {
+      const { latitude: lat, longitude: lon } = pos.coords;
+      // Ortsname via Nominatim
+      let name = '';
+      try {
+        const geo = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json&zoom=10`);
+        const gd = await geo.json();
+        name = gd.address?.city || gd.address?.town || gd.address?.village || gd.address?.county || '';
+      } catch(e) {}
+      // Wetter laden
+      const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}`
+        + `&current=temperature_2m,apparent_temperature,weather_code,wind_speed_10m,is_day`
+        + `&timezone=auto`;
+      const res = await fetch(url);
+      const data = await res.json();
+      localStorage.setItem('wmp_wetter_cache', JSON.stringify({ lat, lon, name, ts: Date.now(), data }));
+      renderStartWeather(data, name);
+    } catch(e) { el.innerHTML = ''; }
+  }, () => { el.innerHTML = ''; }, { timeout: 8000 });
+}
+
+function renderStartWeather(data, name) {
+  const el = document.getElementById('start-weather');
+  if (!el || !data?.current) return;
+  const cur = data.current;
+  const wmo = wmoInfo(cur.weather_code, cur.is_day === 1);
+  const temp = Math.round(cur.temperature_2m);
+  const feel = Math.round(cur.apparent_temperature);
+  const loc = name ? `📍 ${name}` : '';
+  el.innerHTML = `<div onclick="showSection('wetter')" style="display:inline-flex;align-items:center;gap:10px;background:rgba(255,255,255,0.05);border:1px solid var(--border);border-radius:20px;padding:7px 16px;cursor:pointer;transition:border-color 0.2s" onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='var(--border)'">
+    <span style="font-size:1.4rem">${wmo.icon}</span>
+    <div style="text-align:left">
+      <div style="font-size:0.95rem;font-weight:700;color:var(--text)">${temp}°C <span style="font-size:0.72rem;font-weight:400;color:var(--muted)">/ gefühlt ${feel}°C</span></div>
+      <div style="font-size:0.7rem;color:var(--muted)">${wmo.desc}${loc ? ' · ' + loc : ''}</div>
+    </div>
+  </div>`;
 }
 
 function toggleAllTools() {

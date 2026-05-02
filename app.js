@@ -4146,8 +4146,10 @@ function spSaveEntry() {
 }
 
 function spOfferTripLink(entry, trip) {
+  document.getElementById('spl-trip-popup')?.remove();
   const gesamtPreis = (entry.preis * entry.naechte).toFixed(2);
   const div = document.createElement('div');
+  div.id = 'spl-trip-popup';
   div.style.cssText = 'position:fixed;bottom:80px;left:50%;transform:translateX(-50%);z-index:9999;background:var(--panel);border:1px solid var(--accent);border-radius:14px;padding:14px 18px;box-shadow:0 8px 32px rgba(0,0,0,0.4);max-width:340px;width:90%';
   div.innerHTML = `
     <div style="font-size:0.72rem;color:var(--accent);font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-bottom:6px">✅ Stellplatz gespeichert</div>
@@ -4156,8 +4158,8 @@ function spOfferTripLink(entry, trip) {
       <span style="color:var(--muted);font-size:0.78rem">${entry.naechte} Nacht${entry.naechte!==1?'e':''} × ${entry.preis.toFixed(2)} € = <strong style="color:var(--accent)">${gesamtPreis} €</strong></span>
     </div>
     <div style="display:flex;gap:8px">
-      <button onclick="spDoTripLink(${JSON.stringify(entry).replace(/"/g,'&quot;')});this.closest('div[style]').remove()" class="btn btn-primary" style="flex:1;padding:8px;font-size:0.82rem">📋 Ja, übernehmen</button>
-      <button onclick="this.closest('div[style]').remove()" class="btn" style="padding:8px 14px;font-size:0.82rem">Nein</button>
+      <button onclick="spDoTripLink(${JSON.stringify(entry).replace(/"/g,'&quot;')});document.getElementById('spl-trip-popup')?.remove()" class="btn btn-primary" style="flex:1;padding:8px;font-size:0.82rem">📋 Ja, übernehmen</button>
+      <button onclick="document.getElementById('spl-trip-popup')?.remove()" class="btn" style="padding:8px 14px;font-size:0.82rem">Nein</button>
     </div>`;
   document.body.appendChild(div);
 }

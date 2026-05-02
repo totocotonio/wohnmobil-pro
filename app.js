@@ -668,7 +668,7 @@ function renderKosten() {
   document.getElementById('list-kraftstoff').innerHTML = trip.kraftstoff.length ? trip.kraftstoff.map(e =>
     `<div class="entry-item" data-cat="kraftstoff"><div class="ei-info"><div class="ei-main">⛽ ${e.l.toFixed(1)} L &times; ${e.p.toFixed(3)} €/L${e.verbrauch ? ' &middot; <span style="color:var(--accent)">' + e.verbrauch.toFixed(1) + ' L/100km</span>' : ''}</div><div class="ei-sub">${e.dat||'–'}${e.km?' &middot; '+e.km.toLocaleString('de-DE')+' km':''}</div></div><div class="ei-cost">${(e.l*e.p).toFixed(2)} €</div>${del('kraftstoff',e.id)}</div>`).join('') : '<div class="no-entries">⛽ Noch keine Tankungen</div>';
   document.getElementById('list-stellplatz').innerHTML = trip.stellplatz.length ? trip.stellplatz.map(e =>
-    `<div class="entry-item" data-cat="stellplatz"><div class="ei-info"><div class="ei-main">🏕️ ${e.name}</div><div class="ei-sub">${e.dat||'–'} &middot; ${e.n} Nacht/Nächte${e.bem ? ' &middot; ' + e.bem : ''}</div></div><div class="ei-cost">${e.p.toFixed(2)} €</div>${del('stellplatz',e.id)}</div>`).join('') : '<div class="no-entries">🏕️ Noch keine Stellplätze</div>';
+    `<div class="entry-item" data-cat="stellplatz"><div class="ei-info"><div class="ei-main">🏕️ ${e.name}</div><div class="ei-sub">${e.dat||'–'} &middot; ${e.n} Nacht/Nächte${e.bem ? ' &middot; ' + e.bem : ''}</div></div><div class="ei-cost">${e.p.toFixed(2)} €</div>${e.splId ? `<button class="ei-del" title="Im Logbuch anzeigen" onclick="gotoSplEntry(${e.splId})" style="color:var(--accent)">⛺</button>` : ''}${del('stellplatz',e.id)}</div>`).join('') : '<div class="no-entries">🏕️ Noch keine Stellplätze</div>';
   document.getElementById('list-sonstiges').innerHTML = trip.sonstiges.length ? trip.sonstiges.map(e =>
     `<div class="entry-item" data-cat="sonstiges"><div class="ei-info"><div class="ei-main">🎯 ${e.desc}</div><div class="ei-sub">${e.dat||'–'}</div></div><div class="ei-cost">${e.b.toFixed(2)} €</div>${del('sonstiges',e.id)}</div>`).join('') : '<div class="no-entries">🎯 Noch keine Ausgaben</div>';
   renderEtappen(trip, isArchived);
@@ -4166,15 +4166,20 @@ function spDoTripLink(entry) {
   const trip = getActiveTrip ? getActiveTrip() : null;
   if (!trip) { toast('Keine aktive Reise'); return; }
   const gesamtPreis = parseFloat((entry.preis * entry.naechte).toFixed(2));
+  const kostId = Date.now();
   trip.stellplatz.unshift({
-    id:   Date.now(),
-    dat:  entry.datum || '',
-    name: entry.name + (entry.ort ? ', ' + entry.ort : ''),
-    n:    entry.naechte || 1,
-    p:    gesamtPreis,
-    bem:  entry.notiz || '',
+    id:    kostId,
+    dat:   entry.datum || '',
+    name:  entry.name + (entry.ort ? ', ' + entry.ort : ''),
+    n:     entry.naechte || 1,
+    p:     gesamtPreis,
+    bem:   entry.notiz || '',
+    splId: entry.id,
   });
   saveTrips();
+  // Rück-Referenz im Logbuch-Eintrag speichern
+  const splEntry = spData.find(x => x.id === entry.id);
+  if (splEntry) { splEntry.tripId = trip.id; spSave(); }
   toast('📋 In Reise übernommen');
 }
 
@@ -4183,6 +4188,24 @@ function spDelete(id) {
   spData = spData.filter(x => x.id !== id);
   spSave();
   spRender();
+}
+
+// Navigation: Logbuch → Kosten (zur verknüpften Reise)
+function gotoTrip(tripId) {
+  activeTripId = String(tripId);
+  localStorage.setItem('wmp_active_trip', activeTripId);
+  showSection('kosten');
+  renderKosten();
+}
+
+// Navigation: Kosten → Logbuch (zum verknüpften Stellplatz-Eintrag)
+function gotoSplEntry(splId) {
+  showSection('stellplatz');
+  spRender();
+  setTimeout(() => {
+    const el = document.getElementById('spl-entry-' + splId);
+    if (el) { el.scrollIntoView({ behavior: 'smooth', block: 'center' }); el.style.outline = '2px solid var(--accent)'; setTimeout(() => el.style.outline = '', 2000); }
+  }, 150);
 }
 
 function spStars(n) {
@@ -4235,13 +4258,14 @@ function spRender() {
     const preisStr = e.preis !== null && e.preis !== undefined ? parseFloat(e.preis).toFixed(2) + ' €/Nacht' : '';
     const mapsUrl = e.lat && e.lon ? `https://www.google.com/maps?q=${e.lat},${e.lon}` : null;
     const stars = spStars(e.bewertung);
-    return `<div style="background:var(--panel2);border:1px solid var(--border);border-radius:14px;padding:14px 16px;margin-bottom:10px">
+    return `<div id="spl-entry-${e.id}" style="background:var(--panel2);border:1px solid var(--border);border-radius:14px;padding:14px 16px;margin-bottom:10px">
       <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:6px">
         <div style="flex:1;min-width:0">
           <div style="font-size:1rem;font-weight:700;color:var(--text)">${e.name}</div>
           ${(e.ort || e.land) ? `<div style="font-size:0.78rem;color:var(--muted);margin-top:2px">${[e.ort, e.land].filter(Boolean).join(' · ')}</div>` : ''}
         </div>
         <div style="display:flex;gap:6px;flex-shrink:0">
+          ${e.tripId ? `<button onclick="gotoTrip(${e.tripId})" title="Zur verknüpften Reise" style="background:var(--panel);border:1px solid var(--accent);border-radius:8px;padding:5px 10px;color:var(--accent);font-size:0.8rem;cursor:pointer">🗺️</button>` : ''}
           <button onclick="spOpenForm(${e.id})" style="background:var(--panel);border:1px solid var(--border);border-radius:8px;padding:5px 10px;color:var(--muted);font-size:0.8rem;cursor:pointer">✏️</button>
           <button onclick="spDelete(${e.id})" style="background:var(--panel);border:1px solid var(--border);border-radius:8px;padding:5px 10px;color:#ef4444;font-size:0.8rem;cursor:pointer">🗑</button>
         </div>

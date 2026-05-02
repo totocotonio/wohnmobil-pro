@@ -2434,7 +2434,7 @@
         </div>
         <div class="form-col">
           <label class="form-lbl">Heizung (g/Tag)</label>
-          <input class="form-inp" type="number" id="gas-heizung" placeholder="200" min="0" oninput="gasCalc();gasSave()">
+          <input class="form-inp" type="number" id="gas-heizung" placeholder="1500" min="0" oninput="gasCalc();gasSave()">
         </div>
         <div class="form-col">
           <label class="form-lbl">Warmwasser (g/Tag)</label>
@@ -6041,7 +6041,7 @@ let gasData = (() => {
   try { return JSON.parse(localStorage.getItem(GAS_KEY)) || null; } catch(e) { return null; }
 })() || {
   bottles: [{ size: 11, fill: 50 }],
-  kochen: 50, heizung: 200, wasser: 80, sonstig: 0
+  kochen: 60, heizung: 0, wasser: 60, sonstig: 0
 };
 
 function gasSave() {
@@ -6156,7 +6156,7 @@ function gasRemoveBottle(i) {
 function gasPreset(typ) {
   const presets = {
     sommer:  { kochen: 60,  heizung: 0,   wasser: 60,  sonstig: 0 },
-    winter:  { kochen: 80,  heizung: 400, wasser: 100, sonstig: 20 },
+    winter:  { kochen: 100, heizung: 1500, wasser: 150, sonstig: 50 },
     kochen:  { kochen: 100, heizung: 0,   wasser: 0,   sonstig: 0 },
   };
   const p = presets[typ];

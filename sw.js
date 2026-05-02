@@ -2,7 +2,10 @@ const CACHE = 'womo-pro-1.1.93';
 const ASSETS = [
   './',
   './index.html',
+  './style.css',
+  './app.js',
   './manifest.json',
+  './favicon.svg',
   './fonts/rajdhani-400.woff2',
   './fonts/rajdhani-500.woff2',
   './fonts/rajdhani-600.woff2',

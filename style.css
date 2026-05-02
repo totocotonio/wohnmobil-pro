@@ -41,7 +41,7 @@
   html.light .form-inp   { background: #f8fafc; }
   html.light .setting-inp { background: #f8fafc; }
   html.light .btn        { background: #e8eef5; }
-  html.light .btn-primary { background: rgba(22,163,74,0.1); }
+  html.light .btn-primary { background: var(--accent-dim); }
 
   /* Theme Toggle */
   .theme-toggle {
@@ -327,8 +327,8 @@
   }
   .btn:active { transform: scale(0.97); opacity: 0.85; }
   .btn-primary {
-    background: rgba(34,197,94,0.12);
-    border-color: rgba(34,197,94,0.35);
+    background: var(--accent-dim);
+    border-color: var(--accent-border);
     color: var(--accent);
   }
   .btn-row {

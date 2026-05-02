@@ -38,20 +38,21 @@ function loadTheme() {
 }
 
 const COLOR_THEMES = {
-  green:  { label:'Grün',    dark:'#22c55e', darkDim:'rgba(34,197,94,0.15)',   light:'#16a34a', lightDim:'rgba(22,163,74,0.1)' },
-  blue:   { label:'Blau',    dark:'#38bdf8', darkDim:'rgba(56,189,248,0.15)',  light:'#0284c7', lightDim:'rgba(2,132,199,0.1)' },
-  orange: { label:'Orange',  dark:'#f97316', darkDim:'rgba(249,115,22,0.15)',  light:'#ea580c', lightDim:'rgba(234,88,12,0.1)' },
-  purple: { label:'Lila',    dark:'#a78bfa', darkDim:'rgba(167,139,250,0.15)', light:'#7c3aed', lightDim:'rgba(124,58,237,0.1)' },
-  teal:   { label:'Türkis',  dark:'#2dd4bf', darkDim:'rgba(45,212,191,0.15)',  light:'#0d9488', lightDim:'rgba(13,148,136,0.1)' },
-  pink:   { label:'Pink',    dark:'#ec4899', darkDim:'rgba(236,72,153,0.15)',  light:'#be185d', lightDim:'rgba(190,24,93,0.1)' },
-  gold:   { label:'Gold',    dark:'#eab308', darkDim:'rgba(234,179,8,0.15)',   light:'#a16207', lightDim:'rgba(161,98,7,0.1)' },
+  green:  { label:'Grün',    dark:'#22c55e', darkDim:'rgba(34,197,94,0.15)',   darkBorder:'rgba(34,197,94,0.35)',   light:'#16a34a', lightDim:'rgba(22,163,74,0.1)',    lightBorder:'rgba(22,163,74,0.3)'   },
+  blue:   { label:'Blau',    dark:'#38bdf8', darkDim:'rgba(56,189,248,0.15)',  darkBorder:'rgba(56,189,248,0.35)',  light:'#0284c7', lightDim:'rgba(2,132,199,0.1)',    lightBorder:'rgba(2,132,199,0.3)'   },
+  orange: { label:'Orange',  dark:'#f97316', darkDim:'rgba(249,115,22,0.15)',  darkBorder:'rgba(249,115,22,0.35)',  light:'#ea580c', lightDim:'rgba(234,88,12,0.1)',    lightBorder:'rgba(234,88,12,0.3)'   },
+  purple: { label:'Lila',    dark:'#a78bfa', darkDim:'rgba(167,139,250,0.15)', darkBorder:'rgba(167,139,250,0.35)', light:'#7c3aed', lightDim:'rgba(124,58,237,0.1)',   lightBorder:'rgba(124,58,237,0.3)'  },
+  teal:   { label:'Türkis',  dark:'#2dd4bf', darkDim:'rgba(45,212,191,0.15)',  darkBorder:'rgba(45,212,191,0.35)',  light:'#0d9488', lightDim:'rgba(13,148,136,0.1)',   lightBorder:'rgba(13,148,136,0.3)'  },
+  pink:   { label:'Pink',    dark:'#ec4899', darkDim:'rgba(236,72,153,0.15)',  darkBorder:'rgba(236,72,153,0.35)',  light:'#be185d', lightDim:'rgba(190,24,93,0.1)',    lightBorder:'rgba(190,24,93,0.3)'   },
+  gold:   { label:'Gold',    dark:'#eab308', darkDim:'rgba(234,179,8,0.15)',   darkBorder:'rgba(234,179,8,0.35)',   light:'#a16207', lightDim:'rgba(161,98,7,0.1)',     lightBorder:'rgba(161,98,7,0.3)'    },
 };
 
 function applyColorTheme(name, silent) {
   const t = COLOR_THEMES[name] || COLOR_THEMES.green;
   const isLight = document.documentElement.classList.contains('light');
-  document.documentElement.style.setProperty('--accent', isLight ? t.light : t.dark);
-  document.documentElement.style.setProperty('--accent-dim', isLight ? t.lightDim : t.darkDim);
+  document.documentElement.style.setProperty('--accent',        isLight ? t.light       : t.dark);
+  document.documentElement.style.setProperty('--accent-dim',    isLight ? t.lightDim    : t.darkDim);
+  document.documentElement.style.setProperty('--accent-border', isLight ? t.lightBorder : t.darkBorder);
   if (!silent) localStorage.setItem('wmp_color', name);
   renderColorPicker();
 }
@@ -417,7 +418,7 @@ function tripTotal(t) {
 
 function showNewTrip() {
   const f = document.getElementById('newTripForm');
-  const open = f.style.display === 'block';
+  const open = f.offsetHeight > 0; // sichtbar wenn Höhe > 0, unabhängig von inline vs. CSS display
   f.style.display = open ? 'none' : 'block';
   if (!open) { closeTripDropdown(); document.getElementById('newTripName').focus(); }
 }
@@ -447,7 +448,9 @@ function createTrip() {
   document.getElementById('newTripVon').value = '';
   document.getElementById('newTripBis').value = '';
   document.getElementById('newTripForm').style.display = 'none';
-  saveTrips(); renderKosten();
+  saveTrips();
+  renderTripDropdown();
+  renderKosten();
   toast('Urlaub erstellt');
   geocodeTripOrt(t);
 }

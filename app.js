@@ -1553,7 +1553,7 @@ function delTagebuch(tripId, entryId) {
 function editTagebuch(tripId, entryId) {
   const trip = trips.find(t => String(t.id) === String(tripId));
   if (!trip || !trip.tagebuch) return;
-  const entry = trip.tagebuch.find(e => e.id === entryId);
+  const entry = trip.tagebuch.find(e => String(e.id) === String(entryId));
   if (!entry) return;
 
   const ov = document.createElement('div');
@@ -1583,7 +1583,7 @@ function editTagebuch(tripId, entryId) {
 function saveEditTagebuch(tripId, entryId) {
   const trip = trips.find(t => String(t.id) === String(tripId));
   if (!trip || !trip.tagebuch) return;
-  const entry = trip.tagebuch.find(e => e.id === entryId);
+  const entry = trip.tagebuch.find(e => String(e.id) === String(entryId));
   if (!entry) return;
   const dat  = document.getElementById('tb-edit-dat').value.trim();
   const text = document.getElementById('tb-edit-text').value.trim();

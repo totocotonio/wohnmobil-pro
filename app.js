@@ -4044,6 +4044,25 @@ function sendFeedback(typ) {
 const SP_KEY = 'wmp_stellplatz';
 let spData = [];
 let spCurrentStar = 0;
+let _spFotoBase64 = null;
+
+function onSpFotoSelect(input) {
+  const file = input.files[0];
+  if (!file) return;
+  resizeImage(file, 1024).then(b64 => {
+    _spFotoBase64 = b64;
+    const img = document.getElementById('spl-foto-img');
+    img.src = b64;
+    document.getElementById('spl-foto-preview').style.display = 'block';
+  });
+}
+
+function clearSpFoto() {
+  _spFotoBase64 = null;
+  document.getElementById('spl-foto').value = '';
+  document.getElementById('spl-foto-img').src = '';
+  document.getElementById('spl-foto-preview').style.display = 'none';
+}
 
 function spLoad() {
   try { spData = JSON.parse(localStorage.getItem(SP_KEY) || '[]'); } catch(e) { spData = []; }
@@ -4075,6 +4094,12 @@ function spOpenForm(id) {
     if (gpsEl) gpsEl.textContent = e.lat ? `📍 ${parseFloat(e.lat).toFixed(5)}, ${parseFloat(e.lon).toFixed(5)}` : 'Kein GPS gespeichert';
     document.getElementById('spl-form-title').textContent = '✏️ Stellplatz bearbeiten';
     spSetStar(e.bewertung || 0);
+    // Foto vorladen
+    _spFotoBase64 = e.foto || null;
+    const fotoImg = document.getElementById('spl-foto-img');
+    const fotoPrev = document.getElementById('spl-foto-preview');
+    if (e.foto && fotoImg && fotoPrev) { fotoImg.src = e.foto; fotoPrev.style.display = 'block'; }
+    else if (fotoPrev) { fotoPrev.style.display = 'none'; }
   } else {
     document.getElementById('spl-edit-id').value  = '';
     document.getElementById('spl-name').value     = '';
@@ -4090,6 +4115,12 @@ function spOpenForm(id) {
     if (gpsEl) gpsEl.textContent = 'Kein GPS gespeichert';
     document.getElementById('spl-form-title').textContent = '⛺ Neuer Stellplatz';
     spSetStar(0);
+    // Foto zurücksetzen
+    _spFotoBase64 = null;
+    const fotoPrev = document.getElementById('spl-foto-preview');
+    if (fotoPrev) fotoPrev.style.display = 'none';
+    const fotoInput = document.getElementById('spl-foto');
+    if (fotoInput) fotoInput.value = '';
   }
 }
 
@@ -4138,12 +4169,14 @@ function spSaveEntry() {
     notiz:     document.getElementById('spl-notiz').value.trim(),
     lat:       document.getElementById('spl-lat').value || null,
     lon:       document.getElementById('spl-lon').value || null,
+    foto:      _spFotoBase64 || null,
   };
   if (editId) {
     const idx = spData.findIndex(x => x.id == editId);
     if (idx >= 0) {
-      // Verknüpfungs-Felder vom alten Eintrag übernehmen
+      // Verknüpfungs-Felder + Foto vom alten Eintrag übernehmen
       if (spData[idx].tripId) entry.tripId = spData[idx].tripId;
+      if (!entry.foto && spData[idx].foto) entry.foto = spData[idx].foto;
       spData[idx] = entry;
       // Verknüpften Kosten-Eintrag synchronisieren
       if (entry.tripId) {
@@ -4294,6 +4327,16 @@ function spRender() {
     return;
   }
 
+function showSpFotoFull(entryId) {
+  const e = spData.find(x => String(x.id) === String(entryId));
+  if (!e || !e.foto) return;
+  const ov = document.createElement('div');
+  ov.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.92);z-index:9999;display:flex;align-items:center;justify-content:center;padding:16px;cursor:pointer';
+  ov.innerHTML = `<img src="${e.foto}" style="max-width:100%;max-height:90vh;border-radius:10px;object-fit:contain" alt="Foto">`;
+  ov.onclick = () => ov.remove();
+  document.body.appendChild(ov);
+}
+
   list.innerHTML = filtered.map(e => {
     const datumStr = e.datum ? new Date(e.datum + 'T12:00:00').toLocaleDateString('de-DE', { day:'2-digit', month:'2-digit', year:'numeric' }) : '';
     const preisStr = e.preis !== null && e.preis !== undefined ? parseFloat(e.preis).toFixed(2) + ' €/Nacht' : '';
@@ -4319,6 +4362,7 @@ function spRender() {
         ${mapsUrl ? `<a href="${mapsUrl}" target="_blank" rel="noopener" style="color:var(--accent);text-decoration:none">📍 Maps</a>` : ''}
       </div>
       ${e.notiz ? `<div style="font-size:0.8rem;color:var(--text);line-height:1.5;border-top:1px solid var(--border);padding-top:8px;margin-top:8px">${e.notiz}</div>` : ''}
+      ${e.foto ? `<img src="${e.foto}" style="width:100%;max-height:200px;object-fit:cover;border-radius:10px;margin-top:10px;border:1px solid var(--border);cursor:pointer" onclick="showSpFotoFull('${e.id}')" alt="Foto">` : ''}
     </div>`;
   }).join('');
 }

@@ -1461,11 +1461,21 @@
         </div>
       </div>
       <!-- GPS -->
-      <div style="display:flex;gap:8px;align-items:center;margin-top:10px;margin-bottom:14px">
+      <div style="display:flex;gap:8px;align-items:center;margin-top:10px;margin-bottom:10px">
         <button class="btn" style="font-size:0.78rem;padding:6px 12px;flex-shrink:0" onclick="spGetGps()">📍 GPS ermitteln</button>
         <div id="spl-gps-status" style="font-size:0.72rem;color:var(--muted)">Kein GPS gespeichert</div>
         <input type="hidden" id="spl-lat">
         <input type="hidden" id="spl-lon">
+      </div>
+      <!-- Foto -->
+      <div style="margin-bottom:14px">
+        <label class="form-lbl" style="margin-bottom:6px;display:block">Foto (optional)</label>
+        <input type="file" id="spl-foto" accept="image/*" style="display:none" onchange="onSpFotoSelect(this)">
+        <button class="btn" style="width:100%;margin-bottom:6px" onclick="document.getElementById('spl-foto').click()">📷 Foto auswählen</button>
+        <div id="spl-foto-preview" style="display:none">
+          <img id="spl-foto-img" style="max-width:100%;max-height:180px;border-radius:8px;border:1px solid var(--border);display:block" src="" alt="">
+          <button class="btn" style="width:100%;margin-top:4px;font-size:0.75rem;color:var(--danger)" onclick="clearSpFoto()">Foto entfernen</button>
+        </div>
       </div>
       <div style="display:flex;gap:8px">
         <button class="btn btn-primary" style="flex:1;padding:11px" onclick="spSaveEntry()">💾 Speichern</button>

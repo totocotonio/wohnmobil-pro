@@ -4145,6 +4145,21 @@ function spSaveEntry() {
       // Verknüpfungs-Felder vom alten Eintrag übernehmen
       if (spData[idx].tripId) entry.tripId = spData[idx].tripId;
       spData[idx] = entry;
+      // Verknüpften Kosten-Eintrag synchronisieren
+      if (entry.tripId) {
+        const trip = trips.find(t => String(t.id) === String(entry.tripId));
+        if (trip) {
+          const kostEntry = trip.stellplatz.find(k => k.splId === entry.id);
+          if (kostEntry) {
+            kostEntry.name = entry.name + (entry.ort ? ', ' + entry.ort : '');
+            kostEntry.dat  = entry.datum || kostEntry.dat;
+            kostEntry.n    = entry.naechte || kostEntry.n;
+            if (entry.preis !== null && entry.preis > 0)
+              kostEntry.p = parseFloat((entry.preis * entry.naechte).toFixed(2));
+            saveTrips();
+          }
+        }
+      }
     } else {
       spData.unshift(entry);
     }

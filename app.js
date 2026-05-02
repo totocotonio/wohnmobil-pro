@@ -4201,6 +4201,7 @@ function spDoTripLink(entry) {
   // Rück-Referenz im Logbuch-Eintrag speichern
   const splEntry = spData.find(x => x.id === entry.id);
   if (splEntry) { splEntry.tripId = trip.id; spSave(); }
+  spRender();
   toast('📋 In Reise übernommen');
 }
 

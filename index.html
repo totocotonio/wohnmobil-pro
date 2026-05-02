@@ -2436,6 +2436,63 @@
           <label class="form-lbl">Heizung (g/Tag)</label>
           <input class="form-inp" type="number" id="gas-heizung" placeholder="1500" min="0" oninput="gasCalc();gasSave()">
         </div>
+      </div>
+      <!-- Heizungs-Hinweis -->
+      <details style="margin-top:10px">
+        <summary style="font-size:0.75rem;font-weight:700;color:var(--accent);cursor:pointer;letter-spacing:0.5px;list-style:none;display:flex;align-items:center;gap:6px">
+          <span style="font-size:0.9rem">ℹ️</span> Wie berechne ich meinen Heizungsverbrauch?
+        </summary>
+        <div style="margin-top:10px;font-size:0.78rem;color:var(--muted);line-height:1.6">
+          <p style="margin-bottom:8px">Du brauchst den <strong style="color:var(--text)">Verbrauch pro Stunde</strong> deiner Heizung (steht im Handbuch oder Typenschild) und schätzt, <strong style="color:var(--text)">wie viele Stunden pro Tag</strong> sie läuft.</p>
+          <p style="margin-bottom:6px"><strong style="color:var(--text)">Formel:</strong> g/h × Stunden/Tag = g/Tag</p>
+          <div style="background:var(--panel);border:1px solid var(--border);border-radius:8px;padding:10px;margin-top:8px">
+            <div style="font-size:0.68rem;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:var(--accent);margin-bottom:8px">🔥 Truma Combi – Verbrauch (Propan)</div>
+            <table style="width:100%;border-collapse:collapse;font-size:0.75rem">
+              <thead>
+                <tr style="color:var(--muted)">
+                  <th style="text-align:left;padding:3px 6px;font-weight:600">Heizung</th>
+                  <th style="text-align:center;padding:3px 6px;font-weight:600">Stufe</th>
+                  <th style="text-align:right;padding:3px 6px;font-weight:600">g/h</th>
+                  <th style="text-align:right;padding:3px 6px;font-weight:600">5h/Tag</th>
+                  <th style="text-align:right;padding:3px 6px;font-weight:600">8h/Tag</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr style="border-top:1px solid var(--border)">
+                  <td style="padding:4px 6px;color:var(--text)">Combi 4</td>
+                  <td style="padding:4px 6px;text-align:center;color:var(--muted)">2 kW</td>
+                  <td style="padding:4px 6px;text-align:right;color:var(--text)">160 g</td>
+                  <td style="padding:4px 6px;text-align:right;color:var(--muted)">800 g</td>
+                  <td style="padding:4px 6px;text-align:right;color:var(--muted)">1.280 g</td>
+                </tr>
+                <tr style="border-top:1px solid var(--border)">
+                  <td style="padding:4px 6px;color:var(--text)">Combi 4</td>
+                  <td style="padding:4px 6px;text-align:center;color:var(--muted)">4 kW</td>
+                  <td style="padding:4px 6px;text-align:right;color:var(--text)">330 g</td>
+                  <td style="padding:4px 6px;text-align:right;color:var(--muted)">1.650 g</td>
+                  <td style="padding:4px 6px;text-align:right;color:var(--muted)">2.640 g</td>
+                </tr>
+                <tr style="border-top:1px solid var(--border)">
+                  <td style="padding:4px 6px;color:var(--text)">Combi 6</td>
+                  <td style="padding:4px 6px;text-align:center;color:var(--muted)">4 kW</td>
+                  <td style="padding:4px 6px;text-align:right;color:var(--text)">320 g</td>
+                  <td style="padding:4px 6px;text-align:right;color:var(--muted)">1.600 g</td>
+                  <td style="padding:4px 6px;text-align:right;color:var(--muted)">2.560 g</td>
+                </tr>
+                <tr style="border-top:1px solid var(--border)">
+                  <td style="padding:4px 6px;color:var(--text)">Combi 6</td>
+                  <td style="padding:4px 6px;text-align:center;color:var(--muted)">6 kW</td>
+                  <td style="padding:4px 6px;text-align:right;color:var(--text)">470 g</td>
+                  <td style="padding:4px 6px;text-align:right;color:var(--muted)">2.350 g</td>
+                  <td style="padding:4px 6px;text-align:right;color:var(--muted)">3.760 g</td>
+                </tr>
+              </tbody>
+            </table>
+            <p style="margin-top:8px;font-size:0.7rem;color:var(--muted)">Beispiel: Combi 4 auf 4 kW, 5h täglich → <strong style="color:var(--text)">1.650 g/Tag</strong> eintragen. Quelle: Truma Einbauanleitungen.</p>
+          </div>
+        </div>
+      </details>
+      <div class="form-grid" style="margin-top:10px">
         <div class="form-col">
           <label class="form-lbl">Warmwasser (g/Tag)</label>
           <input class="form-inp" type="number" id="gas-wasser" placeholder="80" min="0" oninput="gasCalc();gasSave()">

@@ -1367,8 +1367,13 @@ function renderStatistik() {
   }
   const aktiv  = allTrips.filter(t => !t.archiviert).length;
   const archiv = allTrips.filter(t =>  t.archiviert).length;
-  // Länder
-  const laender = [...new Set(allTrips.map(t => t.land).filter(Boolean))];
+  // Länder – aus Reisen + Stellplatz-Logbuch kombiniert
+  spLoad();
+  const laenderRaw = [
+    ...allTrips.map(t => t.land).filter(Boolean),
+    ...spData.map(e => e.land).filter(Boolean)
+  ];
+  const laender = [...new Set(laenderRaw)];
   // Reisetage
   let gesamtTage = 0;
   allTrips.forEach(t => {

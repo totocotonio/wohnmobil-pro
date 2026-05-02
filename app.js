@@ -628,6 +628,16 @@ function renderKosten() {
     ? ((trip.land ? trip.land + ' ' : '') + trip.name + (isArchived ? ' · Archiviert' : ''))
     : 'Urlaub wählen…';
   btn.classList.toggle('has-trip', !!trip);
+  const hint = document.getElementById('tripCountHint');
+  if (hint) {
+    const total = trips.filter(t => !t.archiviert).length;
+    if (total > 1) {
+      hint.style.display = 'block';
+      hint.textContent = `▼ ${total} Urlaube · antippen zum Wechseln`;
+    } else {
+      hint.style.display = 'none';
+    }
+  }
   const dd = document.getElementById('tripDropdown');
   if (!trip) {
     document.getElementById('tripContent').style.display = 'none';
